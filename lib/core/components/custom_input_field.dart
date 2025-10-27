@@ -19,7 +19,7 @@ class CustomInputField extends StatefulWidget {
     required this.hintText,
     required this.controller,
     this.isPassword = false,
-    this.fontSize = 12,
+    this.fontSize = 14,
     this.textColor,
     this.borderColor,
     this.labelColor,
@@ -64,47 +64,51 @@ class _CustomInputFieldState extends State<CustomInputField> {
           ),
         ),
         SizedBox(height: 5.h),
-        TextFormField(
-          controller: widget.controller,
-          obscureText: widget.isPassword ? _obscureText : false,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: widget.borderColor ?? AppColors.third_color,
-                width: 1.0,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: widget.borderColor ?? AppColors.third_color,
-                width: 1.0,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: widget.borderColor ?? AppColors.third_color,
-                width: 1.5.w,
-              ),
-            ),
-            labelText: widget.hintText,
-            labelStyle: GoogleFonts.outfit(
-              fontSize: (widget.fontSize - 2).sp,
-              fontWeight: FontWeight.normal,
-              color: widget.labelColor ?? AppColors.heading_color,
-            ),
-            suffixIcon: widget.isPassword
-              ? IconButton(
-                icon: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.heading_color,
+        SizedBox(
+          height: 33,
+          child: TextFormField(
+            controller: widget.controller,
+            obscureText: widget.isPassword ? _obscureText : false,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: widget.borderColor ?? AppColors.third_color,
+                  width: 1.0,
                 ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
-            : null,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: widget.borderColor ?? AppColors.third_color,
+                  width: 1.0,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: widget.borderColor ?? AppColors.third_color,
+                  width: 1.0.w,
+                ),
+              ),
+              labelText: widget.hintText,
+              labelStyle: GoogleFonts.outfit(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.normal,
+                color: widget.labelColor ?? AppColors.text_color,
+              ),
+              suffixIcon: widget.isPassword
+                ? IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.text_color,
+                    size: 11.sp,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
+              : null,
+            ),
           ),
         ),
       ],

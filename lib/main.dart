@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -7,11 +8,17 @@ import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
 import 'package:time_verse/core/theme/theme.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
+import 'package:time_verse/features/auth/forgot_passowrd/controller/forgot_password_controller.dart';
+import 'package:time_verse/features/auth/login/controller/login_controller.dart';
+import 'package:time_verse/features/auth/otp/controller/otp_controller.dart';
+import 'package:time_verse/features/auth/reset_password/controller/reset_password_controller.dart';
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
 
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const MyApp());
 }
 
@@ -53,6 +60,10 @@ class _MyAppState extends State<MyApp> {
           providers: [
             ChangeNotifierProvider(create: (_) => ThemeProvider()),
             ChangeNotifierProvider(create: (_) => SignupController()),
+            ChangeNotifierProvider(create: (_) => LoginController()),
+            ChangeNotifierProvider(create: (_)=>  ForgotPasswordController()),
+            ChangeNotifierProvider(create: (_)=>  OtpController()),
+            ChangeNotifierProvider(create: (_)=>  ResetPasswordController()),
           ],
           child: Builder(
             builder: (context) {

@@ -4,21 +4,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
-import 'package:time_verse/core/components/custom_image_uploader.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
 import 'package:time_verse/core/utils/colors.dart';
-import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
+import 'package:time_verse/features/auth/login/controller/login_controller.dart';
 
-class Signup extends StatelessWidget {
-  const Signup({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final signup_controller = Provider.of<SignupController>(context, listen: false);
+    final loginController = Provider.of<LoginController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final String logoAsset = isDarkMode
       ? 'assets/images/logo.png' 
@@ -44,7 +42,7 @@ class Signup extends StatelessWidget {
             SizedBox(height: 20.h,),
             Center(
               child: Text(
-                'Dynamic Social Calendar',
+                'Welcome Back',
                 style: GoogleFonts.outfit(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w500,
@@ -53,82 +51,83 @@ class Signup extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20.h,),
-            CustomInputField(
-              label: 'First Name *',
-              hintText: 'Enter your fullname',
-              controller: signup_controller.nameController,
-              isPassword: false,
-              fontSize: 12,
+            Center(
+              child: Text(
+                'Sign in to continue organizing amazing activities',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isDarkMode?AppColors.text_color: AppColors.heading_color    ,
+                ),
+              ),
             ),
             SizedBox(height: 20.h,),
             CustomInputField(
               label: 'Email Address *',
               hintText: 'Enter your email...',
-              controller: signup_controller.emailController,
+              controller: loginController.emailController,
               isPassword: false,
               fontSize: 12,
             ),
-            SizedBox(height: 20.h,),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomInputField(
-                    label: 'Password *',
-                    hintText: 'Enter your password...',
-                    controller: signup_controller.passwordController,
-                    isPassword: true,
-                    fontSize: 12,
-                  ),
-                ),
-                SizedBox(width: 20.w),
-                Expanded(
-                  child: CustomInputField(
-                    label: 'Confirm Password *',
-                    hintText: 'Enter confirm password...',
-                    controller: signup_controller.confirm_passwordController,
-                    isPassword: true,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            SizedBox(height: 30.h,),
+            CustomInputField(
+              label: 'Password *',
+              hintText: 'Enter your password...',
+              controller: loginController.passwordController,
+              isPassword: true,
+              fontSize: 12,
             ),
             SizedBox(height: 20.h,),
-            Consumer<SignupController>(
-              builder: (context, controller, _) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Consumer<LoginController>(
+              builder: (context, controller, _) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ImagePickerBox(
-                    svgAsset: 'assets/icons/singup_camera.svg',
-                    onTap: controller.pickImage,
-                  ),
-                  if (controller.pickedImageName != null)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(top: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 8,),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(4),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: controller.rememberMe,
+                        onChanged: controller.toggleRememberMe,
+                        activeColor: AppColors.third_color,
+                        materialTapTargetSize:MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text(
-                        controller.pickedImageName!,
-                        textAlign: TextAlign.center,
+                      Text(
+                        'Remember me',
                         style: GoogleFonts.outfit(
                           fontSize: 12,
-                          color: Colors.black87,
+                          color:Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.text_color
+                            :AppColors.heading_color,
+                            ),
+                          ),
+                          SizedBox(width: 123.w,),
+                          //Spacer(),
+                          TextButton(
+                            onPressed: (){
+                              context.push('/forgot_pass');
+                            },
+                            child: Text(
+                              'Forgot Password',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10.sp,
+                                color: AppColors.third_color,
+                                decoration: TextDecoration.underline,
+                                decorationColor: AppColors.third_color 
+                            ),
+                          ), 
                         ),
-                      overflow: TextOverflow.ellipsis,
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             SizedBox(height: 20.h,),
             Center(
               child: CustomButton(
                 text: "Continue",
                 onPressed: () {
-                  context.push('/login');
+                  //context.push('/signup');
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,
@@ -155,7 +154,7 @@ class Signup extends StatelessWidget {
                       children: [
                       const TextSpan(text: 'Already have an account? '),
                       TextSpan(
-                        text: 'Login',
+                        text: 'Sign Up',
                         style: GoogleFonts.outfit(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.normal,
@@ -164,7 +163,7 @@ class Signup extends StatelessWidget {
                             : AppColors.heading_color,
                         ),
                         recognizer: TapGestureRecognizer()..onTap = () {
-                          context.push('/login');
+                          context.push('/signup');
                         },
                       ),
                     ],

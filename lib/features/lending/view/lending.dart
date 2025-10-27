@@ -93,7 +93,7 @@ class LandingScreen extends StatelessWidget {
               child: ProgressIndicatorWidget(
                 barHeight: 4,
                 percentage: 100,
-                progressColor: AppColors.button_color,
+                progressColor: AppColors.third_color,
               ),
             ),
           ],
