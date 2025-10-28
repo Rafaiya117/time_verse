@@ -14,12 +14,16 @@ class CustomButton extends StatelessWidget {
   final FontWeight? fontWeight;
   final Color? textColor;
   final Color? solidColor;
-  final LinearGradient? gradient; 
+  final LinearGradient? gradient;
   final EdgeInsetsGeometry? padding;
   final FontStyle? fontStyle;
 
   // Dynamic Google font
   final String? fontFamily;
+
+  // ✅ Border options
+  final Color? borderColor;
+  final LinearGradient? borderGradient;
 
   const CustomButton({
     Key? key,
@@ -36,6 +40,8 @@ class CustomButton extends StatelessWidget {
     this.padding,
     this.fontStyle,
     this.fontFamily,
+    this.borderColor, 
+    this.borderGradient, 
   }) : super(key: key);
 
   TextStyle _buildTextStyle() {
@@ -65,24 +71,38 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasGradient = gradient != null; // ✅ fixed check
+    final hasGradient = gradient != null;
 
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: width ?? double.infinity,
-        height: height ?? 48.h,
-        padding: padding ?? EdgeInsets.symmetric(vertical: 12.h),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(borderRadius),
-          gradient: hasGradient ? gradient : null,
-          color: hasGradient
-              ? null
-              : (solidColor ?? Theme.of(context).primaryColor),
+    final button = Container(
+      width: width ?? double.infinity,
+      height: height ?? 48.h,
+      padding: padding ?? EdgeInsets.symmetric(vertical: 12.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        gradient: hasGradient ? gradient : null,
+        color: hasGradient ? null : (solidColor ?? Theme.of(context).primaryColor),
+        border: borderGradient == null && borderColor != null
+          ? Border.all(color: borderColor!, width: 1)
+          : null,
         ),
         alignment: Alignment.center,
         child: Text(text, style: _buildTextStyle()),
-      ),
+      );
+    return GestureDetector(
+      onTap: onPressed,
+      child: borderGradient != null
+        ? Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gradient: borderGradient,
+          ),
+        padding: EdgeInsets.all(1), 
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: button,
+          ),
+        )
+      : button,
     );
   }
 }

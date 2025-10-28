@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
@@ -12,6 +13,11 @@ class CustomInputField extends StatefulWidget {
   final Color? textColor;
   final Color? borderColor;
   final Color? labelColor;
+  final double? height;
+  final double? hintFontSize;
+  final String? prefixSvgPath; // ✅ added
+  final Color? prefixIconColor;
+  final Color? suffixIconColor;
 
   const CustomInputField({
     super.key,
@@ -23,6 +29,11 @@ class CustomInputField extends StatefulWidget {
     this.textColor,
     this.borderColor,
     this.labelColor,
+    this.height,
+    this.hintFontSize,
+    this.prefixSvgPath, // ✅ added
+    this.prefixIconColor,
+    this.suffixIconColor,
   });
 
   @override
@@ -48,24 +59,24 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   fontWeight: FontWeight.w500,
                   fontSize: widget.fontSize.sp,
                   color: widget.textColor ??
-                    (isDarkMode ? AppColors.text_color: AppColors.heading_color),
-                  ),
+                      (isDarkMode ? AppColors.text_color : AppColors.heading_color),
                 ),
-                if (widget.label.contains('*'))
+              ),
+              if (widget.label.contains('*'))
                 TextSpan(
                   text: '*',
                   style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w500,
-                  fontSize: widget.fontSize.sp,
-                  color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                    fontSize: widget.fontSize.sp,
+                    color: Colors.red,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
         SizedBox(height: 5.h),
         SizedBox(
-          height: 33,
+          height: widget.height ?? 33,
           child: TextFormField(
             controller: widget.controller,
             obscureText: widget.isPassword ? _obscureText : false,
@@ -90,24 +101,39 @@ class _CustomInputFieldState extends State<CustomInputField> {
               ),
               labelText: widget.hintText,
               labelStyle: GoogleFonts.outfit(
-                fontSize: 10.sp,
+                fontSize: widget.hintFontSize ?? 10.sp,
                 fontWeight: FontWeight.normal,
-                color: widget.labelColor ?? AppColors.text_color,
+                color: widget.labelColor ??
+                    (isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
               ),
+              prefixIcon: widget.prefixSvgPath != null
+                  ? Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: SvgPicture.asset(
+                        widget.prefixSvgPath!,
+                        width: 14.w,
+                        height: 16.h,
+                        colorFilter: ColorFilter.mode(
+                          widget.prefixIconColor ?? AppColors.text_color,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    )
+                  : null,
               suffixIcon: widget.isPassword
-                ? IconButton(
-                  icon: Icon(
-                    _obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: AppColors.text_color,
-                    size: 11.sp,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                )
-              : null,
+                  ? IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: widget.suffixIconColor ?? AppColors.text_color,
+                        size: 11.sp,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    )
+                  : null,
             ),
           ),
         ),

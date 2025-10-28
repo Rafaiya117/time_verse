@@ -13,6 +13,10 @@ import 'package:time_verse/features/auth/login/controller/login_controller.dart'
 import 'package:time_verse/features/auth/otp/controller/otp_controller.dart';
 import 'package:time_verse/features/auth/reset_password/controller/reset_password_controller.dart';
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
+import 'package:time_verse/features/settings/change_password/controller/changepassowrd_controller.dart';
+import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
+import 'package:time_verse/features/settings/settings_controller.dart';
+import 'package:time_verse/features/settings/subscription/controller/subscription_controller.dart';
 
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +68,10 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_)=>  ForgotPasswordController()),
             ChangeNotifierProvider(create: (_)=>  OtpController()),
             ChangeNotifierProvider(create: (_)=>  ResetPasswordController()),
+            ChangeNotifierProvider(create: (_)=>  SettingsController()),
+            ChangeNotifierProvider(create: (_)=>  ProfileController()),
+            ChangeNotifierProvider(create: (_)=>  ChangepassowrdController()),
+            ChangeNotifierProvider(create: (_)=>  SubscriptionController()),
           ],
           child: Builder(
             builder: (context) {

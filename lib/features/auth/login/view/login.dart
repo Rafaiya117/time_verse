@@ -128,6 +128,7 @@ class LoginPage extends StatelessWidget {
                 text: "Continue",
                 onPressed: () {
                   //context.push('/signup');
+                  context.push('/settings');
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

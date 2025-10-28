@@ -25,6 +25,7 @@ class AppColors{
   static const bottom_nav_color = Color(0xFFB4AB9C);
   static const container = Color(0xFFCECECE);                                               
   static const heading_color = Color(0xFF504D4A);
+  static const l_bottom_nav = Color(0xFFB4AB9C);
   static Color getDynamicTextColor(BuildContext context) {
     return Theme.of(context).brightness == Brightness.dark 
       ? AppColors.text_color 
