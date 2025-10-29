@@ -175,6 +175,52 @@ class Subscription extends StatelessWidget {
                           ],
                         ),
                       ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        'Start 7-Day Free Trial',
+                        style: GoogleFonts.inter(
+                          fontSize:13.6.sp,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkMode
+                              ? AppColors.text_color
+                              : const Color(0xFF373F4B),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        'Subcription will automatically renew. Cancel\n anytime.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize:10.2.sp,
+                          fontWeight: FontWeight.normal,
+                          color: isDarkMode
+                            ? AppColors.text_color
+                            : const Color(0xFF373F4B),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/shield.svg',
+                            width:10.67.w,
+                            height: 13.33.h,
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'Secure Payment Processing',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize:10.2.sp,
+                              fontWeight: FontWeight.normal,
+                              color: isDarkMode
+                                ? AppColors.text_color
+                                : const Color(0xFF373F4B),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   );
                 },

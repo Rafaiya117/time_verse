@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
 class PhaseCard extends StatelessWidget {
@@ -115,29 +117,22 @@ class PhaseCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (isSelected && buttonText != null)
-                  SizedBox(
+              Center(
+                child: CustomButton(
+                  text: "Payment",
+                    onPressed: () {
+                      //context.push('/signup');
+                      context.push('/settings');
+                    },
+                    gradient: AppGradientColors.button_gradient,
+                    textColor: AppColors.text_color,
+                    fontFamily: 'outfit',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.normal,
+                    height: 51.h,
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: onButtonPressed,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDarkMode
-                            ? AppColors.text_color
-                            : const Color(0xFF373F4B),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24.r),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                      ),
-                      child: Text(
-                        buttonText!,
-                        style: GoogleFonts.outfit(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
                   ),
+                ),
               ],
             ),
           ),

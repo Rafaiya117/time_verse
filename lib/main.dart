@@ -8,11 +8,13 @@ import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
 import 'package:time_verse/core/theme/theme.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
+import 'package:time_verse/features/all_events/controller/all_events.dart';
 import 'package:time_verse/features/auth/forgot_passowrd/controller/forgot_password_controller.dart';
 import 'package:time_verse/features/auth/login/controller/login_controller.dart';
 import 'package:time_verse/features/auth/otp/controller/otp_controller.dart';
 import 'package:time_verse/features/auth/reset_password/controller/reset_password_controller.dart';
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
+import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_qoute_controller.dart';
 import 'package:time_verse/features/settings/change_password/controller/changepassowrd_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 import 'package:time_verse/features/settings/settings_controller.dart';
@@ -72,6 +74,8 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_)=>  ProfileController()),
             ChangeNotifierProvider(create: (_)=>  ChangepassowrdController()),
             ChangeNotifierProvider(create: (_)=>  SubscriptionController()),
+            ChangeNotifierProvider(create: (_)=>  SavedQouteController()),
+            ChangeNotifierProvider(create: (_)=>  AllEventsController()),
           ],
           child: Builder(
             builder: (context) {

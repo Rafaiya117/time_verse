@@ -17,13 +17,12 @@ class CustomButton extends StatelessWidget {
   final LinearGradient? gradient;
   final EdgeInsetsGeometry? padding;
   final FontStyle? fontStyle;
-
-  // Dynamic Google font
   final String? fontFamily;
-
-  // ✅ Border options
   final Color? borderColor;
   final LinearGradient? borderGradient;
+
+  // Optional icon before text
+  final Widget? leadingIcon;
 
   const CustomButton({
     Key? key,
@@ -40,8 +39,9 @@ class CustomButton extends StatelessWidget {
     this.padding,
     this.fontStyle,
     this.fontFamily,
-    this.borderColor, 
-    this.borderGradient, 
+    this.borderColor,
+    this.borderGradient,
+    this.leadingIcon,
   }) : super(key: key);
 
   TextStyle _buildTextStyle() {
@@ -82,27 +82,38 @@ class CustomButton extends StatelessWidget {
         gradient: hasGradient ? gradient : null,
         color: hasGradient ? null : (solidColor ?? Theme.of(context).primaryColor),
         border: borderGradient == null && borderColor != null
-          ? Border.all(color: borderColor!, width: 1)
-          : null,
-        ),
-        alignment: Alignment.center,
-        child: Text(text, style: _buildTextStyle()),
-      );
+            ? Border.all(color: borderColor!, width: 1)
+            : null,
+      ),
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (leadingIcon != null) ...[
+            leadingIcon!,
+            SizedBox(width: 8.w),
+          ],
+          Text(text, style: _buildTextStyle()),
+        ],
+      ),
+    );
+
     return GestureDetector(
       onTap: onPressed,
       child: borderGradient != null
-        ? Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
-            gradient: borderGradient,
-          ),
-        padding: EdgeInsets.all(1), 
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: button,
-          ),
-        )
-      : button,
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(borderRadius),
+                gradient: borderGradient,
+              ),
+              padding: const EdgeInsets.all(1),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(borderRadius),
+                child: button,
+              ),
+            )
+          : button,
     );
   }
 }
