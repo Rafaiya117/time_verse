@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_qoute_controller.dart';
@@ -17,10 +18,6 @@ class SavedQoutation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).uri.toString();
-    final controller = Provider.of<SavedQouteController>(context, listen: false);
-    controller.updateIndexFromRoute(location);
-    final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SingleChildScrollView(
@@ -28,42 +25,10 @@ class SavedQoutation extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: (){
-                      context.pop();
-                    }, 
-                    icon: SvgPicture.asset(
-                      'assets/icons/arrow_back.svg',
-                      width: 17.5.w,
-                      height: 15.01.h,
-                      // ignore: deprecated_member_use
-                      color: isDarkMode?AppColors.text_color:AppColors.heading_color,
-                    ),
-                  ),
-                  SizedBox(width: 70.w,),
-                  Text(
-                    'The Wisdom Jounal',
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17.sp,
-                      color: isDarkMode? AppColors.text_color: AppColors.heading_color,
-                    ),
-                  ),
-                  SizedBox(width: 40.w,),
-                  IconButton(
-                    onPressed: (){
-                      themeProvider.toggleTheme();
-                    }, 
-                    icon: SvgPicture.asset(
-                      isDarkMode?'assets/icons/theme_dark.svg':'assets/icons/light_theme.svg',
-                      width: 15.w,
-                      height: 15.h,
-                    ),
-                  ),
-                ],
+              CustomHeaderBar(
+                title: 'The Wisdom Jounal',
+                leftSpacing: 70.w,
+                rightSpacing: 40.w,
               ),
               SizedBox(height: 20.h,),
               SearchAnchor(
@@ -203,9 +168,7 @@ class SavedQoutation extends StatelessWidget {
         ),
       ),
       bottomNavigationBar:Consumer<SavedQouteController>(
-        builder: (context, controller, _) => CustomBottomNavBar(
-          selectedIndex: controller.selectedIndex,
-        ),
+        builder: (context, controller, _) => CustomBottomNavBar(),
       ),
     );
   }

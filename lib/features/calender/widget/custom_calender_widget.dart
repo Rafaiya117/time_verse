@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 
@@ -11,9 +11,11 @@ class FancyCalendarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<CalendarController>(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.orange : const Color(0xFF373F4B);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
+      //padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16.r),
@@ -29,25 +31,32 @@ class FancyCalendarView extends StatelessWidget {
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
-          leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white, size: 24.sp),
-          rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white, size: 24.sp),
-          titleTextStyle: GoogleFonts.inter(
-            color: Colors.white,
+          leftChevronIcon:Icon(Icons.chevron_left, color: textColor, size: 24.sp),
+          rightChevronIcon:Icon(Icons.chevron_right, color: textColor, size: 24.sp),
+          titleTextStyle: GoogleFonts.outfit(
+            color: textColor,
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
           headerPadding: EdgeInsets.symmetric(vertical: 8.h),
+          titleTextFormatter: (date, locale) {
+            final month = _monthName(date.month);
+            final year = '${date.year}';
+            return '$month\n$year';
+          },
         ),
 
         // --- DAYS OF WEEK STYLE ---
         daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle: GoogleFonts.inter(
-            color: Colors.white70,
+          weekdayStyle: GoogleFonts.outfit(
+            // ignore: deprecated_member_use
+            color: textColor.withOpacity(0.7),
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
-          weekendStyle: GoogleFonts.inter(
-            color: Colors.white70,
+          weekendStyle: GoogleFonts.outfit(
+            // ignore: deprecated_member_use
+            color: textColor.withOpacity(0.7),
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
@@ -57,33 +66,33 @@ class FancyCalendarView extends StatelessWidget {
         calendarStyle: CalendarStyle(
           isTodayHighlighted: true,
           todayDecoration: BoxDecoration(
-            color: Colors.orange.shade600,
+            color: isDarkMode ? Colors.orange.shade600 : const Color(0xFF373F4B),
             shape: BoxShape.circle,
           ),
           selectedDecoration: BoxDecoration(
-            color: Colors.orange,
+            color: isDarkMode ? Colors.orange : const Color(0xFF373F4B),
             shape: BoxShape.circle,
           ),
-          selectedTextStyle: GoogleFonts.inter(
-            color: Colors.black,
+          selectedTextStyle: GoogleFonts.outfit(
+            color: isDarkMode ? Colors.black : Colors.white,
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
-          todayTextStyle: GoogleFonts.inter(
+          todayTextStyle: GoogleFonts.outfit(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
-          defaultTextStyle: GoogleFonts.inter(
-            color: Colors.white,
+          defaultTextStyle: GoogleFonts.outfit(
+            color: textColor,
             fontSize: 14.sp,
           ),
-          weekendTextStyle: GoogleFonts.inter(
-            color: Colors.white,
+          weekendTextStyle: GoogleFonts.outfit(
+            color: textColor,
             fontSize: 14.sp,
           ),
-          outsideTextStyle: GoogleFonts.inter(
-            color: Colors.white24,
+          outsideTextStyle: GoogleFonts.outfit(
+            color: textColor.withOpacity(0.2),
             fontSize: 14.sp,
           ),
           markersAlignment: Alignment.bottomCenter,
@@ -94,4 +103,23 @@ class FancyCalendarView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// ✅ Helper to return month name
+String _monthName(int month) {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  return months[month - 1];
 }

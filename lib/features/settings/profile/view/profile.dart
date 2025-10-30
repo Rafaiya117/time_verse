@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
-import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 import 'package:time_verse/features/settings/profile/custom_widget/custom_datefield.dart';
@@ -18,49 +15,15 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile_controller = Provider.of<ProfileController>(context, listen: false);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 32.h),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: (){
-                    context.pop();
-                  }, 
-                  icon: SvgPicture.asset(
-                    'assets/icons/arrow_back.svg',
-                    width: 17.5.w,
-                    height: 15.01.h,
-                    // ignore: deprecated_member_use
-                    color: isDarkMode?AppColors.text_color:AppColors.heading_color,
-                  ),
-                ),
-                SizedBox(width: 100.w,),
-                Text(
-                  'Profile',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 20.sp,
-                    color: isDarkMode? AppColors.text_color: AppColors.heading_color,
-                  ),
-                ),
-                SizedBox(width: 83.w,),
-                IconButton(
-                  onPressed: (){
-                    themeProvider.toggleTheme();
-                  }, 
-                  icon: SvgPicture.asset(
-                    isDarkMode?'assets/icons/theme_dark.svg':'assets/icons/light_theme.svg',
-                    width: 15.w,
-                    height: 15.h,
-                  ),
-                ),
-              ],
+            CustomHeaderBar(
+              title: 'Profile',
+              leftSpacing: 100.w,
+              rightSpacing: 83.w,
             ),
             SizedBox(height: 20.h,),
             ProfileImagePicker(
