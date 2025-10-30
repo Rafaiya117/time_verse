@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
+import 'package:time_verse/features/all_events/custom_widget/custom_eventcard.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 
 class AllEvents extends StatelessWidget {
   const AllEvents({super.key});
@@ -61,16 +63,28 @@ class AllEvents extends StatelessWidget {
               ],
             ),
             SizedBox(height: 20.h,),
-            Container(
-              width: 327.w,
-              height: 155.h,
-              decoration: BoxDecoration(
-                color: isDarkMode? AppColors.containers_bgd: AppColors.container,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: AppColors.third_color,
-                ),
-              ),
+            Consumer<AllEventsController>(
+              builder: (context, controller, _) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: controller.events.length,
+                    itemBuilder: (context, index) {
+                      final EventModel event = controller.events[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom:20.0),
+                        child: EventCard(
+                          title: event.title,
+                          date: event.date,
+                          time: event.time,
+                          location: event.location,
+                          isDarkMode: isDarkMode,
+                          onDelete: () => controller.removeEvent(index),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -72,7 +72,6 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasGradient = gradient != null;
-
     final button = Container(
       width: width ?? double.infinity,
       height: height ?? 48.h,
@@ -82,8 +81,8 @@ class CustomButton extends StatelessWidget {
         gradient: hasGradient ? gradient : null,
         color: hasGradient ? null : (solidColor ?? Theme.of(context).primaryColor),
         border: borderGradient == null && borderColor != null
-            ? Border.all(color: borderColor!, width: 1)
-            : null,
+          ? Border.all(color: borderColor!, width: 1)
+          : null,
       ),
       alignment: Alignment.center,
       child: Row(
@@ -102,18 +101,18 @@ class CustomButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: borderGradient != null
-          ? Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(borderRadius),
-                gradient: borderGradient,
-              ),
-              padding: const EdgeInsets.all(1),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius),
-                child: button,
-              ),
-            )
-          : button,
+      ? Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          gradient: borderGradient,
+        ),
+        padding: const EdgeInsets.all(1),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: button,
+        ),
+      )
+      : button,
     );
   }
 }

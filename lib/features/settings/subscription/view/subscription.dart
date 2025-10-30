@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_cards.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
@@ -37,11 +36,12 @@ class Subscription extends StatelessWidget {
                       'assets/icons/arrow_back.svg',
                       width: 17.5.w,
                       height: 15.01.h,
+                      // ignore: deprecated_member_use
                       color: isDarkMode
-                          ? AppColors.text_color
-                          : AppColors.heading_color,
+                        ? AppColors.text_color
+                        : AppColors.heading_color,
+                      ),
                     ),
-                  ),
                   SizedBox(width: 90.w),
                   Text(
                     'Premium',

@@ -1,9 +1,9 @@
 // nav_config.dart
 const List<String> appRoutes = [
   '/home',
-  '/calendar',
+  '/calender',
   '/add',
-  // '/saved',
-  '/all_events',
+  '/saved',
+  //'/all_events',
   '/settings',
 ];
