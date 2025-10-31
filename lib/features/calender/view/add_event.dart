@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/calender/controller/time_controller.dart';
+import 'package:time_verse/features/calender/widget/custom_date_picker.dart';
+import 'package:time_verse/features/calender/widget/time_picker_custom_widget.dart';
 
 class AddEventModal extends StatelessWidget {
   const AddEventModal({super.key});
@@ -69,6 +73,33 @@ class AddEventModal extends StatelessWidget {
                 cursorColor: Colors.grey.shade300,
               ),
             ),
+            SizedBox(height:16.h),
+            GestureDetector(
+              onTap: () => showDialog(
+                context: context,
+                builder: (_) => const DatePickerDialog(),
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text("Date", style: TextStyle(color: Colors.white)),
+                    Icon(Icons.calendar_today, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h,),
+            Consumer<TimePickerController>(
+              builder: (context, controller, _) => TimePickerField(),)
           ],
         ),
       ),
