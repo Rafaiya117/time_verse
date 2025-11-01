@@ -167,7 +167,7 @@ class HomeView extends StatelessWidget {
     final location = GoRouterState.of(context).uri.toString();
     homeController.updateIndexFromRoute(location);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+    final logoPath = isDarkMode ? 'assets/icons/logo_dark.svg' : 'assets/icons/logo_light.svg';
     // Start auto-slide when widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       homeController.startAutoSlide();
@@ -185,14 +185,14 @@ class HomeView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Image.asset(
-                  isDarkMode 
-                      ? 'assets/images/app_logo_d.png'
-                      : 'assets/images/app_logo_w.png',
-                  height: 40.h,
-                  fit: BoxFit.contain,
-                ),
-                Row(
+                  SvgPicture.asset(
+                    logoPath,
+                    width: logoPath.contains('logo_light') ? 58.w : 28.w,
+                    height: logoPath.contains('logo_light') ? 58.h : 28.h,
+                    //fit: BoxFit.contain,
+                  ),
+
+                  Row(
                   children: [
                     IconButton(
                       onPressed: () {
@@ -200,10 +200,10 @@ class HomeView extends StatelessWidget {
                       },
                       icon: SvgPicture.asset(
                         isDarkMode 
-                            ? 'assets/icons/light_theme.svg'
-                            : 'assets/icons/theme_dark.svg',
-                        width: 24.w,
-                        height: 24.h,
+                            ? 'assets/icons/theme_dark.svg'
+                            : 'assets/icons/light_theme.svg',
+                        width: 20.w,
+                        height: 20.h,
                       ),
                     ),
                     SizedBox(width: 8.w),
@@ -236,21 +236,30 @@ class HomeView extends StatelessWidget {
             SizedBox(height: 30.h),
             
             // Welcome Section with SVG Background
+                        // Welcome Section with SVG Background
             Container(
               width: 384.w,
               height: 224.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: SvgPicture.asset(
-                isDarkMode 
-                    ? 'assets/images/WelcomeSection_d.svg'
-                    : 'assets/images/WelcomeSection_w.svg',
-                width: 384.w,
-                height: 224.h,
-                fit: BoxFit.cover,
+              child: Stack(
+                children: [
+                  // Background SVG
+                  SvgPicture.asset(
+                    isDarkMode 
+                        ? 'assets/images/WelcomeSection_d.svg'
+                        : 'assets/images/WelcomeSection_w.svg',
+                    width: 384.w,
+                    height: 224.h,
+                    fit: BoxFit.cover,
+                  ),
+                  
+                  
+                ],
               ),
             ),
+
             SizedBox(height: 30.h),
             
             // Calendar Section
@@ -344,10 +353,12 @@ class HomeView extends StatelessWidget {
                         color: isDarkMode ? const Color(0xFF8B6914) : const Color(0xFFFFF4E6),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.format_quote,
+                      child: SvgPicture.asset(
+                        'assets/icons/qoute_icon.svg',
+                        // ignore: deprecated_member_use
                         color: isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFFA500),
-                        size: 24.sp,
+                        width: 24.w,
+                        height: 24.h,
                       ),
                     ),
                     SizedBox(height: 24.h),
@@ -466,10 +477,12 @@ class HomeView extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.download_outlined,
+                                SvgPicture.asset(
+                                  'assets/icons/download.svg',
+                                  // ignore: deprecated_member_use
                                   color: isDarkMode ? Colors.white : const Color(0xFF4A90E2),
-                                  size: 20.sp,
+                                  width: 20.sp,
+                                  height: 20.sp,
                                 ),
                                 SizedBox(width: 8.w),
                                 Text(
@@ -488,19 +501,23 @@ class HomeView extends StatelessWidget {
                         
                         // Share button
                         Flexible(
-                          child: Container(
+                          child: GestureDetector(
+                            onTap: (){},
+                            child:Container(
                             height: 48.h,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFB800),
+                              color: const Color(0xFFFFA500),
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.share_outlined,
-                                  color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
-                                  size: 20.sp,
+                                SvgPicture.asset(
+                                  isDarkMode?'assets/icons/share_filled.svg':'assets/icons/share.svg',
+                                  // ignore: deprecated_member_use
+                                  color: isDarkMode ? AppColors.text_color :AppColors.heading_color,
+                                  width: 20.sp,
+                                  height: 20.sp
                                 ),
                                 SizedBox(width: 8.w),
                                 Text(
@@ -508,12 +525,13 @@ class HomeView extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16.sp,
-                                    color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
+                                    color: isDarkMode ? AppColors.text_color: AppColors.heading_color,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          )
                         ),
                       ],
                     ),
@@ -761,7 +779,7 @@ class HomeView extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: isDarkMode 
-            ? const Color(0xFF1A1A1A) 
+            ? AppColors.containers_bgd 
             : (lightModeBackgroundColor ?? Colors.white),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(

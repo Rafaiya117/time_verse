@@ -1,5 +1,11 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
 import 'dart:async';
 
@@ -121,6 +127,25 @@ class HomeController extends ChangeNotifier {
     // For now, just clear the form
     clearFeedback();
   }
+  
+  //!---------------- New ----------!
+  final GlobalKey quoteShareKey = GlobalKey();
+
+void shareQuoteAsImage(BuildContext context) async {
+  final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+  if (boundary != null) {
+    final image = await boundary.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/quote.png').create();
+    await file.writeAsBytes(pngBytes);
+
+    // ignore: deprecated_member_use
+    await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration');
+  }
+}
 
   @override
   void dispose() {

@@ -17,6 +17,7 @@ import 'package:time_verse/features/auth/reset_password/controller/reset_passwor
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
+import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_qoute_controller.dart';
 import 'package:time_verse/features/settings/change_password/controller/changepassowrd_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
@@ -81,7 +82,8 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_)=>  AllEventsController()),
             ChangeNotifierProvider(create: (_)=>  CalendarController()),
             ChangeNotifierProvider(create: (_)=>  BottomNavController()),
-            ChangeNotifierProvider(create: (_)=>  TimePickerController()),           
+            ChangeNotifierProvider(create: (_)=>  TimePickerController()),
+            ChangeNotifierProvider(create: (_)=>  HomeController()),           
           ],
           child: Builder(
             builder: (context) {

@@ -8,6 +8,7 @@ import 'package:time_verse/features/auth/otp/view/otp_view.dart';
 import 'package:time_verse/features/auth/reset_password/view/reset_password.dart';
 import 'package:time_verse/features/auth/signup/view/signup.dart';
 import 'package:time_verse/features/calender/view/calender_view.dart';
+import 'package:time_verse/features/home/view/home_view.dart';
 import 'package:time_verse/features/lending/view/lending.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/view/saved_qoutatio.dart';
 import 'package:time_verse/features/settings/change_password/view/change_password.dart';
@@ -122,6 +123,12 @@ final GoRouter appRouter = GoRouter(
       path: '/calender',
       builder: (context, state) => ThemedBackgroundWrapper(
         child: CalenderView(), 
+      ),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => ThemedBackgroundWrapper(
+        child: HomeView(), 
       ),
     ),
   ],

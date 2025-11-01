@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:time_verse/features/calender/model/time_model.dart';
 
 class TimePickerController extends ChangeNotifier {
-  final TimePickerModel _model = TimePickerModel();
+  final Map<String, TimeOfDay?> _selectedTimes = {};
 
-  TimeOfDay? get startTime => _model.startTime;
-  TimeOfDay? get endTime => _model.endTime;
+  TimeOfDay? getTime(String fieldKey) => _selectedTimes[fieldKey];
 
-  Future<void> selectTime(BuildContext context, bool isStart) async {
+  Future<void> selectTime(BuildContext context, String fieldKey) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: _selectedTimes[fieldKey] ?? TimeOfDay.now(),
     );
 
     if (picked != null) {
-      if (isStart) {
-        _model.startTime = picked;
-      } else {
-        _model.endTime = picked;
-      }
+      _selectedTimes[fieldKey] = picked;
       notifyListeners();
     }
   }

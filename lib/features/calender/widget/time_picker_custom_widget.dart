@@ -1,71 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 
 class TimePickerField extends StatelessWidget {
-  const TimePickerField({super.key});
+  final String fieldKey;
+  final String label; 
+  final dynamic icon; 
+  final Color? borderColor;
+  final Color? textColor;
+  final double? fontSize;
 
-  Widget _buildTimeField({
-    required BuildContext context,
-    required String label,
-    required TimeOfDay? time,
-    required VoidCallback onTap,
-    required String formattedTime,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            // ignore: deprecated_member_use
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                time == null ? label : formattedTime,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
+  const TimePickerField({
+    super.key,
+    required this.fieldKey,
+    required this.label,
+    required this.icon,
+    this.borderColor,
+    this.textColor,
+    this.fontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Provider.of<TimePickerController>(context);
+    final time = controller.getTime(fieldKey);
+    final formattedTime = controller.formatTime(time);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: () => controller.selectTime(context, fieldKey),
+      child: Container(
+        width: 170.w,
+        height: 50.h,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.fourth_color,),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              time == null ? label : formattedTime,
+              style: GoogleFonts.outfit(
+                color: isDarkMode?AppColors.text_color:AppColors.heading_color,
+                fontSize: fontSize ?? 15,
               ),
-              const Icon(
-                Icons.access_time,
-                color: Colors.white,
-                size: 20,
-              ),
-            ],
-          ),
+            ),
+            SizedBox(width: 8),
+            _buildIcon(context),
+          ],
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final controller = Provider.of<TimePickerController>(context);
-
-    return Row(
-      children: [
-        _buildTimeField(
-          context: context,
-          label: 'Start time',
-          time: controller.startTime,
-          formattedTime: controller.formatTime(controller.startTime),
-          onTap: () => controller.selectTime(context, true),
-        ),
-        const SizedBox(width: 12),
-        _buildTimeField(
-          context: context,
-          label: 'End time',
-          time: controller.endTime,
-          formattedTime: controller.formatTime(controller.endTime),
-          onTap: () => controller.selectTime(context, false),
-        ),
-      ],
-    );
+  Widget _buildIcon(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    if (icon is String && icon.toString().endsWith('.svg')) {
+      return SvgPicture.asset(
+        icon,
+        width: 20,
+        height: 20,
+        colorFilter:ColorFilter.mode(isDarkMode?AppColors.text_color:AppColors.heading_color, BlendMode.srcIn),
+      );
+    } else if (icon is IconData) {
+      return Icon(icon, color: isDarkMode?AppColors.text_color:AppColors.heading_color, size: 20);
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }

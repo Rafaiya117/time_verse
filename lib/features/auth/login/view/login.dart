@@ -128,7 +128,7 @@ class LoginPage extends StatelessWidget {
                 text: "Continue",
                 onPressed: () {
                   //context.push('/signup');
-                  context.push('/calender');
+                  context.push('/home');
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

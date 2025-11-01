@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:time_verse/core/utils/colors.dart';
 
 class DatePickerDialog extends StatefulWidget {
   const DatePickerDialog({super.key});
@@ -11,26 +14,31 @@ class DatePickerDialog extends StatefulWidget {
 class _DatePickerDialogState extends State<DatePickerDialog> {
   DateTime _focusedDay = DateTime(2025, 9, 6);
   DateTime? _selectedDay = DateTime(2025, 9, 6);
-
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
-      backgroundColor: const Color(0xFF1C1C2D), // Dark background
+      backgroundColor: isDarkMode?AppColors.containers_bgd:AppColors.background_color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 10.h),
+            color: AppColors.third_color,
+            child: Text(
               'Wed, September 6',
-              style: const TextStyle(
-                color: Colors.yellow,
-                fontSize: 18,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                color: Colors
+                    .white, // ✅ makes text readable on AppColors.third_color
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+          ),
+          const SizedBox(height: 8),
             TableCalendar(
               firstDay: DateTime(2025, 8, 26),
               lastDay: DateTime(2025, 10, 4),
@@ -45,36 +53,36 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
               },
               calendarStyle: CalendarStyle(
                 selectedDecoration: BoxDecoration(
-                  color: Colors.yellow.shade700,
+                  color: isDarkMode?AppColors.fourth_color:AppColors.heading_color,
                   shape: BoxShape.circle,
                 ),
                 selectedTextStyle: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
-                defaultTextStyle: const TextStyle(color: Colors.yellow),
-                weekendTextStyle: const TextStyle(color: Colors.yellow),
-                outsideTextStyle: TextStyle(color: Colors.yellow.withOpacity(0.4)),
+                defaultTextStyle:TextStyle(color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
+                weekendTextStyle: TextStyle(color:isDarkMode?AppColors.fourth_color:AppColors.heading_color),
+                // ignore: deprecated_member_use
+                outsideTextStyle: TextStyle(color:Color(0xFFD3C29F).withOpacity(0.2)),
               ),
-              headerStyle: const HeaderStyle(
+              headerStyle:HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
                 titleTextStyle: TextStyle(
-                  color: Colors.yellow,
+                  color: isDarkMode?AppColors.fourth_color:AppColors.heading_color,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                leftChevronIcon: Icon(Icons.chevron_left, color: Colors.yellow),
-                rightChevronIcon: Icon(Icons.chevron_right, color: Colors.yellow),
+                leftChevronIcon: Icon(Icons.chevron_left, color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
+                rightChevronIcon: Icon(Icons.chevron_right, color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
               ),
-              daysOfWeekStyle: const DaysOfWeekStyle(
-                weekdayStyle: TextStyle(color: Colors.yellow),
-                weekendStyle: TextStyle(color: Colors.yellow),
+              daysOfWeekStyle:DaysOfWeekStyle(
+                weekdayStyle: TextStyle(color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
+                weekendStyle: TextStyle(color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
               ),
             ),
           ],
         ),
-      ),
     );
   }
 }
