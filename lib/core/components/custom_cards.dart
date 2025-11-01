@@ -52,8 +52,8 @@ class PhaseCard extends StatelessWidget {
                     fontSize: 16.sp,
                     fontWeight: FontWeight.normal,
                     color: isDarkMode
-                        ? AppColors.text_color
-                        : const Color(0xFF373F4B),
+                      ? AppColors.text_color
+                      : const Color(0xFF373F4B),
                   ),
                 ),
                 SizedBox(height: 5.h),
@@ -63,8 +63,8 @@ class PhaseCard extends StatelessWidget {
                     fontSize: 14.sp,
                     fontWeight: FontWeight.normal,
                     color: isDarkMode
-                        ? AppColors.text_color
-                        : const Color(0xFF373F4B),
+                      ? AppColors.text_color
+                      : const Color(0xFF373F4B),
                   ),
                 ),
                 SizedBox(height: 10.h),

@@ -41,8 +41,8 @@ class Subscription extends StatelessWidget {
                   fontSize: 20.4.sp,
                   fontWeight: FontWeight.normal,
                   color: isDarkMode
-                      ? AppColors.text_color
-                      : const Color(0xFF373F4B),
+                    ? AppColors.text_color
+                    : const Color(0xFF373F4B),
                 ),
               ),
               SizedBox(height: 10.h),

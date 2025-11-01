@@ -550,7 +550,7 @@ class HomeView extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w600,
                     fontSize: 18.sp,
-                    color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
+                    color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
                   ),
                 ),
                 Text(
@@ -558,7 +558,7 @@ class HomeView extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w400,
                     fontSize: 14.sp,
-                    color: isDarkMode ? AppColors.text_color.withOpacity(0.7) : AppColors.heading_color.withOpacity(0.7),
+                    color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
                   ),
                 ),
               ],
@@ -603,7 +603,8 @@ class HomeView extends StatelessWidget {
                 onPressed: (){
                   context.push('/all_events');
                 }, 
-                child: Text('View all events',
+                child: Text(
+                  'View all events',
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w500,
                     fontSize: 14.sp,
@@ -652,7 +653,7 @@ class HomeView extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
+                color: isDarkMode ? AppColors.containers_bgd:AppColors.background_color,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
                   color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.grey.withOpacity(0.2),
@@ -791,10 +792,11 @@ class HomeView extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: isDarkMode 
-            ? AppColors.containers_bgd 
-            : (lightModeBackgroundColor ?? Colors.white),
+          ? AppColors.containers_bgd 
+          : (lightModeBackgroundColor ?? Colors.white),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
+          // ignore: deprecated_member_use
           color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.grey.withOpacity(0.2),
         ),
       ),

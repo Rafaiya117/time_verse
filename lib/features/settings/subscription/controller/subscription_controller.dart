@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SubscriptionController extends ChangeNotifier {
-  int? _selectedIndex;
+  int? _selectedIndex = 0;
 
   int? get selectedIndex => _selectedIndex;
 
