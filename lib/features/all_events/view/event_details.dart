@@ -264,6 +264,20 @@ class EventDetails extends StatelessWidget {
                       ),
                     ),
                     Positioned(
+                      bottom: 10.h,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: SvgPicture.asset(
+                          isDarkMode
+                            ? 'assets/icons/prograss_bar.svg'
+                            : 'assets/icons/prograssbar_light.svg',
+                          width: 64.w,
+                          height: 4.h,
+                        ),
+                      ),
+                    ),
+                    Positioned(
                       bottom: 1.h,
                       left: 1.w,
                       child: ClipRRect(
@@ -344,7 +358,9 @@ class EventDetails extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 TextButton(
-                  onPressed: (){}, 
+                  onPressed: (){
+                    context.push('/all_events');
+                  }, 
                   child: Text(
                     'See all Qoutes',
                     style: GoogleFonts.outfit(

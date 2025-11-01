@@ -827,6 +827,7 @@ class HomeView extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w400,
                     fontSize: 14.sp,
+                    // ignore: deprecated_member_use
                     color: isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
                   ),
                 ),

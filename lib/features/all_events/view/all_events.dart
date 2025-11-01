@@ -10,6 +10,7 @@ import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
 import 'package:time_verse/features/all_events/custom_widget/custom_eventcard.dart';
+import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 
 class AllEvents extends StatelessWidget {
@@ -80,7 +81,8 @@ class AllEvents extends StatelessWidget {
                           time: event.time,
                           location: event.location,
                           isDarkMode: isDarkMode,
-                          onDelete: () => controller.removeEvent(index),
+                          onDelete: () =>controller.confirmAndRemoveEvent(context, index)
+                          //controller.removeEvent(index),
                         ),
                       );
                     },
