@@ -22,7 +22,7 @@ class AddEventModal extends StatelessWidget {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDarkMode?Color(0xFF051123):AppColors.text_color,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(50)),
         border: const Border(top: BorderSide(color: Colors.grey, width: 1.5)),
       ),
 
