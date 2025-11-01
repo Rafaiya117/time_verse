@@ -569,6 +569,7 @@ class HomeView extends StatelessWidget {
             Column(
               children: [
                 _buildScheduleEvent(
+                  context,
                   'Team Standup',
                   '9:00 AM - 9:30 AM',
                   const Color(0xFFFFD700),
@@ -577,6 +578,7 @@ class HomeView extends StatelessWidget {
                 ),
                 SizedBox(height: 12.h),
                 _buildScheduleEvent(
+                  context,
                   'Client Presentation',
                   '11:00 AM - 12:00 PM',
                   Colors.grey,
@@ -585,6 +587,7 @@ class HomeView extends StatelessWidget {
                 ),
                 SizedBox(height: 12.h),
                 _buildScheduleEvent(
+                  context,
                   'Lunch Break',
                   '12:30 PM - 1:30 PM',
                   const Color(0xFFFFB800),
@@ -596,14 +599,18 @@ class HomeView extends StatelessWidget {
             
             SizedBox(height: 16.h),
             Center(
-              child: Text(
-                'View all events',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14.sp,
-                  color: const Color(0xFFFFB800),
+              child: TextButton(
+                onPressed: (){
+                  context.push('/all_events');
+                }, 
+                child: Text('View all events',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
+                    color: const Color(0xFFFFB800),
+                  ),
                 ),
-              ),
+              )
             ),
             
             SizedBox(height: 30.h),
@@ -768,13 +775,18 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildScheduleEvent(
+    BuildContext context,
     String title,
     String time,
     Color indicatorColor,
     bool isDarkMode, {
     Color? lightModeBackgroundColor,
   }) {
-    return Container(
+    return GestureDetector(
+      onTap: (){
+        context.push('/event_details');
+      },
+      child:Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -823,6 +835,7 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
+    )
     );
   }
 

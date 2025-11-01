@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_header.dart';
-import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_qoute_controller.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/custom_widget/custom_qoutation_card.dart';
@@ -27,7 +24,7 @@ class SavedQoutation extends StatelessWidget {
             children: [
               CustomHeaderBar(
                 title: 'The Wisdom Jounal',
-                leftSpacing: 70.w,
+                leftSpacing: 50.w,
                 rightSpacing: 40.w,
               ),
               SizedBox(height: 20.h,),
@@ -68,13 +65,24 @@ class SavedQoutation extends StatelessWidget {
                     ),
                   );
                 },
-                suggestionsBuilder:(BuildContext context, SearchController controller) {
-                  return List<ListTile>.generate(5, (int index) {
-                    final String item = 'item $index';
-                    return ListTile(
-                      title: Text(item),
+                suggestionsBuilder:
+                  (BuildContext context, SearchController controller) {
+                    final query = controller.value.text.toLowerCase();
+                      final quoteController = Provider.of<SavedQouteController>(context,listen: false,);
+                      final filteredQuotes = quoteController.savedQuotes
+                        .where((quote) =>quote['quoteText']!.toLowerCase().contains(query,) ||
+                        quote['author']!.toLowerCase().contains(query),).toList();
+                      return List<ListTile>.generate(filteredQuotes.length, (int index,) {
+                        final quote = filteredQuotes[index];
+                      return ListTile(
+                        title: Text(
+                        quote['quoteText']!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(quote['author']!),
                       onTap: () {
-                        controller.closeView(item);
+                        controller.closeView(quote['quoteText']!);
                       },
                     );
                   });
@@ -146,23 +154,23 @@ class SavedQoutation extends StatelessWidget {
                   );
                 },
               ),
-              SizedBox(height: 10.h),
-              Center(
-                child: CustomButton(
-                  text: "Add New Event",
-                  onPressed: () {
-                    //context.push('/signup');
-                    context.push('/settings');
-                  },
-                  gradient: AppGradientColors.button_gradient,
-                  textColor: AppColors.text_color,
-                  fontFamily: 'outfit',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.normal,
-                  height: 51.h,
-                  width: double.infinity,
-                ),
-              ),
+              // SizedBox(height: 10.h),
+              // Center(
+              //   child: CustomButton(
+              //     text: "Add New Event",
+              //     onPressed: () {
+              //       //context.push('/signup');
+              //       context.push('/settings');
+              //     },
+              //     gradient: AppGradientColors.button_gradient,
+              //     textColor: AppColors.text_color,
+              //     fontFamily: 'outfit',
+              //     fontSize: 16.sp,
+              //     fontWeight: FontWeight.normal,
+              //     height: 51.h,
+              //     width: double.infinity,
+              //   ),
+              // ),
             ],
           ),
         ),

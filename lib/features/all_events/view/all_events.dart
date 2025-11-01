@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/core/components/custom_bottomnav.dart';
+import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
@@ -86,8 +88,28 @@ class AllEvents extends StatelessWidget {
                 );
               },
             ),
+            // SizedBox(height: 10.h),
+            //   Center(
+            //     child: CustomButton(
+            //       text: "Add New Event",
+            //       onPressed: () {
+            //         //context.push('/signup');
+            //         context.push('/add');
+            //       },
+            //       gradient: AppGradientColors.button_gradient,
+            //       textColor: AppColors.text_color,
+            //       fontFamily: 'outfit',
+            //       fontSize: 16.sp,
+            //       fontWeight: FontWeight.normal,
+            //       height: 51.h,
+            //       width: double.infinity,
+            //   ),
+            // ),
           ],
         ),
+      ),
+      bottomNavigationBar:Consumer<AllEventsController>(
+        builder: (context, controller, _) => CustomBottomNavBar(),
       ),
     );
   }
