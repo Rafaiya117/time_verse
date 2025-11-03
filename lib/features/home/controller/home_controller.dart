@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
@@ -43,20 +45,21 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  final Dio _dio = Dio();
   // Daily Inspiration Quotes
   final List<QuoteData> _inspirationalQuotes = [
-    QuoteData(
-      quote: '"This is the day that the Lord has made; let us rejoice and be glad in it"',
-      reference: 'Psalm 118:24',
-    ),
-    QuoteData(
-      quote: '"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, to give you hope and a future."',
-      reference: 'Jeremiah 29:11',
-    ),
-    QuoteData(
-      quote: '"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."',
-      reference: 'Proverbs 3:5-6',
-    ),
+    // QuoteData(
+    //   quote: '"This is the day that the Lord has made; let us rejoice and be glad in it"',
+    //   reference: 'Psalm 118:24',
+    // ),
+    // QuoteData(
+    //   quote: '"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, to give you hope and a future."',
+    //   reference: 'Jeremiah 29:11',
+    // ),
+    // QuoteData(
+    //   quote: '"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."',
+    //   reference: 'Proverbs 3:5-6',
+    // ),
   ];
 
   int _currentQuoteIndex = 0;
@@ -146,6 +149,45 @@ void shareQuoteAsImage(BuildContext context) async {
     await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration');
   }
 }
+
+Future<void> fetchQuotesFromApi() async {
+  debugPrint('🚀 Starting fetchQuotesFromApi...');
+
+  try {
+    final response = await _dio.get('http://10.10.13.6:5000/get-quotes');
+    debugPrint('✅ API responded with status: ${response.statusCode}');
+
+    if (response.statusCode == 200 && response.data != null) {
+      final data = response.data;
+      debugPrint('📦 Response body: $data');
+
+      if (data['quotes'] is List) {
+        final List<QuoteData> loadedQuotes = (data['quotes'] as List).map((q) {
+          final parsed = q is String ? jsonDecode(q) : q;
+          debugPrint('💬 Parsed quote: $parsed');
+          return QuoteData(
+            quote: parsed['quote'] ?? '',
+            reference: parsed['event_name'] ?? '',
+          );
+        }).toList();
+
+        _inspirationalQuotes
+          ..clear()
+          ..addAll(loadedQuotes);
+
+        debugPrint('🎉 Loaded ${_inspirationalQuotes.length} quotes');
+        notifyListeners();
+      } else {
+        debugPrint('⚠️ Unexpected quotes format: ${data['quotes']}');
+      }
+    } else {
+      debugPrint('❌ Failed to load quotes: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching quotes: $e');
+  }
+}
+
 
   @override
   void dispose() {

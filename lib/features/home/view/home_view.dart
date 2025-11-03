@@ -171,6 +171,7 @@ class HomeView extends StatelessWidget {
     // Start auto-slide when widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       homeController.startAutoSlide();
+      homeController.fetchQuotesFromApi();
     });
     
     return Scaffold(
@@ -248,8 +249,8 @@ class HomeView extends StatelessWidget {
                   // Background SVG
                   SvgPicture.asset(
                     isDarkMode 
-                        ? 'assets/images/WelcomeSection_d.svg'
-                        : 'assets/images/WelcomeSection_w.svg',
+                      ? 'assets/images/WelcomeSection_d.svg'
+                      : 'assets/images/WelcomeSection_w.svg',
                     width: 384.w,
                     height: 224.h,
                     fit: BoxFit.cover,
@@ -388,77 +389,81 @@ class HomeView extends StatelessWidget {
                     // Quote PageView
                     SizedBox(
                       height: 120.h,
-                      child: GestureDetector(
-                        onPanStart: (_) => homeController.stopAutoSlide(),
-                        onPanEnd: (_) => homeController.startAutoSlide(),
-                        onTapDown: (_) => homeController.stopAutoSlide(),
-                        onTapUp: (_) => homeController.startAutoSlide(),
-                        child: PageView.builder(
-                          controller: homeController.pageController,
-                          itemCount: homeController.inspirationalQuotes.length,
-                          onPageChanged: (index) {
-                            homeController.updateQuoteIndex(index);
-                          },
-                          itemBuilder: (context, index) {
-                          final quote = homeController.inspirationalQuotes[index];
-                          return Column(
-                            children: [
-                              // Quote text
-                              Flexible(
-                                child: Text(
-                                  quote.quote,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16.sp,
-                                    color: isDarkMode ? Colors.white : Colors.black,
-                                    height: 1.4,
+                        child: GestureDetector(
+                          onPanStart: (_) => homeController.stopAutoSlide(),
+                          onPanEnd: (_) => homeController.startAutoSlide(),
+                          onTapDown: (_) => homeController.stopAutoSlide(),
+                          onTapUp: (_) => homeController.startAutoSlide(),
+                          child: PageView.builder(
+                            controller: homeController.pageController,
+                            itemCount:homeController.inspirationalQuotes.length,
+                            onPageChanged: (index) {
+                              homeController.updateQuoteIndex(index);
+                            },
+                            itemBuilder: (context, index) {
+                              final quote = homeController.inspirationalQuotes[index];
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      quote.quote,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16.sp,
+                                        color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                        height: 1.4,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    quote.reference,
+                                    style: GoogleFonts.outfit(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14.sp,
+                                      color: isDarkMode
+                                        ? const Color(0xFFFFD700)
+                                        : const Color(0xFFFF8C00),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 5.h),
+                      // DOT INDICATORS
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          homeController.inspirationalQuotes.length,
+                          (index) => GestureDetector(
+                            onTap: () => homeController.goToQuote(index),
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4.w),
+                              width: homeController.currentQuoteIndex == index
+                                ? 12.w
+                                : 8.w,
+                              height: homeController.currentQuoteIndex == index
+                                ? 12.h
+                                : 8.h,
+                              decoration: BoxDecoration(
+                                color: homeController.currentQuoteIndex == index
+                                  ? (isDarkMode ? const Color(0xFFFFD700): const Color(0xFFFF8C00))
+                                  : (isDarkMode? Colors.grey[600]: Colors.grey[400]),
+                                shape: BoxShape.circle,
                               ),
-                              SizedBox(height: 16.h),
-                              
-                              // Bible verse reference
-                              Text(
-                                quote.reference,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14.sp,
-                                  color: isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFF8C00),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          );
-                         },
-                         ),
-                       ),
-                    ),
-                    SizedBox(height: 5.h),
-                    
-                    // Interactive Dots indicator
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        homeController.inspirationalQuotes.length,
-                        (index) => GestureDetector(
-                          onTap: () => homeController.goToQuote(index),
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4.w),
-                            width: homeController.currentQuoteIndex == index ? 12.w : 8.w,
-                            height: homeController.currentQuoteIndex == index ? 12.h : 8.h,
-                            decoration: BoxDecoration(
-                              color: homeController.currentQuoteIndex == index
-                                  ? (isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFF8C00))
-                                  : (isDarkMode ? Colors.grey[600] : Colors.grey[400]),
-                              shape: BoxShape.circle,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20.h),
-                    
+                    SizedBox(height: 20.h),                    
                     // Action buttons
                     Row(
                       children: [
@@ -526,11 +531,11 @@ class HomeView extends StatelessWidget {
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16.sp,
                                     color: isDarkMode ? AppColors.text_color: AppColors.heading_color,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
                           )
                         ),
                       ],
@@ -668,6 +673,7 @@ class HomeView extends StatelessWidget {
                         width: 40.w,
                         height: 40.h,
                         decoration: BoxDecoration(
+                          // ignore: deprecated_member_use
                           color: Colors.grey.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(20.r),
                         ),
