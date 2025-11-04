@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,19 +6,24 @@ import 'package:time_verse/core/utils/colors.dart';
 
 class ProfileImagePicker extends StatelessWidget {
   final String assetPath;
-  final File? pickedImage; // ✅ added
+  final File? pickedImage;
+  final String? imageUrl; 
   final VoidCallback onCameraTap;
 
   const ProfileImagePicker({
     super.key,
     required this.assetPath,
     required this.onCameraTap,
-    this.pickedImage, // ✅ added
+    this.pickedImage,
+    this.imageUrl, 
   });
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final imageProvider = pickedImage != null
+      ? FileImage(pickedImage!)
+      : (imageUrl != null ? NetworkImage(imageUrl!) : AssetImage(assetPath)) as ImageProvider;
 
     return SizedBox(
       width: 120.w,
@@ -35,8 +39,8 @@ class ProfileImagePicker extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(
                 color: isDarkMode
-                    ? AppColors.text_color
-                    : const Color(0xFFC2C2C2),
+                  ? AppColors.text_color
+                  : const Color(0xFFC2C2C2),
                 width: 1.5,
               ),
             ),
@@ -46,9 +50,7 @@ class ProfileImagePicker extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: pickedImage != null
-                      ? FileImage(pickedImage!)
-                      : AssetImage(assetPath) as ImageProvider, // ✅ updated
+                  image: imageProvider, 
                   fit: BoxFit.cover,
                 ),
               ),

@@ -71,12 +71,18 @@ class OtpView extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20.h,),
+            // CircularOtpField(
+            //   onSubmit: (code) {
+            //     print('OTP entered: $code');
+            //   },
+            // ),
             CircularOtpField(
+              mainController: otpController.otpController,
               onSubmit: (code) {
                 print('OTP entered: $code');
               },
             ),
-            SizedBox(height: 20.h,),
+            SizedBox(height: 20.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -108,8 +114,32 @@ class OtpView extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Continue",
-                onPressed: () {
-                  context.push('/reset_password');
+                onPressed: ()async {
+                  final email = Uri.decodeComponent(GoRouterState.of(context).uri.queryParameters['email'] ?? '',);
+                    final controller = Provider.of<OtpController>(context,listen: false,);
+                    final otp = controller.otpController.text.replaceAll(RegExp(r'\s+'), '',);
+                    debugPrint("Entered OTP: $otp");
+                    if (otp.length != 4) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please enter a 4-digit OTP'),),);
+                      return;
+                    }
+                    final isVerified = await controller.verifyOtpUser(email,otp,);
+                    if (isVerified) {
+                      final encodedEmail = Uri.encodeComponent(email);
+                      final encodedOtp = Uri.encodeComponent(otp); 
+                        context.push('/reset_password?email=$encodedEmail&otp=$encodedOtp',
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            controller.otpError ?? 'OTP verification failed',
+                          ),
+                        ),
+                      );
+                    }
+                  //context.push('/reset_password');
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

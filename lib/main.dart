@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -20,14 +21,16 @@ import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_qoute_controller.dart';
 import 'package:time_verse/features/settings/change_password/controller/changepassowrd_controller.dart';
+import 'package:time_verse/features/settings/privacy/controller/privacy_policy_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 import 'package:time_verse/features/settings/settings_controller.dart';
 import 'package:time_verse/features/settings/subscription/controller/subscription_controller.dart';
+import 'package:time_verse/features/settings/terms_condition/controller/terms_controller.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  //WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const MyApp());
 }
@@ -83,7 +86,9 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_)=>  CalendarController()),
             ChangeNotifierProvider(create: (_)=>  BottomNavController()),
             ChangeNotifierProvider(create: (_)=>  TimePickerController()),
-            ChangeNotifierProvider(create: (_)=>  HomeController()),           
+            ChangeNotifierProvider(create: (_)=>  HomeController()),
+            ChangeNotifierProvider(create: (_)=>  TermsController()), 
+            ChangeNotifierProvider(create: (_)=>  PrivacyController()),          
           ],
           child: Builder(
             builder: (context) {

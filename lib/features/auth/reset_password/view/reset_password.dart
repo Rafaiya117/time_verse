@@ -16,6 +16,9 @@ class ResetPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     final resetpasswordController = Provider.of<ResetPasswordController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final routerState = GoRouterState.of(context);
+  final email = Uri.decodeComponent(routerState.uri.queryParameters['email'] ?? '');
+  final otp = Uri.decodeComponent(routerState.uri.queryParameters['otp'] ?? '');
     final Color secondaryTextColor = isDarkMode 
         ? AppColors.fourth_color 
         : AppColors.heading_color;
@@ -77,8 +80,36 @@ class ResetPassword extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Continue",
-                onPressed: () {
-                  context.push('/login');
+                onPressed: () async{
+                  if (resetpasswordController.validateLoginFields()) {
+                    final success = await resetpasswordController.resetPassword(email,otp,);
+                    if (success) {
+                      debugPrint("✅ Password reset success confirmed. Navigating to login...",);
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Password reset successful"),
+                        ),
+                      );
+                      await Future.delayed(const Duration(milliseconds: 800));
+                      if (context.mounted) {
+                        context.go('/login');
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              resetpasswordController.errorMessage ?? 'Reset failed',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Please fill all fields")),
+                      );
+                    }
+                  //context.push('/login');
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

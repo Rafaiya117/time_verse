@@ -69,8 +69,33 @@ class ForgotPassword extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Recover Account",
-                onPressed: () {
-                  context.push('/otp');
+                onPressed: ()async {
+                  //context.push('/otp');
+                  if (forgotpassword_controller.validateLoginFields()) {
+                    final success = await forgotpassword_controller.sendForgotPasswordEmail();
+                      if (success) {
+                        if (context.mounted) {
+                          final email = forgotpassword_controller.emailController.text.trim();
+                          final encodedEmail = Uri.encodeComponent(email);
+                          context.push('/otp?email=$encodedEmail');
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              forgotpassword_controller.errorMessage ??
+                                'Request failed',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please enter your email"),
+                        ),
+                      );
+                    }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

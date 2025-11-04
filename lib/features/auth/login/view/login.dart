@@ -126,9 +126,27 @@ class LoginPage extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Continue",
-                onPressed: () {
-                  //context.push('/signup');
-                  context.push('/home');
+                onPressed: () async {
+                  if (loginController.validateLoginFields()) {
+                    final success = await loginController.loginUser();
+                      if (success) {
+                        if (context.mounted) context.push('/home');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              loginController.loginError ?? 'Login failed',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please fill in all fields"),
+                        ),
+                      );
+                    }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

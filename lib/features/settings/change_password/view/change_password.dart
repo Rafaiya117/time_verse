@@ -67,7 +67,7 @@ class ChangePassword extends StatelessWidget {
             CustomButton(
               text: "Update",
               onPressed: () {
-                //context.push('/login');
+               changepassowrd_controller.changePassword(context);
               },
               gradient: AppGradientColors.button_gradient,
               textColor: AppColors.text_color,

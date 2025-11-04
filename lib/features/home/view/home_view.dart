@@ -9,6 +9,7 @@ import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
+import 'package:time_verse/features/settings/profile/user_service/user_service.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -222,10 +223,31 @@ class HomeView extends StatelessWidget {
                             width: 2,
                           ),
                         ),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/images/profile_img.png',
-                            fit: BoxFit.cover,
+                        child: 
+                        // ClipOval(
+                        //   child: Image.asset(
+                        //     'assets/images/profile_img.png',
+                        //     fit: BoxFit.cover,
+                        //   ),
+                        // ),
+                        ClipOval(
+                          child: Builder(
+                            builder: (_) {
+                              final userService = UserService();
+                              final user = userService.currentUser;
+                              debugPrint('!-----${user?.profilePicture}');
+                              final imageProvider = user?.profilePicture != null
+                                ? NetworkImage(
+                                  'http://10.10.13.74:5000/${user!.profilePicture}',
+                                )
+                              : const AssetImage(
+                                'assets/images/profile_img.png',
+                              );
+                              return Image(
+                                image: imageProvider as ImageProvider,
+                                fit: BoxFit.cover,
+                              );
+                            },
                           ),
                         ),
                       ),

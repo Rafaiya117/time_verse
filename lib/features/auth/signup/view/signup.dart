@@ -101,7 +101,7 @@ class Signup extends StatelessWidget {
                     svgAsset: 'assets/icons/singup_camera.svg',
                     onTap: controller.pickImage,
                   ),
-                  if (controller.pickedImageName != null)
+                  if (controller.pickedImagePath != null)
                     Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(top: 6),
@@ -111,7 +111,7 @@ class Signup extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        controller.pickedImageName!,
+                        controller.pickedImagePath!,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.outfit(
                           fontSize: 12,
@@ -127,8 +127,28 @@ class Signup extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Continue",
-                onPressed: () {
-                  context.push('/login');
+                onPressed: ()async {
+                  //context.push('/login');
+                  if (signup_controller.validateSignupFields()) {
+                    final success = await signup_controller.signupUser();
+                      if (success) {
+                        if (context.mounted) context.push('/home');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              signup_controller.signupError ?? 'Signup failed',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please fill in all fields"),
+                        ),
+                      );
+                    }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,
