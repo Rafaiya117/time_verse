@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/features/auth/auth_model/auth_model.dart';
 
 class AuthService {
@@ -68,7 +69,8 @@ class AuthService {
     final token = normalizedData['data']['access'];
     debugPrint('!=========Access Token: $token');
     await saveToken(token);
-
+    await AppPrefs.setLoggedIn(true);
+    
   final user = normalizedData['data']['user'] != null
     ? User.fromJson(normalizedData['data']['user'])
     : null;

@@ -19,12 +19,19 @@ import 'package:time_verse/features/settings/settings.dart';
 import 'package:time_verse/features/settings/subscription/controller/subscription_controller.dart';
 import 'package:time_verse/features/settings/subscription/view/subscription.dart';
 import 'package:time_verse/features/settings/terms_condition/view/terms_&_condition.dart';
+import 'package:time_verse/features/splash_screen/splash_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
+      builder: (context, state) => ThemedBackgroundWrapper(
+        child: SplashScreen(), 
+      ),
+    ),
+    GoRoute(
+      path: '/landing',
       builder: (context, state) => ThemedBackgroundWrapper(
         child: LandingScreen(), 
       ),

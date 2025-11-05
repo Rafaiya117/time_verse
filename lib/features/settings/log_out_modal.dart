@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 void showLogoutDialog(BuildContext context) {
   showDialog(
@@ -73,7 +75,9 @@ void showLogoutDialog(BuildContext context) {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        await AppPrefs.setLoggedIn(false);
+                        await AuthService().clearToken();
                         context.push('/login');
                       },
                       style: ElevatedButton.styleFrom(

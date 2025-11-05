@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
@@ -17,6 +18,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loginController = Provider.of<LoginController>(context, listen: false);
+    loginController.loadRememberedUser();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final String logoAsset = isDarkMode
       ? 'assets/images/logo.png' 
@@ -130,24 +132,36 @@ class LoginPage extends StatelessWidget {
                   onPressed: () async {
                     if (loginController.validateLoginFields()) {
                       final success = await loginController.loginUser();
-                        if (success) {
-                          if (context.mounted) context.push('/home');
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                loginController.loginError ?? 'Login failed',
-                              ),
-                            ),
+                      if (success) {
+                        if (loginController.rememberMe) {
+                          await AppPrefs.saveRememberMe(
+                            true,
+                            loginController.emailController.text.trim(),
+                            loginController.passwordController.text.trim(),
                           );
+                        } else {
+                          await AppPrefs.saveRememberMe(false, '', '');
                         }
+                        await AppPrefs.setLoggedIn(true);
+                        await AppPrefs.setFirstLaunch(false);
+
+                        if (context.mounted) context.push('/home');
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please fill in all fields"),
+                          SnackBar(
+                            content: Text(
+                              loginController.loginError ?? 'Login failed',
+                            ),
                           ),
                         );
                       }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please fill in all fields"),
+                        ),
+                      );
+                    }
                   },
                   gradient: AppGradientColors.button_gradient,
                   textColor: AppColors.text_color,
@@ -181,7 +195,7 @@ class LoginPage extends StatelessWidget {
                             color: isDarkMode
                               ? AppColors.third_color
                               : AppColors.heading_color,
-                          ),
+                            ),
                           recognizer: TapGestureRecognizer()..onTap = () {
                             context.push('/signup');
                           },
@@ -194,9 +208,7 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 30.h,),
               Center(
                 child: GestureDetector(
-                  onTap: () {
-                    
-                  },
+                  onTap: () {},
                   child: SvgPicture.asset(
                     'assets/icons/gmail.svg',
                     width: 35.w,

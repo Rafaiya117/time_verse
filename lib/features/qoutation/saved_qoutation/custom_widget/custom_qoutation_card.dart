@@ -98,7 +98,6 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                   ),
                 ),
                 SizedBox(height: 8.h),
-                // Bottom Row: Author, Heart, Bookmark
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
