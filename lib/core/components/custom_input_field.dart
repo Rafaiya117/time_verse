@@ -59,7 +59,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   fontWeight: FontWeight.w500,
                   fontSize: widget.fontSize.sp,
                   color: widget.textColor ??
-                      (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                    (isDarkMode ? AppColors.text_color : AppColors.heading_color),
                 ),
               ),
               if (widget.label.contains('*'))
@@ -76,11 +76,13 @@ class _CustomInputFieldState extends State<CustomInputField> {
         ),
         SizedBox(height: 5.h),
         SizedBox(
-          height: widget.height ?? 33,
+          height: widget.height ?? 35,
           child: TextFormField(
             controller: widget.controller,
             obscureText: widget.isPassword ? _obscureText : false,
+            textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(vertical: 9.h, horizontal: 8.w),
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: widget.borderColor ?? AppColors.third_color,
@@ -99,41 +101,40 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   width: 1.0.w,
                 ),
               ),
-              labelText: widget.hintText,
-              labelStyle: GoogleFonts.outfit(
-                fontSize: widget.hintFontSize ?? 10.sp,
-                fontWeight: FontWeight.normal,
-                color: widget.labelColor ??
-                    (isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
-              ),
+              // labelText: widget.hintText,
+              // labelStyle: GoogleFonts.outfit(
+              //   fontSize: widget.hintFontSize ?? 10.sp,
+              //   fontWeight: FontWeight.normal,
+              //   color: widget.labelColor ??(isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
+              // ),
               prefixIcon: widget.prefixSvgPath != null
-                  ? Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: SvgPicture.asset(
-                        widget.prefixSvgPath!,
-                        width: 14.w,
-                        height: 16.h,
-                        colorFilter: ColorFilter.mode(
-                          widget.prefixIconColor ?? AppColors.text_color,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    )
-                  : null,
-              suffixIcon: widget.isPassword
+                ? Padding(
+                  padding: EdgeInsets.all(16.0),
+                    child: SvgPicture.asset(
+                      widget.prefixSvgPath!,
+                      width: 14.w,
+                      height: 16.h,
+                      colorFilter: ColorFilter.mode(
+                        widget.prefixIconColor ?? AppColors.text_color,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                )
+                : null,
+                suffixIcon: widget.isPassword
                   ? IconButton(
                       icon: Icon(
                         _obscureText ? Icons.visibility_off : Icons.visibility,
                         color: widget.suffixIconColor ?? AppColors.text_color,
                         size: 11.sp,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
-                      },
-                    )
-                  : null,
+                    ),
+                    onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
+              : null,
             ),
           ),
         ),

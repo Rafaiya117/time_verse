@@ -256,35 +256,46 @@ class HomeView extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 30.h),
-            
+            SizedBox(height: 30.h),            
             // Welcome Section with SVG Background
-                        // Welcome Section with SVG Background
-            Container(
-              width: 384.w,
-              height: 224.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Stack(
-                children: [
-                  // Background SVG
-                  SvgPicture.asset(
-                    isDarkMode 
-                      ? 'assets/images/WelcomeSection_d.svg'
-                      : 'assets/images/WelcomeSection_w.svg',
-                    width: 384.w,
-                    height: 224.h,
-                    fit: BoxFit.cover,
-                  ),
-                  
-                  
-                ],
+            Text(
+              'Welcome',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w700,
+                fontSize: 34.sp,
+                color: isDarkMode? AppColors.fourth_color:Color(0xFF403D3B),
               ),
             ),
-
-            SizedBox(height: 30.h),
-            
+            //SizedBox(height: 10.h),            
+            Text(
+              'Mellisa\n Peters',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.normal,
+                fontSize: 34.sp,
+                color: isDarkMode? AppColors.fourth_color:Color(0xFF403D3B),
+              ),
+            ),
+            // Container(
+            //   width: 384.w,
+            //   height: 224.h,
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(12.r),
+            //   ),
+            //   child: Stack(
+            //     children: [
+            //       //Background SVG
+            //       SvgPicture.asset(
+            //         isDarkMode 
+            //           ? 'assets/images/WelcomeSection_d.svg'
+            //           : 'assets/images/WelcomeSection_w.svg',
+            //         width: 384.w,
+            //         height: 224.h,
+            //         fit: BoxFit.cover,
+            //       ),                                    
+            //     ],
+            //   ),
+            // ),
+            SizedBox(height: 30.h),            
             // Calendar Section
             Center(
               child: Text(
@@ -365,48 +376,48 @@ class HomeView extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: EdgeInsets.all(24.w),
+                padding: EdgeInsets.symmetric(horizontal:24.w, vertical: 100.h),
                 child: Column(
                   children: [
                     // Quote icon
-                    Container(
-                      width: 48.w,
-                      height: 48.h,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? const Color(0xFF8B6914) : const Color(0xFFFFF4E6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: SvgPicture.asset(
-                        'assets/icons/qoute_icon.svg',
-                        // ignore: deprecated_member_use
-                        color: isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFFA500),
-                        width: 24.w,
-                        height: 24.h,
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
+                    // Container(
+                    //   width: 48.w,
+                    //   height: 48.h,
+                    //   decoration: BoxDecoration(
+                    //     color: isDarkMode ? const Color(0xFF8B6914) : const Color(0xFFFFF4E6),
+                    //     shape: BoxShape.circle,
+                    //   ),
+                    //   child: SvgPicture.asset(
+                    //     'assets/icons/qoute_icon.svg',
+                    //     // ignore: deprecated_member_use
+                    //     color: isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFFA500),
+                    //     width: 24.w,
+                    //     height: 24.h,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 24.h),
                     
-                    // Title
-                    Text(
-                      'Your Daily Inspiration',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20.sp,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
+                    // // Title
+                    // Text(
+                    //   'Your Daily Inspiration',
+                    //   style: GoogleFonts.outfit(
+                    //     fontWeight: FontWeight.w600,
+                    //     fontSize: 20.sp,
+                    //     color: isDarkMode ? Colors.white : Colors.black,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 8.h),
                     
-                    // Subtitle
-                    Text(
-                      'Generated from your calendar',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14.sp,
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                      ),
-                    ),
-                    SizedBox(height: 32.h),
+                    // // Subtitle
+                    // Text(
+                    //   'Generated from your calendar',
+                    //   style: GoogleFonts.outfit(
+                    //     fontWeight: FontWeight.w400,
+                    //     fontSize: 14.sp,
+                    //     color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    //   ),
+                    // ),
+                    // SizedBox(height: 32.h),
                     
                     // Quote PageView
                     SizedBox(

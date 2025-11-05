@@ -60,9 +60,9 @@ class AuthService {
     );
 
     final data = response.data is String ? jsonDecode(response.data) : response.data;
-  final normalizedData = data['data'] != null
-    ? data
-    : {'data': {'access': data['access'], 'refresh': data['refresh'], 'user': null}};
+    final normalizedData = data['data'] != null
+      ? data
+       : {'data': {'access': data['access'], 'refresh': data['refresh'], 'user': null}};
 
   if (response.statusCode == 200 && normalizedData['data']?['access'] != null) {
     final token = normalizedData['data']['access'];
@@ -88,7 +88,6 @@ return {
   'success': false,
   'error': errorMessage,
 };
-
   } on DioException catch (e) {
     return {'success': false, 'error': _handleError(e)};
   }

@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_image_uploader.dart';
@@ -12,6 +11,8 @@ import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path/path.dart' as path;
 
 class Signup extends StatelessWidget {
   const Signup({super.key});
@@ -105,13 +106,16 @@ class Signup extends StatelessWidget {
                     Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(top: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 8,),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        controller.pickedImagePath!,
+                        path.basename(controller.pickedImagePath!),
                         textAlign: TextAlign.center,
                         style: GoogleFonts.outfit(
                           fontSize: 12,
@@ -205,7 +209,7 @@ class Signup extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 120.h,),
+            SizedBox(height: 90.h,),
             Center(
               child: SizedBox(
                 width: 142.w,

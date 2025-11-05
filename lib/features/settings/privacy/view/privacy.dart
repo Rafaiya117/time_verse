@@ -20,61 +20,63 @@ class Privacy extends StatelessWidget {
     });
 
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
-        child: Column(
-          children: [
-            CustomHeaderBar(
-              title: 'Privacy Policy',
-              leftSpacing: 60.w,
-              rightSpacing: 60.w,
-            ),
-            SizedBox(height: 20.h),
-
-            if (controller.isLoading)
-              const Center(child: CircularProgressIndicator())
-            else if (controller.errorMessage != null)
-              Text(
-                controller.errorMessage!,
-                style: GoogleFonts.outfit(
-                  fontSize: 16.sp,
-                  color: Colors.red,
-                ),
-              )
-            else if (controller.privacyData != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.outfit(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.normal,
-                        color: isDarkMode
-                          ? AppColors.text_color
-                          : const Color(0xFF373F4B),
-                        ),
-                        children: [
-                          TextSpan(
-                            text: controller.privacyData!['description'] ?? '',
-                        ),
-                      ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
+          child: Column(
+            children: [
+              CustomHeaderBar(
+                title: 'Privacy Policy',
+                leftSpacing: 60.w,
+                rightSpacing: 60.w,
+              ),
+              SizedBox(height: 20.h),
+        
+              if (controller.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (controller.errorMessage != null)
+                Text(
+                  controller.errorMessage!,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16.sp,
+                    color: Colors.red,
+                  ),
+                )
+              else if (controller.privacyData != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.outfit(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.normal,
+                          color: isDarkMode
+                            ? AppColors.text_color
+                            : const Color(0xFF373F4B),
+                          ),
+                          children: [
+                            TextSpan(
+                              text: controller.privacyData!['description'] ?? '',
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                )
+                else
+                Text(
+                  'No privacy policy available.',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16.sp,
+                    color: isDarkMode
+                      ? AppColors.text_color
+                      : const Color(0xFF373F4B),
                 ),
-              )
-              else
-              Text(
-                'No privacy policy available.',
-                style: GoogleFonts.outfit(
-                  fontSize: 16.sp,
-                  color: isDarkMode
-                    ? AppColors.text_color
-                    : const Color(0xFF373F4B),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

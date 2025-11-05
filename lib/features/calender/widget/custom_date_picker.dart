@@ -31,8 +31,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
               'Wed, September 6',
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
-                color: Colors
-                    .white, // ✅ makes text readable on AppColors.third_color
+                color: Colors.white, 
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -49,7 +48,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
                 });
-                Navigator.pop(context); // Close dialog on selection
+                Navigator.pop(context); 
               },
               calendarStyle: CalendarStyle(
                 selectedDecoration: BoxDecoration(

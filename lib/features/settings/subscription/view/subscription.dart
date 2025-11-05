@@ -36,7 +36,7 @@ class Subscription extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
               Text(
-                'Hemerolog Premium',
+                'Infini Quote Premium',
                 style: GoogleFonts.outfit(
                   fontSize: 20.4.sp,
                   fontWeight: FontWeight.normal,

@@ -48,18 +48,18 @@ class HomeController extends ChangeNotifier {
   final Dio _dio = Dio();
   // Daily Inspiration Quotes
   final List<QuoteData> _inspirationalQuotes = [
-    // QuoteData(
-    //   quote: '"This is the day that the Lord has made; let us rejoice and be glad in it"',
-    //   reference: 'Psalm 118:24',
-    // ),
-    // QuoteData(
-    //   quote: '"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, to give you hope and a future."',
-    //   reference: 'Jeremiah 29:11',
-    // ),
-    // QuoteData(
-    //   quote: '"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."',
-    //   reference: 'Proverbs 3:5-6',
-    // ),
+    QuoteData(
+      quote: '"This is the day that the Lord has made; let us rejoice and be glad in it"',
+      reference: 'Psalm 118:24',
+    ),
+    QuoteData(
+      quote: '"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, to give you hope and a future."',
+      reference: 'Jeremiah 29:11',
+    ),
+    QuoteData(
+      quote: '"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."',
+      reference: 'Proverbs 3:5-6',
+    ),
   ];
 
   int _currentQuoteIndex = 0;
