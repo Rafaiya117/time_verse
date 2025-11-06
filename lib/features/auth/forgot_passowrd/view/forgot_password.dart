@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/forgot_passowrd/controller/forgot_password_controller.dart';
@@ -69,33 +70,29 @@ class ForgotPassword extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Recover Account",
-                onPressed: ()async {
-                  //context.push('/otp');
+                onPressed: () async {
                   if (forgotpassword_controller.validateLoginFields()) {
                     final success = await forgotpassword_controller.sendForgotPasswordEmail();
-                      if (success) {
-                        if (context.mounted) {
-                          final email = forgotpassword_controller.emailController.text.trim();
-                          final encodedEmail = Uri.encodeComponent(email);
-                          context.push('/otp?email=$encodedEmail');
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              forgotpassword_controller.errorMessage ??
-                                'Request failed',
-                            ),
-                          ),
-                        );
+                    if (success) {
+                      if (context.mounted) {
+                        final email = forgotpassword_controller.emailController
+                          .text.trim();
+                        final encodedEmail = Uri.encodeComponent(email);
+                        context.push('/otp?email=$encodedEmail');
                       }
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please enter your email"),
-                        ),
-                      );
+                      if (context.mounted) {
+                        await showErrorDialog(
+                          context,
+                          forgotpassword_controller.errorMessage ?? 'Request failed',
+                        );
+                      }
                     }
+                  } else {
+                    if (context.mounted) {
+                      await showErrorDialog(context, 'Please enter your email');
+                    }
+                  }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

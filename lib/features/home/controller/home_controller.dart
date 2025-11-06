@@ -5,11 +5,14 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
+import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'dart:async';
+import 'package:time_verse/features/home/model/review_model.dart';
 
 class QuoteData {
   final String quote;
@@ -20,7 +23,9 @@ class QuoteData {
 
 class HomeController extends ChangeNotifier {
   int selectedIndex = 0;
-
+  final List<ReviewData> _reviews = [];
+  List<ReviewData> get reviews => List.unmodifiable(_reviews);
+  
   void updateIndexFromRoute(String location) {
     final index = appRoutes.indexWhere((r) => location.startsWith(r));
     if (index != -1 && index != selectedIndex) {
@@ -126,8 +131,6 @@ class HomeController extends ChangeNotifier {
   }
 
   void submitFeedback() {
-    // Here you can add logic to submit feedback to backend
-    // For now, just clear the form
     clearFeedback();
   }
   
@@ -185,6 +188,101 @@ Future<void> fetchQuotesFromApi() async {
     }
   } catch (e) {
     debugPrint('⚠️ Error fetching quotes: $e');
+  }
+}
+
+Future<void> fetchReviewsFromApi() async {
+  debugPrint('🚀 Starting fetchReviewsFromApi...');
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    debugPrint('🪪 Token used: $token');
+
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+    final response = await _dio.get(
+      '${baseUrl}api/v1/event/my-feedbacks/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    debugPrint('✅ API responded with status: ${response.statusCode}');
+
+    if (response.statusCode == 200 && response.data != null) {
+      final data = response.data;
+      debugPrint('📦 Response body: $data');
+
+      if (data is List) {
+        final List<ReviewData> loadedReviews = data.map((json) {
+          return ReviewData.fromJson(json);
+        }).toList();
+
+        _reviews
+          ..clear()
+          ..addAll(loadedReviews);
+
+        debugPrint('🎉 Loaded ${_reviews.length} reviews');
+        notifyListeners();
+      } else {
+        debugPrint('⚠️ Unexpected reviews format: $data');
+      }
+    } else {
+      debugPrint('❌ Failed to load reviews: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching reviews: $e');
+  }
+}
+
+Future<void> postReviewToApi() async {
+  debugPrint('🚀 Starting postReviewToApi...');
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    debugPrint('🪪 Token used: $token');
+
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    if (baseUrl.isEmpty) {
+      debugPrint('⚠️ BASE_URL is empty. Please check your .env file.');
+      return;
+    }
+
+    final Map<String, dynamic> reviewData = {
+      'rating': _selectedRating,
+      'comments': _feedbackController.text.trim(),
+    };
+
+    debugPrint('📦 Sending review: $reviewData');
+
+    final response = await _dio.post(
+      '${baseUrl}api/v1/event/feedback/',
+      data: jsonEncode(reviewData),
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    debugPrint('✅ POST responded with status: ${response.statusCode}');
+    debugPrint('📥 Response data: ${response.data}');
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      debugPrint('🎉 Feedback submitted successfully!');
+      clearFeedback();
+      await fetchReviewsFromApi();
+      notifyListeners();
+    } else {
+      debugPrint('❌ Failed to post review: ${response.statusCode}');
+    }
+  } catch (e, stack) {
+    debugPrint('⚠️ Error posting review: $e');
+    debugPrint('🧩 Stack trace: $stack');
   }
 }
 

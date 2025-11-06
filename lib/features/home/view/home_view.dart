@@ -115,8 +115,9 @@ class HomeView extends StatelessWidget {
                     
                     // Submit Button
                     GestureDetector(
-                      onTap: () {
-                        controller.submitFeedback();
+                      onTap: () async {
+                        //controller.submitFeedback();
+                        await controller.postReviewToApi();
                         Navigator.of(context).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -170,9 +171,11 @@ class HomeView extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final logoPath = isDarkMode ? 'assets/icons/logo_dark.svg' : 'assets/icons/logo_light.svg';
     // Start auto-slide when widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       homeController.startAutoSlide();
       homeController.fetchQuotesFromApi();
+      await Future.delayed(const Duration(milliseconds: 200));
+      homeController.fetchReviewsFromApi();
     });
     
     return Scaffold(
@@ -331,8 +334,8 @@ class HomeView extends StatelessWidget {
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                             color: isToday 
-                                ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
-                                : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                              ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
+                              : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
                           ),
                         ),
                         SizedBox(height: 4.h),
@@ -342,8 +345,8 @@ class HomeView extends StatelessWidget {
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: isToday 
-                                ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
-                                : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                              ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
+                              : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
                           ),
                         ),
                       ],
@@ -352,8 +355,7 @@ class HomeView extends StatelessWidget {
                 },
               ),
             ),
-            SizedBox(height: 30.h),
-            
+            SizedBox(height: 30.h),            
             // Daily Inspiration Section
             Text(
               'Daily Inspiration',
@@ -363,8 +365,7 @@ class HomeView extends StatelessWidget {
                 color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
               ),
             ),
-            SizedBox(height: 20.h),
-            
+            SizedBox(height: 20.h),            
             Container(
               width: 360.w,
               height: 421.h,
@@ -420,6 +421,56 @@ class HomeView extends StatelessWidget {
                     // SizedBox(height: 32.h),
                     
                     // Quote PageView
+                    // SizedBox(
+                    //   height: 120.h,
+                    //     child: GestureDetector(
+                    //       onPanStart: (_) => homeController.stopAutoSlide(),
+                    //       onPanEnd: (_) => homeController.startAutoSlide(),
+                    //       onTapDown: (_) => homeController.stopAutoSlide(),
+                    //       onTapUp: (_) => homeController.startAutoSlide(),
+                    //       child: PageView.builder(
+                    //         controller: homeController.pageController,
+                    //         itemCount:homeController.inspirationalQuotes.length,
+                    //         onPageChanged: (index) {
+                    //           homeController.updateQuoteIndex(index);
+                    //         },
+                    //         itemBuilder: (context, index) {
+                    //           final quote = homeController.inspirationalQuotes[index];
+                    //           return Column(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             children: [
+                    //               Flexible(
+                    //                 child: Text(
+                    //                   quote.quote,
+                    //                   textAlign: TextAlign.center,
+                    //                   style: GoogleFonts.outfit(
+                    //                     fontWeight: FontWeight.w500,
+                    //                     fontSize: 16.sp,
+                    //                     color: isDarkMode
+                    //                       ? Colors.white
+                    //                       : Colors.black,
+                    //                     height: 1.4,
+                    //                   ),
+                    //                 ),
+                    //               ),
+                    //               SizedBox(height: 16.h),
+                    //               Text(
+                    //                 quote.reference,
+                    //                 style: GoogleFonts.outfit(
+                    //                   fontWeight: FontWeight.w500,
+                    //                   fontSize: 14.sp,
+                    //                   color: isDarkMode
+                    //                     ? const Color(0xFFFFD700)
+                    //                     : const Color(0xFFFF8C00),
+                    //                   fontStyle: FontStyle.italic,
+                    //                 ),
+                    //               ),
+                    //             ],
+                    //           );
+                    //         },
+                    //       ),
+                    //     ),
+                    //   ),
                     SizedBox(
                       height: 120.h,
                         child: GestureDetector(
@@ -427,46 +478,51 @@ class HomeView extends StatelessWidget {
                           onPanEnd: (_) => homeController.startAutoSlide(),
                           onTapDown: (_) => homeController.stopAutoSlide(),
                           onTapUp: (_) => homeController.startAutoSlide(),
-                          child: PageView.builder(
-                            controller: homeController.pageController,
-                            itemCount:homeController.inspirationalQuotes.length,
-                            onPageChanged: (index) {
-                              homeController.updateQuoteIndex(index);
-                            },
-                            itemBuilder: (context, index) {
-                              final quote = homeController.inspirationalQuotes[index];
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      quote.quote,
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.outfit(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16.sp,
-                                        color: isDarkMode
-                                          ? Colors.white
-                                          : Colors.black,
-                                        height: 1.4,
+
+                          // 👇 Wrap your PageView with RepaintBoundary
+                          child: RepaintBoundary(
+                            key: homeController.quoteShareKey,
+                            child: PageView.builder(
+                              controller: homeController.pageController,
+                              itemCount:homeController.inspirationalQuotes.length,
+                              onPageChanged: (index) {
+                                homeController.updateQuoteIndex(index);
+                              },
+                              itemBuilder: (context, index) {
+                                final quote = homeController.inspirationalQuotes[index];
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        quote.quote,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.outfit(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16.sp,
+                                          color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black,
+                                          height: 1.4,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: 16.h),
-                                  Text(
-                                    quote.reference,
-                                    style: GoogleFonts.outfit(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14.sp,
-                                      color: isDarkMode
-                                        ? const Color(0xFFFFD700)
-                                        : const Color(0xFFFF8C00),
-                                      fontStyle: FontStyle.italic,
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      quote.reference,
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14.sp,
+                                        color: isDarkMode
+                                          ? const Color(0xFFFFD700)
+                                          : const Color(0xFFFF8C00),
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            },
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -540,7 +596,9 @@ class HomeView extends StatelessWidget {
                         // Share button
                         Flexible(
                           child: GestureDetector(
-                            onTap: (){},
+                            onTap: (){
+                              homeController.shareQuoteAsImage(context);
+                            },
                             child:Container(
                             height: 48.h,
                             decoration: BoxDecoration(
@@ -684,77 +742,111 @@ class HomeView extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
-            
+            SizedBox(height: 16.h),            
             // User testimonial
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: isDarkMode ? AppColors.containers_bgd:AppColors.background_color,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.grey.withOpacity(0.2),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40.w,
-                        height: 40.h,
+            Consumer<HomeController>(
+                builder: (context, controller, _) {
+                  if (controller.reviews.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No reviews available.',
+                        style: GoogleFonts.outfit(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: List.generate(controller.reviews.length, (index) {
+                      final review = controller.reviews[index];
+                      return Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
-                          // ignore: deprecated_member_use
-                          color: Colors.grey.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20.r),
+                          color: isDarkMode
+                            ? AppColors.containers_bgd
+                            : AppColors.background_color,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDarkMode
+                              // ignore: deprecated_member_use
+                              ? const Color(0xFFFFB800).withOpacity(0.3)
+                              // ignore: deprecated_member_use
+                              : Colors.grey.withOpacity(0.2),
+                          ),
                         ),
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.grey,
-                          size: 20.sp,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Elma Shen',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14.sp,
-                              color: isDarkMode ? Colors.white : Colors.black,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 40.w,
+                                  height: 40.h,
+                                  decoration: BoxDecoration(
+                                    // ignore: deprecated_member_use
+                                    color: Colors.grey.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.grey,
+                                    size: 20.sp,
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      review.userEmail,
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14.sp,
+                                        color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: List.generate(
+                                        review.rating ?? 0,
+                                        (index) => Icon(
+                                          Icons.star,
+                                          color: const Color(0xFFFFB800),
+                                          size: 12.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ),
-                          Row(
-                            children: List.generate(5, (index) => Icon(
-                              Icons.star,
-                              color: const Color(0xFFFFB800),
-                              size: 12.sp,
-                            )),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.h),
-                  Text(
-                    '"The Bible quote suggestions feel so personal — like it knows exactly what I need."',
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 14.sp,
-                      color: isDarkMode ? Colors.white.withOpacity(0.8) : Colors.black.withOpacity(0.8),
-                      height: 1.4,
-                    ),
-                  ),
-                ],
+                            SizedBox(height: 12.h),
+                            Text(
+                              '"${review.comments}"',
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14.sp,
+                                color: isDarkMode
+                                  // ignore: deprecated_member_use
+                                  ? Colors.white.withOpacity(0.8)
+                                  // ignore: deprecated_member_use
+                                  : Colors.black.withOpacity(0.8),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  );
+                },
               ),
-            ),
-            
-            SizedBox(height: 30.h),
-            
+              SizedBox(height: 30.h),            
             // Unlock More Blessings section
             Container(
               width: double.infinity,
@@ -763,6 +855,7 @@ class HomeView extends StatelessWidget {
                 color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFFFFF),
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
+                  // ignore: deprecated_member_use
                   color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.transparent,
                 ),
               ),
@@ -797,13 +890,13 @@ class HomeView extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 16.sp,
                           color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             ],
           ),
         ),

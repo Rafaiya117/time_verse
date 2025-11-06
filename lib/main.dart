@@ -11,11 +11,13 @@ import 'package:time_verse/core/components/bottom_card_controller/bottom_card_co
 import 'package:time_verse/core/theme/theme.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
+import 'package:time_verse/features/all_events/controller/event_details_controller.dart';
 import 'package:time_verse/features/auth/forgot_passowrd/controller/forgot_password_controller.dart';
 import 'package:time_verse/features/auth/login/controller/login_controller.dart';
 import 'package:time_verse/features/auth/otp/controller/otp_controller.dart';
 import 'package:time_verse/features/auth/reset_password/controller/reset_password_controller.dart';
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';
+import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
@@ -81,6 +83,8 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_)=>  ProfileController()),
             ChangeNotifierProvider(create: (_)=>  ChangepassowrdController()),
             ChangeNotifierProvider(create: (_)=>  SubscriptionController()),
+            ChangeNotifierProvider(create: (_)=>  AddEventController()),
+            ChangeNotifierProvider(create: (_)=>  EventController()),
             ChangeNotifierProvider(create: (_)=>  SavedQouteController()),
             ChangeNotifierProvider(create: (_)=>  AllEventsController()),
             ChangeNotifierProvider(create: (_)=>  CalendarController()),

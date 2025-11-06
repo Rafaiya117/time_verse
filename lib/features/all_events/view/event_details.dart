@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/all_events/controller/event_details_controller.dart';
 
 class EventDetails extends StatelessWidget {
   const EventDetails({super.key});
@@ -71,12 +72,12 @@ class EventDetails extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isDarkMode ? null : const Color(0xFFB4AB9C),
                         gradient: isDarkMode
-                            ? LinearGradient(
-                                colors: [Color(0xFF0A1128), Color(0xFF1A1F3A)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
+                          ? LinearGradient(
+                            colors: [Color(0xFF0A1128), Color(0xFF1A1F3A)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                          : null,
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: Padding(
@@ -98,8 +99,8 @@ class EventDetails extends StatelessWidget {
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.w600,
                                     color: isDarkMode
-                                        ? AppColors.text_color
-                                        : AppColors.heading_color,
+                                      ? AppColors.text_color
+                                      : AppColors.heading_color,
                                   ),
                                 ),
                               ],
@@ -113,8 +114,8 @@ class EventDetails extends StatelessWidget {
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.normal,
                                     color: isDarkMode
-                                        ? AppColors.third_color
-                                        : AppColors.heading_color,
+                                      ? AppColors.third_color
+                                      : AppColors.heading_color,
                                   ),
                                   children: [
                                     const TextSpan(text: 'Today • '),
@@ -122,8 +123,8 @@ class EventDetails extends StatelessWidget {
                                       text: '2:00 PM  ',
                                       style: GoogleFonts.outfit(
                                         color: isDarkMode
-                                            ? AppColors.third_color
-                                            : AppColors.heading_color,
+                                          ? AppColors.third_color
+                                          : AppColors.heading_color,
                                         fontWeight: FontWeight.normal,
                                       ),
                                     ),
@@ -185,15 +186,21 @@ class EventDetails extends StatelessWidget {
                                 ),
                                 child: Column(
                                   children: [
-                                    Text(
-                                      '"Even the tallest tree\nstarts from a small seed. Your Contribution\nmatters."',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 17.sp,
-                                        fontWeight: FontWeight.normal,
-                                        color: isDarkMode
+                                    Consumer<EventController>(
+                                    builder: (context, eventController, _) =>
+                                    RepaintBoundary(
+                                      key: eventController.quoteShareKey,
+                                      child: Text(
+                                        eventController.quoteText,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 17.sp,
+                                          fontWeight: FontWeight.normal,
+                                          color: isDarkMode
                                             ? AppColors.text_color
                                             : AppColors.heading_color,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     SizedBox(height: 40.h),
@@ -338,7 +345,9 @@ class EventDetails extends StatelessWidget {
                     SizedBox(width:10.w),
                     CustomButton(
                       text: "Share",
-                      onPressed: () {},
+                      onPressed: () {
+                        context.read<EventController>().shareQuoteAsImage();
+                      },
                       gradient: AppGradientColors.button_gradient,
                       textColor: AppColors.text_color,
                       fontFamily: 'outfit',

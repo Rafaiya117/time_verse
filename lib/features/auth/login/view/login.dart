@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
 import 'package:time_verse/core/utils/colors.dart';
@@ -144,23 +145,22 @@ class LoginPage extends StatelessWidget {
                         }
                         await AppPrefs.setLoggedIn(true);
                         await AppPrefs.setFirstLaunch(false);
-
                         if (context.mounted) context.push('/home');
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              loginController.loginError ?? 'Login failed',
-                            ),
-                          ),
-                        );
+                        if (context.mounted) {
+                          await showErrorDialog(
+                            context,
+                            loginController.loginError ?? 'Login failed',
+                          );
+                        }
                       }
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please fill in all fields"),
-                        ),
-                      );
+                      if (context.mounted) {
+                        await showErrorDialog(
+                          context,
+                          "Please fill in all fields",
+                        );
+                      }
                     }
                   },
                   gradient: AppGradientColors.button_gradient,

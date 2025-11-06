@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/calender/widget/custom_chip.dart';
 import 'package:time_verse/features/calender/widget/custom_date_picker.dart';
@@ -17,6 +17,10 @@ class AddEventModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final addEventController = Provider.of<AddEventController>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      addEventController.fetchCategories();
+    });
     return Container(
       height: 652.h,
       padding: EdgeInsets.all(16),
@@ -166,29 +170,47 @@ class AddEventModal extends StatelessWidget {
             SizedBox(height: 16.h,),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  BulletButton(
-                    label: 'Brainstorm',
-                    color: AppColors.fourth_color,
-                    iconPath: 'assets/icons/bullet_point.svg',
-                  ),
-                  SizedBox(width: 16.w),
-                  BulletButton(
-                    label: 'Design',
-                    color: AppColors.fifth_color,
-                    iconPath: 'assets/icons/bullet_point.svg',
-                  ),
-                  SizedBox(width: 16.w),
-                  BulletButton(
-                    label: 'Work',
-                    color: AppColors.fourth_color,
-                    iconPath: 'assets/icons/bullet_point.svg',
-                  ),
-                ],
+              child: Consumer<AddEventController>(
+                builder: (context, controller, _) {
+                  final categories = controller.categories;
+                  if (categories.isEmpty) {
+                    return Row(
+                      children: List.generate(3, (index) {
+                        return Row(
+                          children: [
+                            BulletButton(
+                              label: 'Loading...',
+                              color: AppColors.fourth_color,
+                              iconPath: 'assets/icons/bullet_point.svg',
+                            ),
+                            SizedBox(width: 16.w),
+                          ],
+                        );
+                      }),
+                    );
+                  }
+                  return Row(
+                    children: List.generate(categories.length, (index) {
+                      final category = categories[index];
+                      final color = index % 2 == 0
+                        ? AppColors.fourth_color
+                        : AppColors.fifth_color;
+                      return Row(
+                        children: [
+                          BulletButton(
+                            label: category.name,
+                            color: color,
+                            iconPath: 'assets/icons/bullet_point.svg',
+                          ),
+                          SizedBox(width: 16.w),
+                        ],
+                      );
+                    }),
+                  );
+                },
               ),
             ),
-            SizedBox(height: 16.h,),
+            SizedBox(height: 16.h),
             CustomButton(
               text: "Save",
                 onPressed: () {

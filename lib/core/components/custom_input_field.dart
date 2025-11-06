@@ -101,12 +101,12 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   width: 1.0.w,
                 ),
               ),
-              // labelText: widget.hintText,
-              // labelStyle: GoogleFonts.outfit(
-              //   fontSize: widget.hintFontSize ?? 10.sp,
-              //   fontWeight: FontWeight.normal,
-              //   color: widget.labelColor ??(isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
-              // ),
+              labelText: widget.hintText,
+              labelStyle: GoogleFonts.outfit(
+                fontSize: widget.hintFontSize ?? 10.sp,
+                fontWeight: FontWeight.normal,
+                color: widget.labelColor ??(isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
+              ),
               prefixIcon: widget.prefixSvgPath != null
                 ? Padding(
                   padding: EdgeInsets.all(16.0),

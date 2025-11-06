@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_image_uploader.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
@@ -131,28 +132,27 @@ class Signup extends StatelessWidget {
             Center(
               child: CustomButton(
                 text: "Continue",
-                onPressed: ()async {
-                  //context.push('/login');
+                onPressed: () async {
                   if (signup_controller.validateSignupFields()) {
                     final success = await signup_controller.signupUser();
-                      if (success) {
-                        if (context.mounted) context.push('/home');
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              signup_controller.signupError ?? 'Signup failed',
-                            ),
-                          ),
+                    if (success) {
+                      if (context.mounted) context.push('/home');
+                    } else {
+                      if (context.mounted) {
+                        await showErrorDialog(
+                          context,
+                          signup_controller.signupError ?? 'Signup failed',
                         );
                       }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please fill in all fields"),
-                        ),
+                    }
+                  } else {
+                    if (context.mounted) {
+                      await showErrorDialog(
+                        context,
+                        'Please fill in all fields',
                       );
                     }
+                  }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -248,6 +247,30 @@ Future<Map<String, dynamic>> forgotPassword(String email) async {
 
 
 // ---------------- ERROR HANDLER ---------------- //
+  // String _handleError(DioException e) {
+  // debugPrint("DioException response: ${e.response?.data}");
+
+  // if (e.response != null && e.response!.data != null) {
+  //   final data = e.response!.data;
+
+  //   if (data is Map<String, dynamic>) {
+  //     return data['detail'] ?? data['message'] ?? 'Request failed';
+  //   } else if (data is String) {
+  //     try {
+  //       final decoded = jsonDecode(data);
+  //       return decoded['detail'] ?? decoded['message'] ?? 'Request failed';
+  //     } catch (_) {
+  //       return data; 
+  //     }
+  //   }
+  // }
+
+  // if (e.type == DioExceptionType.connectionTimeout ||
+  //     e.type == DioExceptionType.receiveTimeout) {
+  //   return 'Connection timeout. Try again.';
+  // }
+  //   return e.message ?? 'Something went wrong. Please try later.';
+  // }
   String _handleError(DioException e) {
   debugPrint("DioException response: ${e.response?.data}");
 
@@ -255,21 +278,50 @@ Future<Map<String, dynamic>> forgotPassword(String email) async {
     final data = e.response!.data;
 
     if (data is Map<String, dynamic>) {
-      return data['detail'] ?? data['message'] ?? 'Request failed';
-    } else if (data is String) {
+      final detail = data['detail'];
+      final message = data['message'];
+      final error = data['error'];
+
+      if (detail != null) return detail.toString();
+      if (message != null) return message.toString();
+      if (error != null) return error.toString();
+      for (var value in data.values) {
+        if (value is List && value.isNotEmpty) {
+          return value.first.toString();
+        } else if (value is String) {
+          return value;
+        }
+      }
+      return 'Request failed';
+    }
+    else if (data is String) {
       try {
         final decoded = jsonDecode(data);
-        return decoded['detail'] ?? decoded['message'] ?? 'Request failed';
+        if (decoded is Map<String, dynamic>) {
+          final detail = decoded['detail'] ?? decoded['message'] ?? decoded['error'];
+          if (detail != null) return detail.toString();
+          for (var value in decoded.values) {
+            if (value is List && value.isNotEmpty) {
+              return value.first.toString();
+            } else if (value is String) {
+              return value;
+            }
+          }
+        }
       } catch (_) {
-        return data; 
+        return data;
       }
     }
   }
-
   if (e.type == DioExceptionType.connectionTimeout ||
       e.type == DioExceptionType.receiveTimeout) {
     return 'Connection timeout. Try again.';
   }
-    return e.message ?? 'Something went wrong. Please try later.';
+  if (e.type == DioExceptionType.badResponse &&
+      e.response?.statusCode == 401) {
+    return 'Unauthorized. Please log in again.';
   }
+  return e.message ?? 'Something went wrong. Please try later.';
+}
+
 }

@@ -23,6 +23,9 @@ class AllEvents extends StatelessWidget {
     final controller = Provider.of<AllEventsController>(context, listen: false);
     controller.updateIndexFromRoute(location);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchEvents();
+    });
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 32.h),
