@@ -15,6 +15,10 @@ class CalenderView extends StatelessWidget {
  @override
 Widget build(BuildContext context) {
   final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  final controller = Provider.of<CalendarController>(context, listen: false);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchUpcomingEvents();
+    });
   return Scaffold(
     body: Stack(
       children: [
