@@ -137,76 +137,124 @@ Future<Map<String, dynamic>> signup(String email, String password, String name, 
   }
 }
 
+// Future<Map<String, dynamic>> forgotPassword(String email) async {
+//     try {
+//       final response = await _dio.post(
+//         'api/v1/forget_password/',
+//         options: await _authorizedHeader(),
+//         data: jsonEncode({'email': email}),
+//       );
+
+//       final data = response.data is String ? jsonDecode(response.data) : response.data;
+
+//       final userData = data['data']?['user'];
+//       final user = userData != null ? User.fromJson(userData) : null;
+
+//       return {
+//         'success': response.statusCode == 200,
+//         'message': data['message'] ?? 'Password reset initiated',
+//         'data': {'user': user},
+//       };
+//     } on DioException catch (e) {
+//       return {'success': false, 'error': _handleError(e)};
+//     }
+//   }
+
 Future<Map<String, dynamic>> forgotPassword(String email) async {
-    try {
-      final response = await _dio.post(
-        'api/v1/forget_password/',
-        options: await _authorizedHeader(),
-        data: jsonEncode({'email': email}),
-      );
+  try {
+    final response = await _dio.post(
+      'api/v1/forget_password/',
+      options: Options(headers: {'Content-Type': 'application/json'}), // 🔹 No token needed
+      data: jsonEncode({'email': email}),
+    );
 
-      final data = response.data is String ? jsonDecode(response.data) : response.data;
+    final data = response.data is String ? jsonDecode(response.data) : response.data;
 
-      final userData = data['data']?['user'];
-      final user = userData != null ? User.fromJson(userData) : null;
+    final userData = data['data']?['user'];
+    final user = userData != null ? User.fromJson(userData) : null;
 
-      return {
-        'success': response.statusCode == 200,
-        'message': data['message'] ?? 'Password reset initiated',
-        'data': {'user': user},
-      };
-    } on DioException catch (e) {
-      return {'success': false, 'error': _handleError(e)};
-    }
+    return {
+      'success': response.statusCode == 200,
+      'message': data['message'] ?? 'Password reset initiated',
+      'data': {'user': user},
+    };
+  } on DioException catch (e) {
+    return {'success': false, 'error': _handleError(e)};
   }
+}
 
+
+  // Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
+  //   try {
+  //     final response = await _dio.post(
+  //       'api/v1/verify-otp/',
+  //       options: await _authorizedHeader(),
+  //       data: jsonEncode({'email': email, 'otp': otp}),
+  //     );
+  //     final data = response.data is String ? jsonDecode(response.data) : response.data;
+  //     final userData = data['data']?['user'];
+  //     final user = userData != null ? User.fromJson(userData) : null;
+
+  //     return {
+  //       'success': response.statusCode == 200,
+  //       'message': data['message'] ?? 'OTP verified',
+  //       'data': {'user': user},
+  //     };
+  //   } on DioException catch (e) {
+  //     return {'success': false, 'error': _handleError(e)};
+  //   }
+  // }
   Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
-    try {
-      final response = await _dio.post(
-        'api/v1/verify-otp/',
-        options: await _authorizedHeader(),
-        data: jsonEncode({'email': email, 'otp': otp}),
-      );
-      final data = response.data is String ? jsonDecode(response.data) : response.data;
-      final userData = data['data']?['user'];
-      final user = userData != null ? User.fromJson(userData) : null;
+  try {
+    final response = await _dio.post(
+      'api/v1/verify-otp/',
+      options: Options(headers: {'Content-Type': 'application/json'}), 
+      data: jsonEncode({'email': email, 'otp': otp}),
+    );
 
-      return {
-        'success': response.statusCode == 200,
-        'message': data['message'] ?? 'OTP verified',
-        'data': {'user': user},
-      };
-    } on DioException catch (e) {
-      return {'success': false, 'error': _handleError(e)};
-    }
+    final data = response.data is String ? jsonDecode(response.data) : response.data;
+    final userData = data['data']?['user'];
+    final user = userData != null ? User.fromJson(userData) : null;
+
+    return {
+      'success': response.statusCode == 200,
+      'message': data['message'] ?? 'OTP verified',
+      'data': {'user': user},
+    };
+  } on DioException catch (e) {
+    return {'success': false, 'error': _handleError(e)};
   }
+}
 
-  Future<Map<String, dynamic>> resetPassword(String email,String otp, String newPassword) async {
-    try {
-      final response = await _dio.post(
-        'api/v1/reset-password/',
-        options: await _authorizedHeader(),
-        data: jsonEncode({
-          'email': email,
-          'otp': otp,
-          'new_password':newPassword
-        }),
-      );
 
-      final data = response.data is String ? jsonDecode(response.data) : response.data;
+  Future<Map<String, dynamic>> resetPassword(String email,String otp,String newPassword,) async {
+  try {
+    final response = await _dio.post(
+      'api/v1/reset-password/',
+      options: Options(headers: {'Content-Type': 'application/json'}), // 🔹 No token needed
+      data: jsonEncode({
+        'email': email,
+        'otp': otp,
+        'new_password': newPassword,
+      }),
+    );
 
-      final userData = data['data']?['user'];
-      final user = userData != null ? User.fromJson(userData) : null;
+    final data = response.data is String ? jsonDecode(response.data) : response.data;
 
-      return {
-        'success':response.statusCode == 200 || data['message']?.toString().toLowerCase().contains('success') == true,
-        'message': data['message'] ?? 'Password reset successful',
-        'data': {'user': user},
-      };
-    } on DioException catch (e) {
-      return {'success': false, 'error': _handleError(e)};
-    }
+    final userData = data['data']?['user'];
+    final user = userData != null ? User.fromJson(userData) : null;
+
+    return {
+      'success': response.statusCode == 200 ||
+          data['message']?.toString().toLowerCase().contains('success') == true,
+      'message': data['message'] ?? 'Password reset successful',
+      'data': {'user': user},
+    };
+  } on DioException catch (e) {
+    return {'success': false, 'error': _handleError(e)};
   }
+}
+
   
   Future<Map<String, dynamic>> changePassword(String oldPassword, String newPassword) async {
   try {

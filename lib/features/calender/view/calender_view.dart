@@ -59,7 +59,7 @@ Widget build(BuildContext context) {
                           child: EventCard(
                             title: event.title,
                             date: event.date,
-                            time: event.time,
+                            time: '${event.startTime}-${event.endTime}',
                             location: event.location,
                             isDarkMode: isDarkMode,
                             onDelete: () => controller.removeEvent(index),

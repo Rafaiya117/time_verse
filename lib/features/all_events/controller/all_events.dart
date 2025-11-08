@@ -28,29 +28,61 @@ class AllEventsController extends ChangeNotifier {
   }
   
   final List<EventModel> _events = [
-    EventModel(
+   EventModel(
       title: 'Soccer Practice & Fun',
       date: 'Today',
-      time: '4.00 PM',
-      location: 'City Sports Complex',
+      startTime: '4.00 PM',
+      location: 'City Sports Complex', 
+      id:0, 
+      userName: '', 
+      description: '', 
+      endTime: '', 
+      alarmTime: '', 
+      isCompleted: false, 
+      createdAt: '', 
+      user: 0,
     ),
     EventModel(
       title: 'Emma\'s 10th Birthday Party',
       date: 'Saturday, Sep 19,2025',
-      time: '3.00 - 6:00 PM',
-      location: '123 Oak Street, Springfield',
+      startTime: '3.00 - 6:00 PM',
+      location: '123 Oak Street, Springfield', 
+      id: 0, 
+      userName: '', 
+      description: '', 
+      endTime: '', 
+      alarmTime: '', 
+      isCompleted: false, 
+      createdAt: '', 
+      user: 0,
     ),
     EventModel(
       title: 'Soccer Practice & Fun',
       date: 'Today',
-      time: '4.00 PM',
-      location: 'City Sports Complex',
+      startTime: '4.00 PM',
+      location: 'City Sports Complex', 
+      id:0, 
+      userName: '', 
+      description: '', 
+      endTime: '', 
+      alarmTime: '', 
+      isCompleted: false, 
+      createdAt: '', 
+      user: 0,
     ),
     EventModel(
       title: 'Emma\'s 10th Birthday Party',
       date: 'Saturday, Sep 19,2025',
-      time: '3.00 - 6:00 PM',
-      location: '123 Oak Street, Springfield',
+      startTime: '3.00 - 6:00 PM',
+      location: '123 Oak Street, Springfield', 
+      id: 0, 
+      userName: '', 
+      description: '', 
+      endTime: '', 
+      alarmTime: '', 
+      isCompleted: false, 
+      createdAt: '', 
+      user: 0,
     ),
   ];
 
@@ -114,18 +146,28 @@ class AllEventsController extends ChangeNotifier {
 
         _events
           ..clear()
-          ..addAll(data.map((json) {
-            final formattedDate = formatEventDate(json['start_date'] ?? '');
-            debugPrint('💬 Event parsed: ${json['title']} - $formattedDate');
+          ..addAll(
+            data.map((json) {
+              final formattedDate = formatEventDate(json['date'] ?? '');
+              debugPrint('💬 Event parsed: ${json['title']} - $formattedDate');
 
-            return EventModel(
-              title: json['title'] ?? '',
-              date: formattedDate,
-              time: json['start_date'] ?? '', // keep original for now
-              location: json['category_name'] ?? '',
-            );
-          }).toList());
-
+              return EventModel(
+                id: json['id'] ?? 0,
+                userName: json['user_name'] ?? '',
+                title: json['title'] ?? '',
+                description: json['description'] ?? '',
+                date: formattedDate,
+                startTime: json['start_time'] ?? '',
+                endTime: json['end_time'] ?? '',
+                location: json['location'] ?? '',
+                alarmTime: json['alarm_time'] ?? '',
+                isCompleted: json['is_completed'] ?? false,
+                createdAt: json['created_at'] ?? '',
+                user: json['user'] ?? 0,
+                category: json['category'],
+              );
+            }).toList(),
+          );
         notifyListeners();
         debugPrint('🎉 Events added to controller: ${_events.length}');
       } else {

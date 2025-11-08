@@ -1,31 +1,67 @@
 class EventModel {
+  final int id;
+  final String userName;
   final String title;
+  final String description;
   final String date;
-  final String time;
+  final String startTime;
+  final String endTime;
   final String location;
+  final String alarmTime;
+  final bool isCompleted;
+  final String createdAt;
+  final int user;
+  final String? category;
 
   EventModel({
+    required this.id,
+    required this.userName,
     required this.title,
+    required this.description,
     required this.date,
-    required this.time,
+    required this.startTime,
+    required this.endTime,
     required this.location,
+    required this.alarmTime,
+    required this.isCompleted,
+    required this.createdAt,
+    required this.user,
+    this.category,
   });
 
-  factory EventModel.fromMap(Map<String, String> map) {
+  factory EventModel.fromMap(Map<String, dynamic> map) {
     return EventModel(
+      id: map['id'] ?? 0,
+      userName: map['user_name'] ?? '',
       title: map['title'] ?? '',
+      description: map['description'] ?? '',
       date: map['date'] ?? '',
-      time: map['time'] ?? '',
+      startTime: map['start_time'] ?? '',
+      endTime: map['end_time'] ?? '',
       location: map['location'] ?? '',
+      alarmTime: map['alarm_time'] ?? '',
+      isCompleted: map['is_completed'] ?? false,
+      createdAt: map['created_at'] ?? '',
+      user: map['user'] ?? 0,
+      category: map['category'],
     );
   }
 
-  Map<String, String> toMap() {
+  Map<String, dynamic> toMap() {
     return {
+      'id': id,
+      'user_name': userName,
       'title': title,
+      'description': description,
       'date': date,
-      'time': time,
+      'start_time': startTime,
+      'end_time': endTime,
       'location': location,
+      'alarm_time': alarmTime,
+      'is_completed': isCompleted,
+      'created_at': createdAt,
+      'user': user,
+      'category': category,
     };
   }
 }

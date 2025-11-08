@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,8 +18,8 @@ class OtpView extends StatelessWidget {
     final otpController = Provider.of<OtpController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color secondaryTextColor = isDarkMode 
-        ? AppColors.fourth_color 
-        : AppColors.heading_color;
+      ? AppColors.fourth_color 
+      : AppColors.heading_color;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(

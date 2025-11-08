@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -17,11 +16,11 @@ class ResetPassword extends StatelessWidget {
     final resetpasswordController = Provider.of<ResetPasswordController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final routerState = GoRouterState.of(context);
-  final email = Uri.decodeComponent(routerState.uri.queryParameters['email'] ?? '');
-  final otp = Uri.decodeComponent(routerState.uri.queryParameters['otp'] ?? '');
+    final email = Uri.decodeComponent(routerState.uri.queryParameters['email'] ?? '');
+    final otp = Uri.decodeComponent(routerState.uri.queryParameters['otp'] ?? '');
     final Color secondaryTextColor = isDarkMode 
-        ? AppColors.fourth_color 
-        : AppColors.heading_color;
+      ? AppColors.fourth_color 
+      : AppColors.heading_color;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(

@@ -144,8 +144,8 @@ class EventDetails extends StatelessWidget {
                                       text: '1:30 PM',
                                       style: GoogleFonts.outfit(
                                         color: isDarkMode
-                                            ? AppColors.third_color
-                                            : AppColors.heading_color,
+                                          ? AppColors.third_color
+                                          : AppColors.heading_color,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -158,15 +158,15 @@ class EventDetails extends StatelessWidget {
                               children: [
                                 SvgPicture.asset(
                                   isDarkMode
-                                      ? 'assets/icons/star_dark.svg'
-                                      : 'assets/icons/star_light.svg',
+                                    ? 'assets/icons/star_dark.svg'
+                                    : 'assets/icons/star_light.svg',
                                   width: 21.33.w,
                                   height: 21.33.h,
                                 ),
                                 SvgPicture.asset(
                                   isDarkMode
-                                      ? 'assets/icons/prograss_bar.svg'
-                                      : 'assets/icons/prograssbar_light.svg',
+                                    ? 'assets/icons/prograss_bar.svg'
+                                    : 'assets/icons/prograssbar_light.svg',
                                   width: 64.w,
                                   height: 4.h,
                                 ),
@@ -181,8 +181,8 @@ class EventDetails extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12.r),
                                   color: isDarkMode
-                                      ? AppColors.containers_bgd
-                                      : AppColors.text_color,
+                                    ? AppColors.containers_bgd
+                                    : AppColors.text_color,
                                 ),
                                 child: Column(
                                   children: [

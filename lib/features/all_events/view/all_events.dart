@@ -5,12 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
-import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
 import 'package:time_verse/features/all_events/custom_widget/custom_eventcard.dart';
-import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 
 class AllEvents extends StatelessWidget {
@@ -81,7 +79,7 @@ class AllEvents extends StatelessWidget {
                         child: EventCard(
                           title: event.title,
                           date: event.date,
-                          time: event.time,
+                          time: '${event.startTime}-${event.endTime}',
                           location: event.location,
                           isDarkMode: isDarkMode,
                           onDelete: () =>controller.confirmAndRemoveEvent(context, index)

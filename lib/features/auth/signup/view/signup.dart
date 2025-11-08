@@ -26,8 +26,8 @@ class Signup extends StatelessWidget {
       ? 'assets/images/logo.png' 
       : 'assets/images/logo_light.png';
     final Color secondaryTextColor = isDarkMode 
-        ? AppColors.fourth_color 
-        : AppColors.heading_color;
+      ? AppColors.fourth_color 
+      : AppColors.heading_color;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(
@@ -199,9 +199,7 @@ class Signup extends StatelessWidget {
             SizedBox(height: 30.h,),
             Center(
               child: GestureDetector(
-                onTap: () {
-                  
-                },
+                onTap: () {},
                 child: SvgPicture.asset(
                   'assets/icons/gmail.svg',
                   width: 35.w,
@@ -222,7 +220,7 @@ class Signup extends StatelessWidget {
             ),
           ],
         ),
-      ) ,
+      ),
     );
   }
 }
