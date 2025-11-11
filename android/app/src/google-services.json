@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "830774705235",
+    "project_id": "timeverse-f53ff",
+    "storage_bucket": "timeverse-f53ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830774705235:android:6e253106ae0c785ae91aa6",
+        "android_client_info": {
+          "package_name": "com.example.time_verse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYEV21ojpirDypuJ2mrXrKM3CfnWjucH4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

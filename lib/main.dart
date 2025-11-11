@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
+import 'package:time_verse/config/app_route/fire_base_service.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
 import 'package:time_verse/core/theme/theme.dart';
@@ -28,12 +30,17 @@ import 'package:time_verse/features/settings/profile/controller/profile_controll
 import 'package:time_verse/features/settings/settings_controller.dart';
 import 'package:time_verse/features/settings/subscription/controller/subscription_controller.dart';
 import 'package:time_verse/features/settings/terms_condition/controller/terms_controller.dart';
+import 'package:time_verse/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   //WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FCMService.initialize();
   runApp(const MyApp());
 }
 
