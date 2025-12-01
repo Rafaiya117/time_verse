@@ -56,8 +56,7 @@ class SavedQouteController extends ChangeNotifier{
   Future<void> fetchSavedQuotes() async {
   try {
     final authService = AuthService();
-    //final token = await authService.getToken();
-    final token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0Nzc0Mjg4LCJpYXQiOjE3NjQ0NzQyODgsImp0aSI6ImUzM2YwMjU2OTg4NjRhNWI5ZTc5Yjc4Nzg4YjY3MGRlIiwidXNlcl9pZCI6IjE0In0.UVLft17WzjXiyklVLYOljbV3zpzCIoJT_2x_HMkg2I0";
+    final token = await authService.getToken();
     final dio = Dio();
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final url = '${baseUrl}api/v1/event/my-quotes/';

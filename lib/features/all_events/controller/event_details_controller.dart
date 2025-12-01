@@ -40,9 +40,7 @@ class EventController extends ChangeNotifier {
   Future<EventModel?> fetchEventDetailsById(int eventId) async {
   try {
     final authService = AuthService();
-    // final token = await authService.getToken();
-    final token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzkxOTE1LCJpYXQiOjE3NjQ0OTE5MTUsImp0aSI6ImQ0ZmZiMzA0ODQ1ODQwMmM5YmFlMGVlYmU1YmQ5Yzk1IiwidXNlcl9pZCI6IjI3In0.4eETFk_9AwVkJtsosOZJBP5Pub3pJ5ZEGypEfrFPMSs'; 
-
+    final token = await authService.getToken();
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final url = '${baseUrl}api/v1/event/details/?event_id=$eventId';
 
