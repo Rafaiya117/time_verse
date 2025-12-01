@@ -9,6 +9,7 @@ class EventModel {
   final String location;
   final String alarmTime;
   final bool isCompleted;
+  final bool isFavorite;
   final String createdAt;
   final int user;
   final String? category;
@@ -24,6 +25,7 @@ class EventModel {
     required this.location,
     required this.alarmTime,
     required this.isCompleted,
+    required this.isFavorite,
     required this.createdAt,
     required this.user,
     this.category,
@@ -41,6 +43,7 @@ class EventModel {
       location: map['location'] ?? '',
       alarmTime: map['alarm_time'] ?? '',
       isCompleted: map['is_completed'] ?? false,
+      isFavorite: map['is_favorite'] ?? false,
       createdAt: map['created_at'] ?? '',
       user: map['user'] ?? 0,
       category: map['category'],
@@ -59,6 +62,7 @@ class EventModel {
       'location': location,
       'alarm_time': alarmTime,
       'is_completed': isCompleted,
+      'is_favorite': isFavorite,
       'created_at': createdAt,
       'user': user,
       'category': category,

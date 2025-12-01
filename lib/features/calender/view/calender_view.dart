@@ -57,6 +57,7 @@ Widget build(BuildContext context) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 20.0),
                           child: EventCard(
+                            id: event.id,
                             title: event.title,
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',

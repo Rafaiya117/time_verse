@@ -16,8 +16,14 @@ class EventDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = GoRouterState.of(context);
+    final int eventId = state.extra is int ? state.extra as int : 0;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final controller = Provider.of<EventController>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchEventDetailsById(eventId);
+    });
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 32.0.h),
@@ -82,7 +88,9 @@ class EventDetails extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 50.h),
-                        child: Column(
+                        child:Consumer<EventController>(
+                          builder: (context, eventController, _) {
+                            return Column(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +102,7 @@ class EventDetails extends StatelessWidget {
                                 ),
                                 SizedBox(width: 10.w),
                                 Text(
-                                  'Mathematics Final Exam',
+                                  eventController.eventDetail?.title?? 'Mathematics Final Exam',
                                   style: GoogleFonts.outfit(
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.w600,
@@ -120,7 +128,7 @@ class EventDetails extends StatelessWidget {
                                   children: [
                                     const TextSpan(text: 'Today • '),
                                     TextSpan(
-                                      text: '2:00 PM  ',
+                                      text:eventController.eventDetail?.startTime ??'2:00 PM  ',
                                       style: GoogleFonts.outfit(
                                         color: isDarkMode
                                           ? AppColors.third_color
@@ -131,7 +139,7 @@ class EventDetails extends StatelessWidget {
                                     WidgetSpan(
                                       alignment: PlaceholderAlignment.middle,
                                       child: Padding(
-                                        padding: EdgeInsets.only(bottom: 2.h),
+                                        padding: EdgeInsets.only(bottom: 2.h,left: 8.w),
                                         child: SvgPicture.asset(
                                           'assets/icons/clock.svg',
                                           width: 14.w,
@@ -139,9 +147,9 @@ class EventDetails extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    const WidgetSpan(child: SizedBox(width: 6)),
+                                    const WidgetSpan(child: SizedBox(width: 8)),
                                     TextSpan(
-                                      text: '1:30 PM',
+                                      text: eventController.formatTime(eventController.eventDetail?.alarmTime??'1:30 PM'),
                                       style: GoogleFonts.outfit(
                                         color: isDarkMode
                                           ? AppColors.third_color
@@ -205,7 +213,7 @@ class EventDetails extends StatelessWidget {
                                     ),
                                     SizedBox(height: 40.h),
                                     Text(
-                                      'Name xyz',
+                                      'Name ${eventController.eventDetail?.userName??'xyz'}',
                                       style: GoogleFonts.outfit(
                                         fontSize: 13.6.sp,
                                         fontWeight: FontWeight.w500,
@@ -217,6 +225,8 @@ class EventDetails extends StatelessWidget {
                               ),
                             ),
                           ],
+                        );
+                          },
                         ),
                       ),
                     ),

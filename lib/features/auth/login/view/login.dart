@@ -131,37 +131,38 @@ class LoginPage extends StatelessWidget {
                 child: CustomButton(
                   text: "Continue",
                   onPressed: () async {
-                    if (loginController.validateLoginFields()) {
-                      final success = await loginController.loginUser();
-                      if (success) {
-                        if (loginController.rememberMe) {
-                          await AppPrefs.saveRememberMe(
-                            true,
-                            loginController.emailController.text.trim(),
-                            loginController.passwordController.text.trim(),
-                          );
-                        } else {
-                          await AppPrefs.saveRememberMe(false, '', '');
-                        }
-                        await AppPrefs.setLoggedIn(true);
-                        await AppPrefs.setFirstLaunch(false);
-                        if (context.mounted) context.push('/home');
-                      } else {
-                        if (context.mounted) {
-                          await showErrorDialog(
-                            context,
-                            loginController.loginError ?? 'Login failed',
-                          );
-                        }
-                      }
-                    } else {
-                      if (context.mounted) {
-                        await showErrorDialog(
-                          context,
-                          "Please fill in all fields",
-                        );
-                      }
-                    }
+                    context.push('/home');
+                    // if (loginController.validateLoginFields()) {
+                    //   final success = await loginController.loginUser();
+                    //   if (success) {
+                    //     if (loginController.rememberMe) {
+                    //       await AppPrefs.saveRememberMe(
+                    //         true,
+                    //         loginController.emailController.text.trim(),
+                    //         loginController.passwordController.text.trim(),
+                    //       );
+                    //     } else {
+                    //       await AppPrefs.saveRememberMe(false, '', '');
+                    //     }
+                    //     await AppPrefs.setLoggedIn(true);
+                    //     await AppPrefs.setFirstLaunch(false);
+                    //     if (context.mounted) context.push('/home');
+                    //   } else {
+                    //     if (context.mounted) {
+                    //       await showErrorDialog(
+                    //         context,
+                    //         loginController.loginError ?? 'Login failed',
+                    //       );
+                    //     }
+                    //   }
+                    // } else {
+                    //   if (context.mounted) {
+                    //     await showErrorDialog(
+                    //       context,
+                    //       "Please fill in all fields",
+                    //     );
+                    //   }
+                    // }
                   },
                   gradient: AppGradientColors.button_gradient,
                   textColor: AppColors.text_color,
@@ -208,7 +209,9 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 30.h,),
               Center(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    loginController.startGoogleLogin(); 
+                  },
                   child: SvgPicture.asset(
                     'assets/icons/gmail.svg',
                     width: 35.w,

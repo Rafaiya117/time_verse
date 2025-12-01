@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginController extends ChangeNotifier{
   TextEditingController emailController = TextEditingController();
@@ -64,5 +65,21 @@ class LoginController extends ChangeNotifier{
     rememberMe = true;
   }
     notifyListeners();
+  }
+
+  Future<void> startGoogleLogin() async {
+    final url = Uri.parse("http://10.10.13.74:5000/google_auth/google/login");
+
+    try {
+      // Open in external browser
+      if (!await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      )) {
+        print("Could not launch login url");
+      }
+    } catch (e) {
+      print("Error launching login url: $e");
+    }
   }
 }

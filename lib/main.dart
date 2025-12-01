@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
+import 'package:time_verse/config/app_route/deeplink_service.dart';
 import 'package:time_verse/config/app_route/fire_base_service.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
@@ -41,6 +42,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await FCMService.initialize();
+  final deepLinkService = DeepLinkService();
+  await deepLinkService.init();
   runApp(const MyApp());
 }
 

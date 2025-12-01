@@ -40,7 +40,8 @@ class AllEventsController extends ChangeNotifier {
       alarmTime: '', 
       isCompleted: false, 
       createdAt: '', 
-      user: 0,
+      user: 0, 
+      isFavorite: false,
     ),
     EventModel(
       title: 'Emma\'s 10th Birthday Party',
@@ -54,7 +55,8 @@ class AllEventsController extends ChangeNotifier {
       alarmTime: '', 
       isCompleted: false, 
       createdAt: '', 
-      user: 0,
+      user: 0, 
+      isFavorite: false,
     ),
     EventModel(
       title: 'Soccer Practice & Fun',
@@ -68,7 +70,8 @@ class AllEventsController extends ChangeNotifier {
       alarmTime: '', 
       isCompleted: false, 
       createdAt: '', 
-      user: 0,
+      user: 0, 
+      isFavorite: false,
     ),
     EventModel(
       title: 'Emma\'s 10th Birthday Party',
@@ -82,7 +85,8 @@ class AllEventsController extends ChangeNotifier {
       alarmTime: '', 
       isCompleted: false, 
       createdAt: '', 
-      user: 0,
+      user: 0, 
+      isFavorite: false,
     ),
   ];
 
@@ -121,7 +125,8 @@ class AllEventsController extends ChangeNotifier {
   Future<void> fetchEvents() async {
     try {
       final authService = AuthService();
-      final token = await authService.getToken();
+      //final token = await authService.getToken();
+      final token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzkxOTE1LCJpYXQiOjE3NjQ0OTE5MTUsImp0aSI6ImQ0ZmZiMzA0ODQ1ODQwMmM5YmFlMGVlYmU1YmQ5Yzk1IiwidXNlcl9pZCI6IjI3In0.4eETFk_9AwVkJtsosOZJBP5Pub3pJ5ZEGypEfrFPMSs";
       debugPrint('🚀 Token fetched: $token');
 
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
@@ -153,21 +158,22 @@ class AllEventsController extends ChangeNotifier {
 
               return EventModel(
                 id: json['id'] ?? 0,
-                userName: json['user_name'] ?? '',
-                title: json['title'] ?? '',
-                description: json['description'] ?? '',
+                userName: json['user_name']?.toString() ?? '',
+                title: json['title']?.toString() ?? '',
+                description: json['description']?.toString() ?? '',
                 date: formattedDate,
-                startTime: json['start_time'] ?? '',
-                endTime: json['end_time'] ?? '',
-                location: json['location'] ?? '',
-                alarmTime: json['alarm_time'] ?? '',
+                startTime: json['start_time']?.toString() ?? '',
+                endTime: json['end_time']?.toString() ?? '',
+                location: json['location']?.toString() ?? '',
+                alarmTime: json['alarm_time']?.toString() ?? '',
                 isCompleted: json['is_completed'] ?? false,
-                createdAt: json['created_at'] ?? '',
+                createdAt: json['created_at']?.toString() ?? '',
                 user: json['user'] ?? 0,
-                category: json['category'],
+                category: json['category']?.toString(),
+                isFavorite: json['is_favorite'] ?? false,
               );
             }).toList(),
-          );
+          );        
         notifyListeners();
         debugPrint('🎉 Events added to controller: ${_events.length}');
       } else {

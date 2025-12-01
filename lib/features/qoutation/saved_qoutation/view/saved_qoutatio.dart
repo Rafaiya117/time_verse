@@ -16,6 +16,10 @@ class SavedQoutation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = Provider.of<SavedQouteController>(context, listen: false);
+      controller.fetchSavedQuotes();
+    });
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(

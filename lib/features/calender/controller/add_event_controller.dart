@@ -10,7 +10,8 @@ class AddEventController extends ChangeNotifier {
   bool isLoading = false;
 
   Future<Options> _authorizedHeader() async {
-    final token = await AuthService().getToken();
+    //final token = await AuthService().getToken();
+    final token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzkxOTE1LCJpYXQiOjE3NjQ0OTE5MTUsImp0aSI6ImQ0ZmZiMzA0ODQ1ODQwMmM5YmFlMGVlYmU1YmQ5Yzk1IiwidXNlcl9pZCI6IjI3In0.4eETFk_9AwVkJtsosOZJBP5Pub3pJ5ZEGypEfrFPMSs";
     return Options(
       headers: {
         'Authorization': 'Bearer $token',

@@ -53,6 +53,9 @@ dependencies:
   path_provider: ^2.1.5
   firebase_core: ^4.2.1
   firebase_messaging: ^16.0.4
+  url_launcher: ^6.3.2
+  app_links: ^6.4.1
+ 
 
 dev_dependencies:
   flutter_test:

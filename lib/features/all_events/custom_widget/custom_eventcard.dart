@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
 class EventCard extends StatelessWidget {
+  final int id;
   final String title;
   final String date;
   final String time;
@@ -15,6 +16,7 @@ class EventCard extends StatelessWidget {
 
   const EventCard({
     Key? key,
+    required this.id,
     required this.title,
     required this.date,
     required this.time,
@@ -27,7 +29,7 @@ class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-        context.push('/event_details');
+        context.push('/event_details', extra: id);
       },
       child:Container(
       width: 327.w,
