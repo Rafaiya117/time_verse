@@ -76,7 +76,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
         ),
         SizedBox(height: 5.h),
         SizedBox(
-          height: widget.height ?? 35,
+          height: widget.height ?? 40.h,
           child: TextFormField(
             controller: widget.controller,
             obscureText: widget.isPassword ? _obscureText : false,

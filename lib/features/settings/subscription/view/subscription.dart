@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_cards.dart';
 import 'package:time_verse/core/components/custom_header.dart';
-import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/settings/subscription/controller/subscription_controller.dart';
 
@@ -26,7 +24,7 @@ class Subscription extends StatelessWidget {
               CustomHeaderBar(
               title: 'Premium',
               leftSpacing: 90.w,
-              rightSpacing: 83.w,
+              rightSpacing: 80.w,
               ),
               SizedBox(height: 20.h),
               Image.asset(

@@ -27,9 +27,9 @@ Widget build(BuildContext context) {
           child: Column(
             children: [
               CustomHeaderBar(
-                title: 'My Calendar',
+                title: 'My Calender',
                 leftSpacing: 80.w,
-                rightSpacing: 70.w,
+                rightSpacing: 57.w,
               ),
               FancyCalendarView(),
               SizedBox(height: 24.h),

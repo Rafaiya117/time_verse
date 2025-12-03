@@ -22,7 +22,7 @@ class ChangePassword extends StatelessWidget {
             CustomHeaderBar(
               title: 'Change Password',
               leftSpacing: 60.w,
-              rightSpacing: 40.w,
+              rightSpacing: 30.w,
             ),
             SizedBox(height: 20.h,),
             CustomInputField(

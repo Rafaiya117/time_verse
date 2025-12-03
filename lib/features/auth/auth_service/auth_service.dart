@@ -245,8 +245,7 @@ Future<Map<String, dynamic>> forgotPassword(String email) async {
     final user = userData != null ? User.fromJson(userData) : null;
 
     return {
-      'success': response.statusCode == 200 ||
-          data['message']?.toString().toLowerCase().contains('success') == true,
+      'success': response.statusCode == 200 || data['message']?.toString().toLowerCase().contains('success') == true,
       'message': data['message'] ?? 'Password reset successful',
       'data': {'user': user},
     };

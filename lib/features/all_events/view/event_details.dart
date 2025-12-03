@@ -53,7 +53,7 @@ class EventDetails extends StatelessWidget {
                     color: isDarkMode? AppColors.text_color: AppColors.heading_color,
                   ),
                 ),
-                SizedBox(width: 55.w,),
+                SizedBox(width: 45.w,),
                 IconButton(
                   onPressed: (){
                     themeProvider.toggleTheme();

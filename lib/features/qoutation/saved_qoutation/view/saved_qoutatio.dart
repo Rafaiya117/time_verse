@@ -29,7 +29,7 @@ class SavedQoutation extends StatelessWidget {
               CustomHeaderBar(
                 title: 'The Wisdom Jounal',
                 leftSpacing: 50.w,
-                rightSpacing: 40.w,
+                rightSpacing: 23.w,
               ),
               SizedBox(height: 20.h,),
               SearchAnchor(

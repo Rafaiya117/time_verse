@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
+import 'package:time_verse/config/app_route/google_service.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
@@ -18,8 +19,12 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final googleServices = GoogleServices();
     final loginController = Provider.of<LoginController>(context, listen: false);
     loginController.loadRememberedUser();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      googleServices.init();
+    });
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final String logoAsset = isDarkMode
       ? 'assets/images/logo.png' 
@@ -88,6 +93,7 @@ class LoginPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Checkbox(
                           value: controller.rememberMe,
@@ -104,7 +110,8 @@ class LoginPage extends StatelessWidget {
                               :AppColors.heading_color,
                               ),
                             ),
-                            SizedBox(width: 123.w,),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.35,),
+                            // SizedBox(width: 95.w,),
                             //Spacer(),
                             TextButton(
                               onPressed: (){
@@ -131,38 +138,38 @@ class LoginPage extends StatelessWidget {
                 child: CustomButton(
                   text: "Continue",
                   onPressed: () async {
-                    context.push('/home');
-                    // if (loginController.validateLoginFields()) {
-                    //   final success = await loginController.loginUser();
-                    //   if (success) {
-                    //     if (loginController.rememberMe) {
-                    //       await AppPrefs.saveRememberMe(
-                    //         true,
-                    //         loginController.emailController.text.trim(),
-                    //         loginController.passwordController.text.trim(),
-                    //       );
-                    //     } else {
-                    //       await AppPrefs.saveRememberMe(false, '', '');
-                    //     }
-                    //     await AppPrefs.setLoggedIn(true);
-                    //     await AppPrefs.setFirstLaunch(false);
-                    //     if (context.mounted) context.push('/home');
-                    //   } else {
-                    //     if (context.mounted) {
-                    //       await showErrorDialog(
-                    //         context,
-                    //         loginController.loginError ?? 'Login failed',
-                    //       );
-                    //     }
-                    //   }
-                    // } else {
-                    //   if (context.mounted) {
-                    //     await showErrorDialog(
-                    //       context,
-                    //       "Please fill in all fields",
-                    //     );
-                    //   }
-                    // }
+                    //context.push('/home');
+                    if (loginController.validateLoginFields()) {
+                      final success = await loginController.loginUser();
+                      if (success) {
+                        if (loginController.rememberMe) {
+                          await AppPrefs.saveRememberMe(
+                            true,
+                            loginController.emailController.text.trim(),
+                            loginController.passwordController.text.trim(),
+                          );
+                        } else {
+                          await AppPrefs.saveRememberMe(false, '', '');
+                        }
+                        await AppPrefs.setLoggedIn(true);
+                        await AppPrefs.setFirstLaunch(false);
+                        if (context.mounted) context.push('/home');
+                      } else {
+                        if (context.mounted) {
+                          await showErrorDialog(
+                            context,
+                            loginController.loginError ?? 'Login failed',
+                          );
+                        }
+                      }
+                    } else {
+                      if (context.mounted) {
+                        await showErrorDialog(
+                          context,
+                          "Please fill in all fields",
+                        );
+                      }
+                    }
                   },
                   gradient: AppGradientColors.button_gradient,
                   textColor: AppColors.text_color,
@@ -209,8 +216,9 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 30.h,),
               Center(
                 child: GestureDetector(
-                  onTap: () {
-                    loginController.startGoogleLogin(); 
+                  onTap: ()async {
+                    bool signedIn = await googleServices.signIn();
+                    //loginController.startGoogleLogin(); 
                   },
                   child: SvgPicture.asset(
                     'assets/icons/gmail.svg',
@@ -230,6 +238,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(height: 10.h,),
             ],
           ),
         ),

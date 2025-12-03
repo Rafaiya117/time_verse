@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_header.dart';
-import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
 class DeleteAccount extends StatelessWidget {
@@ -23,7 +20,7 @@ class DeleteAccount extends StatelessWidget {
             CustomHeaderBar(
               title: 'Delete Account',
               leftSpacing: 60.w,
-              rightSpacing: 65.w,
+              rightSpacing: 55.w,
             ),
             SizedBox(height: 50.h,),
             SvgPicture.asset(

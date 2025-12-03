@@ -21,7 +21,7 @@ class Settings extends StatelessWidget {
             CustomHeaderBar(
               title: 'Settings',
               leftSpacing: 100.w,
-              rightSpacing: 83.w,
+              rightSpacing: 79.w,
             ),
             SizedBox(height: 20.h),
             SettingsSection(

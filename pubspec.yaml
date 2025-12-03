@@ -55,6 +55,7 @@ dependencies:
   firebase_messaging: ^16.0.4
   url_launcher: ^6.3.2
   app_links: ^6.4.1
+  google_sign_in: ^7.2.0
  
 
 dev_dependencies:
