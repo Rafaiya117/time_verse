@@ -6,23 +6,8 @@ import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 
 class SavedQouteController extends ChangeNotifier{
-  final List<Map<String, String>> savedQuotes = [
-    {
-      'time': 'Today, 2:30 PM',
-      'quoteText': 'The only way to do great work is to love what you do. If you haven\'t found it yet, keep looking. Don\'t settle.',
-      'author': 'Steve Jobs',
-    },
-    {
-      'time': 'Yesterday, 4:15 PM',
-      'quoteText': 'Your time is limited, so don’t waste it living someone else’s life.',
-      'author': 'Steve Jobs',
-    },
-    {
-      'time': 'Monday, 9:00 AM',
-      'quoteText': 'Innovation distinguishes between a leader and a follower.',
-      'author': 'Steve Jobs',
-    },
-  ];
+ final List<Map<String, dynamic>> savedQuotes = [];
+
   final Set<int> selectedQuotes = {};
 
   void toggleQuoteSelection(int index) {
@@ -77,12 +62,19 @@ class SavedQouteController extends ChangeNotifier{
       savedQuotes.clear();
 
       for (var item in data) {
+        // savedQuotes.add({
+        //   'id': item['id']?.toString() ?? '',
+        //   'time': item['created_at']?.toString() ?? '',
+        //   'quoteText': item['description']?.toString() ?? 'The only way to do great work is to love what you do. If you haven\'t found it yet, keep looking. Don\'t settle.',
+        //   'author': item['author']?.toString() ?? '',
+        // });
         savedQuotes.add({
-          'time': item['created_at']?.toString() ?? '',
-          'quoteText': item['quote_text']?.toString() ?? 'The only way to do great work is to love what you do. If you haven\'t found it yet, keep looking. Don\'t settle.',
-          'author': item['author']?.toString() ?? '',
-        });
-      }
+            'id': item['id'] as int? ?? 0, 
+            'time': item['created_at']?.toString() ?? '',
+            'description': item['description']?.toString() ?? '',
+            'author': item['author']?.toString() ?? '',
+          });
+        }
       notifyListeners();
     } else {
       debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
@@ -90,6 +82,36 @@ class SavedQouteController extends ChangeNotifier{
   } catch (e) {
     debugPrint('⚠️ Error fetching saved quotes: $e');
   }
-}
+  }
 
+  Future<bool> toggleFavorite(int eventId) async {
+    try {
+      final authService = AuthService();
+      final token = await authService.getToken();
+
+      final dio = Dio();
+      final baseUrl =  dotenv.env['BASE_URL'] ?? '';
+      final url = '${baseUrl}api/v1/event/$eventId/favorite/';
+        final response = await dio.post(
+          url,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          ),
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          debugPrint('⭐ Favorite toggled successfully: ${response.data}');
+          return true;
+        } else {
+          debugPrint('❌ Failed with status: ${response.statusCode}');
+          return false;
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error toggling favorite: $e');
+      return false;
+    }
+  }
 }

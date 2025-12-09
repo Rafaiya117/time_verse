@@ -17,6 +17,9 @@ class QuoteCardWidget extends StatefulWidget {
   // ✅ Optional selection state
   final bool isSelected;
   final VoidCallback? onTap;
+  final VoidCallback? onHeartTap; // for heart
+  final VoidCallback? onBookmarkTap; // new for bookmark
+  final int id;
 
   const QuoteCardWidget({
     super.key,
@@ -28,8 +31,11 @@ class QuoteCardWidget extends StatefulWidget {
     required this.heartFilledIconPath,
     required this.bookmarkIconPath,
     required this.bookmarkFilledIconPath,
+    required this.id,
     this.isSelected = false,
     this.onTap,
+    this.onHeartTap,
+    this.onBookmarkTap, // added
   });
 
   @override
@@ -58,7 +64,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Top Row: Time and Share
+                // Top Row: Time and Share (unchanged)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -71,9 +77,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {
-                        // Handle share logic
-                      },
+                      onPressed: () {}, // Keep Share unchanged
                       icon: SvgPicture.asset(
                         widget.shareIconPath,
                         width: 14.w,
@@ -110,12 +114,13 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                     ),
                     Row(
                       children: [
-                        // Heart Icon
+                        // Heart Icon (unchanged, optional callback)
                         IconButton(
                           onPressed: () {
                             setState(() {
                               isLiked = !isLiked;
                             });
+                            if (widget.onHeartTap != null) widget.onHeartTap!();
                           },
                           icon: SvgPicture.asset(
                             isLiked ? widget.heartFilledIconPath : widget.heartIconPath,
@@ -130,12 +135,13 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                           ),
                         ),
 
-                        // Bookmark Icon
+                        // Bookmark Icon ✅ with custom callback
                         IconButton(
                           onPressed: () {
                             setState(() {
                               isBookmarked = !isBookmarked;
                             });
+                            if (widget.onBookmarkTap != null) widget.onBookmarkTap!();
                           },
                           icon: SvgPicture.asset(
                             isBookmarked ? widget.bookmarkFilledIconPath : widget.bookmarkIconPath,

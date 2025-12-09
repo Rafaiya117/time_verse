@@ -49,7 +49,7 @@ class AddEventModal extends StatelessWidget {
             CustomInputField(
               label: '',
               hintText: 'Enter Name *',
-              controller: TextEditingController(),
+              controller: addEventController.titleController,
               isPassword: false,
               fontSize: 12.sp,
               height: 44.h,
@@ -59,6 +59,7 @@ class AddEventModal extends StatelessWidget {
             SizedBox(
               height: 88.h,
               child: TextFormField(
+                controller: addEventController.noteController,
                 decoration: InputDecoration(
                   hintText: 'Type the note here...',
                   hintStyle: TextStyle(
@@ -97,7 +98,9 @@ class AddEventModal extends StatelessWidget {
             GestureDetector(
               onTap: () => showDialog(
                 context: context,
-                builder: (_) => const DatePickerDialog(),
+                builder: (_) => DatePickerDialog(
+                  controller: addEventController.dateController,
+                ),
               ),
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -105,19 +108,36 @@ class AddEventModal extends StatelessWidget {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  border: Border.all(color:AppColors.fourth_color),
+                  border: Border.all(color: AppColors.fourth_color),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children:[
-                    Text("Date", style: GoogleFonts.outfit(color: isDarkMode?AppColors.text_color:AppColors.heading_color)),
-                    Icon(Icons.calendar_today, color: isDarkMode?AppColors.text_color:AppColors.heading_color),
+                  children: [
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: addEventController.dateController,
+                      builder: (context, value, child) {
+                        return Text(
+                          value.text.isEmpty ? "Date" : value.text,
+                          style: GoogleFonts.outfit(
+                            color: isDarkMode
+                                ? AppColors.text_color
+                                : AppColors.heading_color,
+                          ),
+                        );
+                      },
+                    ),
+                    Icon(
+                      Icons.calendar_today,
+                      color: isDarkMode
+                      ? AppColors.text_color
+                      : AppColors.heading_color,
+                    ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 16.h,),
+            SizedBox(height: 16.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -141,7 +161,7 @@ class AddEventModal extends StatelessWidget {
             CustomInputField(
               label: '',
               hintText: 'Enter Address *',
-              controller: TextEditingController(),
+              controller: addEventController.locationController,
               isPassword: false,
               fontSize: 12.sp,
               height: 44.h,
@@ -193,14 +213,21 @@ class AddEventModal extends StatelessWidget {
                     children: List.generate(categories.length, (index) {
                       final category = categories[index];
                       final color = index % 2 == 0
-                        ? AppColors.fourth_color
-                        : AppColors.fifth_color;
+                          ? AppColors.fourth_color
+                          : AppColors.fifth_color;
                       return Row(
                         children: [
-                          BulletButton(
-                            label: category.name,
-                            color: color,
-                            iconPath: 'assets/icons/bullet_point.svg',
+                          GestureDetector(
+                            onTap: () {
+                              // Debug print the selected category name
+                              debugPrint('Selected Category: ${category.name}');
+                              // You can also do controller.selectCategory(category) here if needed
+                            },
+                            child: BulletButton(
+                              label: category.name,
+                              color: color,
+                              iconPath: 'assets/icons/bullet_point.svg',
+                            ),
                           ),
                           SizedBox(width: 16.w),
                         ],
@@ -213,18 +240,44 @@ class AddEventModal extends StatelessWidget {
             SizedBox(height: 16.h),
             CustomButton(
               text: "Save",
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Saved successfully'),
-                    duration: Duration(seconds: 2),
-                  ),
+                onPressed: () async {
+                final timeController = Provider.of<TimePickerController>(context, listen: false);
+                final start = timeController.formatTime(timeController.getTime('start'));
+                final end = timeController.formatTime(timeController.getTime('end'));
+                
+                final result = await addEventController.createTask(
+                  title: addEventController.titleController.text.trim(),
+                  date: addEventController.dateController.text.trim(),
+                  startTime: start,
+                  endTime: end,
+                  location: addEventController.locationController.text.trim(),
+                  alarmTime: addEventController.alarmTimeController.text.trim(),
+                  categoryName: "Design",
+                  note: addEventController.noteController?.text.trim() ?? "",
                 );
-                Future.delayed(Duration(seconds: 2), () {
-                  Navigator.pop(context);
-                });
+                debugPrint("Create Task Result: $start");
+                if (result != null) {
+                  // success
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Saved successfully'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  Future.delayed(Duration(seconds: 2), () {
+                      Navigator.pop(context);
+                    });
+                  } else {
+                  // fail
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to save'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
-                gradient: AppGradientColors.button_gradient,
+              gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,
                 fontFamily: 'outfit',
                 fontSize: 16.sp,

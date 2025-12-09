@@ -183,7 +183,7 @@ class EventDetails extends StatelessWidget {
                             SizedBox(height: 20.h),
                             Flexible(
                               child: Container(
-                                padding: EdgeInsets.all(16.0.w),
+                                padding: EdgeInsets.all(12.0.w),
                                 width: 248.w,
                                 height: 230.h,
                                 decoration: BoxDecoration(
@@ -199,7 +199,7 @@ class EventDetails extends StatelessWidget {
                                     RepaintBoundary(
                                       key: eventController.quoteShareKey,
                                       child: Text(
-                                        eventController.quoteText,
+                                        eventController.eventDetail?.description ??eventController.quoteText,
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.outfit(
                                           fontSize: 17.sp,

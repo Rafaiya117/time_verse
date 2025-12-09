@@ -18,7 +18,7 @@ class BulletButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 125.w,
+      //width: 125.w,
       height: 44.h,
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),

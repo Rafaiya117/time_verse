@@ -55,8 +55,8 @@ class CustomHeaderBar extends StatelessWidget {
           },
           icon: SvgPicture.asset(
             isDarkMode ? 'assets/icons/theme_dark.svg' : 'assets/icons/light_theme.svg',
-            width: 15.w,
-            height: 15.h,
+            width: 20.w,
+            height: 20.h,
           ),
         ),
       ],

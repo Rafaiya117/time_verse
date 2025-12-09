@@ -13,7 +13,8 @@ class TimePickerField extends StatelessWidget {
   final Color? borderColor;
   final Color? textColor;
   final double? fontSize;
-
+  final TextEditingController? textController;
+  
   const TimePickerField({
     super.key,
     required this.fieldKey,
@@ -22,6 +23,7 @@ class TimePickerField extends StatelessWidget {
     this.borderColor,
     this.textColor,
     this.fontSize,
+    this.textController, 
   });
 
   @override
@@ -44,7 +46,9 @@ class TimePickerField extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              time == null ? label : formattedTime,
+              time != null
+                ? formattedTime : (textController?.text.isNotEmpty == true
+                ? textController!.text : label),
               style: GoogleFonts.outfit(
                 color: isDarkMode?AppColors.text_color:AppColors.heading_color,
                 fontSize: fontSize ?? 15,

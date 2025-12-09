@@ -138,18 +138,28 @@ class SavedQoutation extends StatelessWidget {
               Consumer<SavedQouteController>(
                 builder: (context, controller, _) {
                   return Column(
-                    children: controller.savedQuotes.map((quote) {
+                    children: controller.savedQuotes.map((quote) {    
+                      debugPrint("Quote ID: ${quote['id']}");
                       return Column(
                         children: [
                           QuoteCardWidget(
-                            time: quote['time']!,
-                            quoteText: quote['quoteText']!,
-                            author: quote['author']!,
+                            time: quote['time'] ?? '',
+                            quoteText: quote['description'] ?? '',
+                            author: quote['author'] ?? '',
                             shareIconPath: 'assets/icons/share.svg',
                             heartIconPath: 'assets/icons/heart.svg',
                             heartFilledIconPath:'assets/icons/heart_filled.svg',
                             bookmarkIconPath: 'assets/icons/bookmark.svg',
                             bookmarkFilledIconPath:'assets/icons/bookmark_filled.svg',
+                            id: quote['id'] as int,
+                            onHeartTap: () {
+                              print("Heart clicked: ${quote['id']}");
+                            },
+                            onBookmarkTap: () {
+                              final int id = (quote['id'] as int?) ?? 0;
+                              controller.toggleQuoteSelection(id);                           
+                              print("Bookmark clicked: ${quote['id']}");
+                            },
                           ),
                           SizedBox(height: 10.h),
                         ],

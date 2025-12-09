@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
 class DatePickerDialog extends StatefulWidget {
-  const DatePickerDialog({super.key});
+  // const DatePickerDialog({super.key});
+  final TextEditingController controller;
+  const DatePickerDialog({super.key, required this.controller});
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -28,10 +31,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
             padding: EdgeInsets.symmetric(vertical: 10.h),
             color: AppColors.third_color,
             child: Text(
-              'Wed, September 6',
+              DateFormat('EEE, MMMM d').format(_selectedDay ?? _focusedDay),
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
-                color: Colors.white, 
+                color: Colors.white,
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -43,13 +46,23 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
               lastDay: DateTime(2025, 10, 4),
               focusedDay: _focusedDay,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              // onDaySelected: (selectedDay, focusedDay) {
+              //   setState(() {
+              //     _selectedDay = selectedDay;
+              //     _focusedDay = focusedDay;
+              //   });
+              //   Navigator.pop(context); 
+              // },
               onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                Navigator.pop(context); 
-              },
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+              // Update the controller with formatted date
+              widget.controller.text = DateFormat('yyyy-MM-dd',).format(selectedDay);
+              debugPrint("Selected date: ${widget.controller.text}");
+              Navigator.pop(context);
+            },
               calendarStyle: CalendarStyle(
                 selectedDecoration: BoxDecoration(
                   color: isDarkMode?AppColors.fourth_color:AppColors.heading_color,
