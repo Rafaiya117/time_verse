@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
@@ -240,11 +241,15 @@ class AddEventModal extends StatelessWidget {
             SizedBox(height: 16.h),
             CustomButton(
               text: "Save",
-                onPressed: () async {
-                final timeController = Provider.of<TimePickerController>(context, listen: false);
-                final start = timeController.formatTime(timeController.getTime('start'));
-                final end = timeController.formatTime(timeController.getTime('end'));
-                
+              onPressed: () async {
+                final timeController = Provider.of<TimePickerController>(context,listen: false,);
+                final start = timeController.formatTime(
+                  timeController.getTime('start'),
+                );
+                final end = timeController.formatTime(
+                  timeController.getTime('end'),
+                );
+
                 final result = await addEventController.createTask(
                   title: addEventController.titleController.text.trim(),
                   date: addEventController.dateController.text.trim(),
@@ -257,33 +262,33 @@ class AddEventModal extends StatelessWidget {
                 );
                 debugPrint("Create Task Result: $start");
                 if (result != null) {
-                  // success
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Saved successfully'),
-                      duration: Duration(seconds: 2),
-                    ),
+                  await showMessageDialog(
+                    context,
+                    'Saved successfully',
+                    title: 'Success',
+                    icon: Icons.check_circle_outline,
+                    iconColor: Colors.green,
                   );
                   Future.delayed(Duration(seconds: 2), () {
-                      Navigator.pop(context);
-                    });
-                  } else {
-                  // fail
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to save'),
-                      duration: Duration(seconds: 2),
-                    ),
+                    Navigator.pop(context);
+                  });
+                } else {
+                  await showMessageDialog(
+                    context,
+                    'Failed to save',
+                    title: 'Failed',
+                    icon: Icons.error_outline,
+                    iconColor: Colors.red,
                   );
                 }
               },
               gradient: AppGradientColors.button_gradient,
-                textColor: AppColors.text_color,
-                fontFamily: 'outfit',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.normal,
-                height: 51.h,
-                width: double.infinity,
+              textColor: AppColors.text_color,
+              fontFamily: 'outfit',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.normal,
+              height: 51.h,
+              width: double.infinity,
             ),
           ],
         ),

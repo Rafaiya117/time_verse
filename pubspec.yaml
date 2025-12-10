@@ -56,6 +56,8 @@ dependencies:
   url_launcher: ^6.3.2
   app_links: ^6.4.1
   google_sign_in: ^7.2.0
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
  
 
 dev_dependencies:

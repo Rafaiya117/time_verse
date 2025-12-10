@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -65,13 +65,13 @@ class AddEventController extends ChangeNotifier {
     bool isCompleted = false,
     String? note,
   }) async {
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    final authService = AuthService();
+    final accessToken = await authService.getToken();
 
-  final baseUrl = dotenv.env['BASE_URL'] ?? ''; 
-  final authService = AuthService();
-  final accessToken = await authService.getToken();
- 
     try {
-      final url = Uri.parse("$baseUrl/api/v1/event/create/");   
+      final url = Uri.parse("$baseUrl/api/v1/event/create/");
+      final formattedAlarmTime = _formatAlarmTime(date, alarmTime);
 
       final body = {
         "title": title,
@@ -79,15 +79,15 @@ class AddEventController extends ChangeNotifier {
         "start_time": startTime,
         "end_time": endTime,
         "location": location,
-        "alarm_time": alarmTime,
+        "alarm_time":formattedAlarmTime ,//alarmTime,
         "category_name": categoryName,
         "is_completed": isCompleted,
-        "type_event_description": note ?? ""
+        "type_event_description": note ?? "",
       };
 
       final response = await _dio.post(
         url.toString(),
-        data: jsonEncode(body),
+        data: body, // FIXED
         options: Options(
           headers: {
             "Content-Type": "application/json",
@@ -106,8 +106,30 @@ class AddEventController extends ChangeNotifier {
         return null;
       }
     } catch (e) {
+      if (e is DioException) {
+        print("❌ Dio Error Response: ${e.response?.data}");
+      }
       print("❌ Exception: $e");
-      return null;
+    }
+  }
+
+  String _formatAlarmTime(String date, String time) {
+    try {
+      final parsedTime = DateFormat("hh:mm a").parse(time);
+      final parsedDate = DateFormat("yyyy-MM-dd").parse(date);
+
+      final combined = DateTime(
+        parsedDate.year,
+        parsedDate.month,
+        parsedDate.day,
+        parsedTime.hour,
+        parsedTime.minute,
+      );
+
+      return combined.toIso8601String();
+    } catch (e) {
+      print("⚠️ Alarm time format error: $e");
+      return date + "T00:00:00";
     }
   }
 }

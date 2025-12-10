@@ -129,7 +129,7 @@ class OtpView extends StatelessWidget {
 
                   if (otp.length != 4) {
                     if (context.mounted) {
-                      await showErrorDialog(
+                      await showMessageDialog(
                         context,
                         'Please enter a 4-digit OTP',
                       );
@@ -143,7 +143,7 @@ class OtpView extends StatelessWidget {
                     context.push('/reset_password?email=$encodedEmail&otp=$encodedOtp',);
                   } else {
                     if (context.mounted) {
-                      await showErrorDialog(
+                      await showMessageDialog(
                         context,
                         controller.otpError ?? 'OTP verification failed',
                       );

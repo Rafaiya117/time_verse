@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
@@ -15,11 +15,17 @@ import 'dart:async';
 import 'package:time_verse/features/home/model/review_model.dart';
 
 class QuoteData {
+  final int? id;      
   final String quote;
   final String reference;
 
-  QuoteData({required this.quote, required this.reference});
+  QuoteData({
+    this.id,
+    required this.quote,
+    required this.reference,
+  });
 }
+
 
 class HomeController extends ChangeNotifier {
   int selectedIndex = 0;
@@ -54,24 +60,33 @@ class HomeController extends ChangeNotifier {
   // Daily Inspiration Quotes
   final List<QuoteData> _inspirationalQuotes = [
     QuoteData(
-      quote: '"This is the day that the Lord has made; let us rejoice and be glad in it"',
-      reference: 'Psalm 118:24',
+      id: 0,
+      quote: "This is the day that the Lord has made; let us rejoice and be glad in it",
+      reference: "Psalm 118:24",
     ),
     QuoteData(
-      quote: '"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, to give you hope and a future."',
-      reference: 'Jeremiah 29:11',
+      id: 0,
+      quote: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
+      reference: "Jeremiah 29:11",
     ),
     QuoteData(
-      quote: '"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."',
-      reference: 'Proverbs 3:5-6',
+      id: 0,
+      quote: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
+      reference: "Proverbs 3:5-6",
     ),
   ];
+  List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
+
+  //!---------------- Default Quote ----------!
+  List<QuoteData> allQuotes = [];
+
+  QuoteController() {
+    allQuotes = [..._inspirationalQuotes];
+  }
 
   int _currentQuoteIndex = 0;
   Timer? _autoSlideTimer;
   final PageController _pageController = PageController();
-
-  List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
   int get currentQuoteIndex => _currentQuoteIndex;
   PageController get pageController => _pageController;
 
@@ -285,6 +300,140 @@ Future<void> postReviewToApi() async {
     debugPrint('🧩 Stack trace: $stack');
   }
 }
+
+Future<bool> saveQuoteToFavorite({
+  required int eventId,
+}) async {
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    debugPrint('🚀 Starting saveQuoteToFavorite...');
+
+    final response = await _dio.post(
+      '$baseUrl/api/v1/event/$eventId/favorite/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    debugPrint('✅ Quote favorited, status: ${response.statusCode}');
+    return response.statusCode == 200 || response.statusCode == 201;
+  } catch (e) {
+    debugPrint('! Error saving quote: $e');
+    return false;
+  }
+}
+
+  // ------------------ Reusable date formatter ------------------ //
+  String formatEventDate(String rawDate) {
+    final startDateTime = DateTime.tryParse(rawDate);
+    if (startDateTime == null) return '';
+
+    final now = DateTime.now();
+    if (startDateTime.year == now.year &&
+        startDateTime.month == now.month &&
+        startDateTime.day == now.day) {
+      return 'Today';
+    } else {
+      return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);
+    }
+  }
+
+// Future<void> fetchEvents() async {
+//   try {
+//     final authService = AuthService();
+//     final token = await authService.getToken();
+//     debugPrint('🚀 Token fetched: $token');
+
+//     final baseUrl = dotenv.env['BASE_URL'] ?? '';
+//     debugPrint('🌐 Base URL: $baseUrl');
+
+//     final response = await _dio.get(
+//       '${baseUrl}api/v1/event/',
+//       options: Options(
+//         headers: {
+//           'Authorization': 'Bearer $token',
+//           'Content-Type': 'application/json',
+//         },
+//       ),
+//     );
+
+//     debugPrint('📦 API Response Status: ${response.statusCode}');
+//     debugPrint('📄 Response data: ${response.data}');
+
+//     if (response.statusCode == 200) {
+//       final List data = response.data;
+//       debugPrint('✅ Number of events fetched: ${data.length}');
+
+//       _inspirationalQuotes
+//         ..clear()
+//         ..addAll(
+//           data.map((json) {
+//             final formattedDate = formatEventDate(json['date'] ?? '');
+//             debugPrint('💬 Event parsed for quote: ${json['title']} - $formattedDate');
+
+//             return QuoteData(
+//               id: json['id'], 
+//               quote: json['description']?.toString() ?? '',
+//               reference: json['title']?.toString() ?? '',
+//             );
+//           }),
+//         );
+//       // -------------------------------------------------------------
+
+//       notifyListeners();
+//       debugPrint('🎉 Quotes loaded from events: ${_inspirationalQuotes.length}');
+//     } else {
+//       debugPrint('❌ Failed to load events: ${response.statusCode}');
+//     }
+//   } catch (e) {
+//     debugPrint('⚠️ Error fetching events: $e');
+//   }
+// }
+
+
+Future<void> fetchSavedQuotes() async {
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    final dio = Dio();
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    final url = '${baseUrl}api/v1/event/my-quotes/';
+
+    final response = await dio.get(
+      url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        _inspirationalQuotes.clear();
+        for (var item in data) {
+          _inspirationalQuotes.add(
+            QuoteData(
+              id: item['id'] as int? ?? 0,
+              quote: item['description']?.toString() ?? '',
+              reference: item['author']?.toString() ?? '',
+            ),
+          );
+        }
+        notifyListeners();
+        debugPrint('🎉 Loaded saved quotes: ${_inspirationalQuotes.length}');
+      } else {
+        debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching saved quotes: $e');
+    }
+  }
 
 
   @override

@@ -156,7 +156,7 @@ class LoginPage extends StatelessWidget {
                         if (context.mounted) context.push('/home');
                       } else {
                         if (context.mounted) {
-                          await showErrorDialog(
+                          await showMessageDialog(
                             context,
                             loginController.loginError ?? 'Login failed',
                           );
@@ -164,7 +164,7 @@ class LoginPage extends StatelessWidget {
                       }
                     } else {
                       if (context.mounted) {
-                        await showErrorDialog(
+                        await showMessageDialog(
                           context,
                           "Please fill in all fields",
                         );

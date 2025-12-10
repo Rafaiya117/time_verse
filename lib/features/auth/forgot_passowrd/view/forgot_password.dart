@@ -83,7 +83,7 @@ class ForgotPassword extends StatelessWidget {
                         }
                       } else {
                         if (context.mounted) {
-                          await showErrorDialog(
+                          await showMessageDialog(
                             context,
                             forgotpassword_controller.errorMessage ?? 'Request failed',
                           );
@@ -91,7 +91,7 @@ class ForgotPassword extends StatelessWidget {
                       }
                     } else {
                       if (context.mounted) {
-                        await showErrorDialog(context, 'Please enter your email');
+                        await showMessageDialog(context, 'Please enter your email');
                       }
                     }
                   },

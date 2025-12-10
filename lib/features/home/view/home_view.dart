@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
+import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
@@ -65,10 +66,8 @@ class HomeView extends StatelessWidget {
                           ),
                         );
                       }),
-                    ),
-                    
-                    SizedBox(height: 20.h),
-                    
+                    ),                    
+                    SizedBox(height: 20.h),                    
                     Text(
                       'Your Feedback:',
                       style: GoogleFonts.outfit(
@@ -76,10 +75,8 @@ class HomeView extends StatelessWidget {
                         fontSize: 14.sp,
                         color: isDarkMode ? Colors.white : Colors.black,
                       ),
-                    ),
-                    
-                    SizedBox(height: 12.h),
-                    
+                    ),                    
+                    SizedBox(height: 12.h),                    
                     // Feedback Text Field
                     Container(
                       height: 100.h,
@@ -109,10 +106,8 @@ class HomeView extends StatelessWidget {
                           contentPadding: EdgeInsets.all(12.w),
                         ),
                       ),
-                    ),
-                    
-                    SizedBox(height: 24.h),
-                    
+                    ),                    
+                    SizedBox(height: 24.h),                    
                     // Submit Button
                     GestureDetector(
                       onTap: () async {
@@ -173,7 +168,8 @@ class HomeView extends StatelessWidget {
     // Start auto-slide when widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       homeController.startAutoSlide();
-      homeController.fetchQuotesFromApi();
+      homeController.fetchSavedQuotes();
+      //homeController.fetchQuotesFromApi();
       await Future.delayed(const Duration(milliseconds: 200));
       homeController.fetchReviewsFromApi();
     });
@@ -196,7 +192,6 @@ class HomeView extends StatelessWidget {
                     height: logoPath.contains('logo_light') ? 58.h : 28.h,
                     //fit: BoxFit.contain,
                   ),
-
                   Row(
                   children: [
                     IconButton(
@@ -204,9 +199,7 @@ class HomeView extends StatelessWidget {
                         themeProvider.toggleTheme();
                       },
                       icon: SvgPicture.asset(
-                        isDarkMode 
-                            ? 'assets/icons/theme_dark.svg'
-                            : 'assets/icons/light_theme.svg',
+                        isDarkMode ? 'assets/icons/theme_dark.svg' : 'assets/icons/light_theme.svg',
                         width: 20.w,
                         height: 20.h,
                       ),
@@ -319,7 +312,7 @@ class HomeView extends StatelessWidget {
                 itemCount: 7,
                 itemBuilder: (context, index) {
                   final now = DateTime.now();
-                  final date = now.add(Duration(days: index - 3)); // Show 3 days before and after today
+                  final date = now.add(Duration(days: index - 3)); 
                   final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
                   
                   return Container(
@@ -471,88 +464,97 @@ class HomeView extends StatelessWidget {
                     //       ),
                     //     ),
                     //   ),
-                    SizedBox(
-                      height: 120.h,
-                        child: GestureDetector(
-                          onPanStart: (_) => homeController.stopAutoSlide(),
-                          onPanEnd: (_) => homeController.startAutoSlide(),
-                          onTapDown: (_) => homeController.stopAutoSlide(),
-                          onTapUp: (_) => homeController.startAutoSlide(),
-
-                          // 👇 Wrap your PageView with RepaintBoundary
-                          child: RepaintBoundary(
-                            key: homeController.quoteShareKey,
-                            child: PageView.builder(
-                              controller: homeController.pageController,
-                              itemCount:homeController.inspirationalQuotes.length,
-                              onPageChanged: (index) {
-                                homeController.updateQuoteIndex(index);
-                              },
-                              itemBuilder: (context, index) {
-                                final quote = homeController.inspirationalQuotes[index];
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        quote.quote,
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.outfit(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16.sp,
-                                          color: isDarkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                          height: 1.4,
+                    Consumer<HomeController>(
+                      builder: (context, homeController, child) {
+                        return Column(
+                          children: [
+                            SizedBox(
+                                height: 120.h,
+                                child: GestureDetector(
+                                  onPanStart: (_) => homeController.stopAutoSlide(),
+                                  onPanEnd: (_) => homeController.startAutoSlide(),
+                                  onTapDown: (_) => homeController.stopAutoSlide(),
+                                  onTapUp: (_) => homeController.startAutoSlide(),
+                                  child: RepaintBoundary(
+                                    key: homeController.quoteShareKey,
+                                    child: PageView.builder(
+                                      controller: homeController.pageController,
+                                      itemCount: homeController.inspirationalQuotes.length,
+                                      onPageChanged: (index) {
+                                        homeController.updateQuoteIndex(index);
+                                      },
+                                      itemBuilder: (context, index) {
+                                        final quote = homeController.inspirationalQuotes[index];
+                                        return Column(
+                                          mainAxisAlignment:MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                quote.quote,
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.outfit(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16.sp,
+                                                  color: isDarkMode
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 16.h),
+                                            Text(
+                                              quote.reference,
+                                              style: GoogleFonts.outfit(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14.sp,
+                                                color: isDarkMode
+                                                  ? const Color(0xFFFFD700)
+                                                  : const Color(0xFFFF8C00),
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 5.h),
+                              // DOT INDICATORS
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  homeController.inspirationalQuotes.length > 5 ? 5
+                                  : homeController.inspirationalQuotes.length,
+                                  (i) {
+                                    final index = i + (homeController.currentQuoteIndex ~/5) *5;
+                                    final actualIndex = index % homeController.inspirationalQuotes.length;
+                                    return GestureDetector(
+                                      onTap: () => homeController.goToQuote(actualIndex),
+                                      child: Container(
+                                        margin: EdgeInsets.symmetric(horizontal: 4.w,),
+                                        width:homeController.currentQuoteIndex == actualIndex
+                                          ? 12.w: 8.w,
+                                        height: homeController.currentQuoteIndex == actualIndex
+                                          ? 12.h: 8.h,
+                                        decoration: BoxDecoration(
+                                          color:homeController.currentQuoteIndex == actualIndex
+                                            ? (isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFF8C00))
+                                            : (isDarkMode ? Colors.grey[600]: Colors.grey[400]),
+                                          shape: BoxShape.circle,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 16.h),
-                                    Text(
-                                      quote.reference,
-                                      style: GoogleFonts.outfit(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14.sp,
-                                        color: isDarkMode
-                                          ? const Color(0xFFFFD700)
-                                          : const Color(0xFFFF8C00),
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 5.h),
-                      // DOT INDICATORS
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          homeController.inspirationalQuotes.length,
-                          (index) => GestureDetector(
-                            onTap: () => homeController.goToQuote(index),
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 4.w),
-                              width: homeController.currentQuoteIndex == index
-                                ? 12.w
-                                : 8.w,
-                              height: homeController.currentQuoteIndex == index
-                                ? 12.h
-                                : 8.h,
-                              decoration: BoxDecoration(
-                                color: homeController.currentQuoteIndex == index
-                                  ? (isDarkMode ? const Color(0xFFFFD700): const Color(0xFFFF8C00))
-                                  : (isDarkMode? Colors.grey[600]: Colors.grey[400]),
-                                shape: BoxShape.circle,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
+                            ],
+                          );
+                        },
                       ),
-                    SizedBox(height: 20.h),                    
+                      SizedBox(height: 20.h),                    
                     // Action buttons
                     Row(
                       children: [
@@ -568,31 +570,50 @@ class HomeView extends StatelessWidget {
                                 width: 1.5,
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/icons/download.svg',
-                                  // ignore: deprecated_member_use
-                                  color: isDarkMode ? Colors.white : const Color(0xFF4A90E2),
-                                  width: 20.sp,
-                                  height: 20.sp,
+                            child: GestureDetector(
+                              onTap: () async {
+                                final currentQuote = homeController.inspirationalQuotes[homeController.currentQuoteIndex];
+                                debugPrint('Saving quote with ID: ${currentQuote.id}',);
+                                final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
+                                  if (success) {
+                                    // Replace SnackBar with dialog
+                                    await showMessageDialog(
+                                      context,
+                                      "Quote saved successfully!",
+                                      title: "Success",
+                                      icon: Icons.check_circle_outline,
+                                      iconColor: Colors.green,
+                                    );
+                                  }
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/download.svg',
+                                      color: isDarkMode
+                                        ? Colors.white
+                                        : const Color(0xFF4A90E2),
+                                      width: 20.sp,
+                                      height: 20.sp,
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      'Save',
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16.sp,
+                                        color: isDarkMode
+                                          ? Colors.white
+                                          : const Color(0xFF4A90E2),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 8.w),
-                                Text(
-                                  'Save',
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16.sp,
-                                    color: isDarkMode ? Colors.white : const Color(0xFF4A90E2),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 16.w),
-                        
+                          SizedBox(width: 16.w),                       
                         // Share button
                         Flexible(
                           child: GestureDetector(
@@ -636,7 +657,6 @@ class HomeView extends StatelessWidget {
               ),
             ),
             SizedBox(height: 30.h),
-
             // Today's Schedule section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -659,8 +679,7 @@ class HomeView extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
-            
+            SizedBox(height: 16.h),            
             // Schedule events list
             Column(
               children: [
@@ -691,8 +710,7 @@ class HomeView extends StatelessWidget {
                   lightModeBackgroundColor: AppColors.l_schedule_clr3,
                 ),
               ],
-            ),
-            
+            ),            
             SizedBox(height: 16.h),
             Center(
               child: TextButton(

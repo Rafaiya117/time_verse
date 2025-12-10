@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/app_route/alerm_notification_service.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/app_route/deeplink_service.dart';
 import 'package:time_verse/config/app_route/fire_base_service.dart';
@@ -32,6 +33,7 @@ import 'package:time_verse/features/settings/settings_controller.dart';
 import 'package:time_verse/features/settings/subscription/controller/subscription_controller.dart';
 import 'package:time_verse/features/settings/terms_condition/controller/terms_controller.dart';
 import 'package:time_verse/firebase_options.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +46,8 @@ void main() async {
   await FCMService.initialize();
   final deepLinkService = DeepLinkService();
   await deepLinkService.init();
+  tz.initializeTimeZones();
+  await NotificationService.init();
   runApp(const MyApp());
 }
 

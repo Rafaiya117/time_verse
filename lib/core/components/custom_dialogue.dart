@@ -37,7 +37,13 @@
 // }
 import 'package:flutter/material.dart';
 
-Future<void> showErrorDialog(BuildContext context, String message) async {
+Future<void> showMessageDialog(
+  BuildContext context,
+  String message, {
+  String title = 'Error',
+  IconData icon = Icons.error_outline,
+  Color iconColor = Colors.red,
+}) async {
   await showDialog(
     context: context,
     builder: (ctx) {
@@ -46,14 +52,14 @@ Future<void> showErrorDialog(BuildContext context, String message) async {
           borderRadius: BorderRadius.circular(12),
         ),
         title: Row(
-          children: const [
-            Icon(Icons.error_outline, color: Colors.red),
-            SizedBox(width: 8),
+          children: [
+            Icon(icon, color: iconColor),
+            const SizedBox(width: 8),
             Text(
-              'Error',
+              title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.red,
+                color: iconColor,
               ),
             ),
           ],
@@ -61,7 +67,7 @@ Future<void> showErrorDialog(BuildContext context, String message) async {
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 250),
           child: SingleChildScrollView(
-            child: SelectableText( 
+            child: SelectableText(
               message,
               style: const TextStyle(
                 fontSize: 15,
@@ -80,4 +86,3 @@ Future<void> showErrorDialog(BuildContext context, String message) async {
     },
   );
 }
-

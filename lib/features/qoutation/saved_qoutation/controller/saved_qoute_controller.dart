@@ -39,49 +39,49 @@ class SavedQouteController extends ChangeNotifier{
   }
 
   Future<void> fetchSavedQuotes() async {
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    final dio = Dio();
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    final url = '${baseUrl}api/v1/event/my-quotes/';
+    try {
+      final authService = AuthService();
+      final token = await authService.getToken();
+      final dio = Dio();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+      final url = '${baseUrl}api/v1/event/my-quotes/';
 
-    final response = await dio.get(
-      url,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      ),
-    );
+      final response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = response.data;
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
 
-      savedQuotes.clear();
+        savedQuotes.clear();
 
-      for (var item in data) {
-        // savedQuotes.add({
-        //   'id': item['id']?.toString() ?? '',
-        //   'time': item['created_at']?.toString() ?? '',
-        //   'quoteText': item['description']?.toString() ?? 'The only way to do great work is to love what you do. If you haven\'t found it yet, keep looking. Don\'t settle.',
-        //   'author': item['author']?.toString() ?? '',
-        // });
-        savedQuotes.add({
-            'id': item['id'] as int? ?? 0, 
+        for (var item in data) {
+          // savedQuotes.add({
+          //   'id': item['id']?.toString() ?? '',
+          //   'time': item['created_at']?.toString() ?? '',
+          //   'quoteText': item['description']?.toString() ?? 'The only way to do great work is to love what you do. If you haven\'t found it yet, keep looking. Don\'t settle.',
+          //   'author': item['author']?.toString() ?? '',
+          // });
+          savedQuotes.add({
+            'id': item['id'] as int? ?? 0,
             'time': item['created_at']?.toString() ?? '',
             'description': item['description']?.toString() ?? '',
             'author': item['author']?.toString() ?? '',
           });
         }
-      notifyListeners();
-    } else {
-      debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
+        notifyListeners();
+      } else {
+        debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching saved quotes: $e');
     }
-  } catch (e) {
-    debugPrint('⚠️ Error fetching saved quotes: $e');
-  }
   }
 
   Future<bool> toggleFavorite(int eventId) async {
