@@ -137,7 +137,7 @@ class Signup extends StatelessWidget {
                     if (signup_controller.validateSignupFields()) {
                       final success = await signup_controller.signupUser();
                       if (success) {
-                        if (context.mounted) context.push('/home');
+                        if (context.mounted) context.push('/login');
                       } else {
                         if (context.mounted) {
                           await showMessageDialog(

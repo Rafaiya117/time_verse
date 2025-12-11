@@ -42,8 +42,8 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
           ),
           const SizedBox(height: 8),
             TableCalendar(
-              firstDay: DateTime(2025, 8, 26),
-              lastDay: DateTime(2025, 10, 4),
+              firstDay: DateTime(2025, 1, 1),
+              lastDay: DateTime(2025, 12, 30),
               focusedDay: _focusedDay,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               // onDaySelected: (selectedDay, focusedDay) {

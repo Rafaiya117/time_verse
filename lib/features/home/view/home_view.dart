@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
-import 'package:time_verse/features/settings/profile/user_service/user_service.dart';
+import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
+
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -160,18 +162,15 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final homeController = Provider.of<HomeController>(context, listen: false);
+    final homeController = Provider.of<HomeController>(context);
+    final profileController = Provider.of<ProfileController>(context, listen: false);
     final location = GoRouterState.of(context).uri.toString();
     homeController.updateIndexFromRoute(location);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final logoPath = isDarkMode ? 'assets/icons/logo_dark.svg' : 'assets/icons/logo_light.svg';
+    final logoPath =  'assets/images/logo.png';
     // Start auto-slide when widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      homeController.startAutoSlide();
-      homeController.fetchSavedQuotes();
-      //homeController.fetchQuotesFromApi();
-      await Future.delayed(const Duration(milliseconds: 200));
-      homeController.fetchReviewsFromApi();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      homeController.initOnce(profileController);
     });
     
     return Scaffold(
@@ -186,11 +185,11 @@ class HomeView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                  SvgPicture.asset(
+                  Image.asset(
                     logoPath,
-                    width: logoPath.contains('logo_light') ? 58.w : 28.w,
-                    height: logoPath.contains('logo_light') ? 58.h : 28.h,
-                    //fit: BoxFit.contain,
+                    width:68.w ,
+                    height:54.h ,
+                    fit: BoxFit.contain,
                   ),
                   Row(
                   children: [
@@ -227,16 +226,12 @@ class HomeView extends StatelessWidget {
                         //   ),
                         // ),
                         ClipOval(
-                          child: Builder(
-                            builder: (_) {
-                              final userService = UserService();
-                              final user = userService.currentUser;
-                              debugPrint('!-----${user?.profilePicture}');
-                              final imageProvider = user?.profilePicture != null
-                                ? NetworkImage(
-                                  'http://10.10.13.74:5000/${user!.profilePicture}',
-                                )
-                              : const AssetImage(
+                          child: Selector<ProfileController, String?>(
+                            selector: (_, controller) => controller.currentUser?.profilePicture,
+                              builder: (_, profilePicture, __) {
+                                final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
+                                ? NetworkImage('http://10.10.13.74:5000/$profilePicture')
+                                : const AssetImage(
                                 'assets/images/profile_img.png',
                               );
                               return Image(
@@ -264,7 +259,7 @@ class HomeView extends StatelessWidget {
             ),
             //SizedBox(height: 10.h),            
             Text(
-              'Mellisa\n Peters',
+              '${UserSession().formattedUsername}',
               style: GoogleFonts.outfit(
                 fontWeight: FontWeight.normal,
                 fontSize: 34.sp,
@@ -681,36 +676,33 @@ class HomeView extends StatelessWidget {
             ),
             SizedBox(height: 16.h),            
             // Schedule events list
-            Column(
-              children: [
-                _buildScheduleEvent(
-                  context,
-                  'Team Standup',
-                  '9:00 AM - 9:30 AM',
-                  const Color(0xFFFFD700),
-                  isDarkMode,
-                  lightModeBackgroundColor: AppColors.l_schedule_clr1,
-                ),
-                SizedBox(height: 12.h),
-                _buildScheduleEvent(
-                  context,
-                  'Client Presentation',
-                  '11:00 AM - 12:00 PM',
-                  Colors.grey,
-                  isDarkMode,
-                  lightModeBackgroundColor: AppColors.l_schedule_clr2,
-                ),
-                SizedBox(height: 12.h),
-                _buildScheduleEvent(
-                  context,
-                  'Lunch Break',
-                  '12:30 PM - 1:30 PM',
-                  const Color(0xFFFFB800),
-                  isDarkMode,
-                  lightModeBackgroundColor: AppColors.l_schedule_clr3,
-                ),
-              ],
-            ),            
+            Consumer<HomeController>(
+                builder: (context, controller, _) {
+                  final events = controller.todaysEvents;
+
+                  if (events.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  return Column(
+                    children: events.map((event) {
+                      return Column(
+                        children: [
+                          _buildScheduleEvent(
+                            context,
+                            event.title,
+                            '${event.startTime} - ${event.endTime}',
+                            Colors.grey,
+                            isDarkMode,
+                            lightModeBackgroundColor: AppColors.l_schedule_clr1,
+                          ),
+                          SizedBox(height: 12.h),
+                        ],
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             SizedBox(height: 16.h),
             Center(
               child: TextButton(
@@ -726,10 +718,8 @@ class HomeView extends StatelessWidget {
                   ),
                 ),
               )
-            ),
-            
-            SizedBox(height: 30.h),
-            
+            ),            
+            SizedBox(height: 30.h),            
             // What Our Users Are Saying section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -935,7 +925,7 @@ class HomeView extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: (){
-        context.push('/event_details');
+        //context.push('/event_details');
       },
       child:Container(
       width: double.infinity,

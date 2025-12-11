@@ -10,9 +10,11 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'dart:async';
 import 'package:time_verse/features/home/model/review_model.dart';
+import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
 class QuoteData {
   final int? id;      
@@ -31,6 +33,21 @@ class HomeController extends ChangeNotifier {
   int selectedIndex = 0;
   final List<ReviewData> _reviews = [];
   List<ReviewData> get reviews => List.unmodifiable(_reviews);
+  final List<EventModel> todaysEvents = [];
+
+  bool _isInitialized = false;
+
+  void initOnce(ProfileController profileController) {
+    if (_isInitialized) return;
+    _isInitialized = true;
+
+    startAutoSlide();
+    fetchEvents();
+    todaysfetchEvents();
+    fetchReviewsFromApi();
+    profileController.loadUserProfile();
+  }
+
   
   void updateIndexFromRoute(String location) {
     final index = appRoutes.indexWhere((r) => location.startsWith(r));
@@ -75,8 +92,8 @@ class HomeController extends ChangeNotifier {
       reference: "Proverbs 3:5-6",
     ),
   ];
-  List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
 
+  List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
   //!---------------- Default Quote ----------!
   List<QuoteData> allQuotes = [];
 
@@ -343,69 +360,62 @@ Future<bool> saveQuoteToFavorite({
     }
   }
 
-// Future<void> fetchEvents() async {
-//   try {
-//     final authService = AuthService();
-//     final token = await authService.getToken();
-//     debugPrint('🚀 Token fetched: $token');
-
-//     final baseUrl = dotenv.env['BASE_URL'] ?? '';
-//     debugPrint('🌐 Base URL: $baseUrl');
-
-//     final response = await _dio.get(
-//       '${baseUrl}api/v1/event/',
-//       options: Options(
-//         headers: {
-//           'Authorization': 'Bearer $token',
-//           'Content-Type': 'application/json',
-//         },
-//       ),
-//     );
-
-//     debugPrint('📦 API Response Status: ${response.statusCode}');
-//     debugPrint('📄 Response data: ${response.data}');
-
-//     if (response.statusCode == 200) {
-//       final List data = response.data;
-//       debugPrint('✅ Number of events fetched: ${data.length}');
-
-//       _inspirationalQuotes
-//         ..clear()
-//         ..addAll(
-//           data.map((json) {
-//             final formattedDate = formatEventDate(json['date'] ?? '');
-//             debugPrint('💬 Event parsed for quote: ${json['title']} - $formattedDate');
-
-//             return QuoteData(
-//               id: json['id'], 
-//               quote: json['description']?.toString() ?? '',
-//               reference: json['title']?.toString() ?? '',
-//             );
-//           }),
-//         );
-//       // -------------------------------------------------------------
-
-//       notifyListeners();
-//       debugPrint('🎉 Quotes loaded from events: ${_inspirationalQuotes.length}');
-//     } else {
-//       debugPrint('❌ Failed to load events: ${response.statusCode}');
-//     }
-//   } catch (e) {
-//     debugPrint('⚠️ Error fetching events: $e');
-//   }
-// }
-
-
-Future<void> fetchSavedQuotes() async {
+Future<void> fetchEvents() async {
   try {
     final authService = AuthService();
     final token = await authService.getToken();
-    final dio = Dio();
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    final url = '${baseUrl}api/v1/event/my-quotes/';
+    debugPrint('🚀 Token fetched: $token');
 
-    final response = await dio.get(
-      url,
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    debugPrint('🌐 Base URL: $baseUrl');
+
+    final response = await _dio.get(
+      'http://10.10.13.74:5000/api/v1/next-quite/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    debugPrint('📦 API Response Status: ${response.statusCode}');
+    debugPrint('📄 Response data: ${response.data}');
+
+    if (response.statusCode == 200) {
+      final List data = response.data is List ? response.data : [response.data];
+        debugPrint('✅ Number of events fetched: ${data.length}');
+        _inspirationalQuotes
+          ..clear()
+          ..addAll(
+            data.map((json) {
+              final formattedDate = formatEventDate(json['date'] ?? '');
+              debugPrint('💬 Event parsed for quote: ${json['title']} - $formattedDate',);
+            return QuoteData(
+              id: json['id'],
+              quote: json['description']?.toString() ?? '',
+              reference: json['title']?.toString() ?? '',
+            );
+          }),
+        );
+        notifyListeners();
+        debugPrint('🎉 Quotes loaded from events: ${_inspirationalQuotes.length}',);
+      } else {
+      debugPrint('❌ Failed to load events: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('⚠️......... Error fetching events: $e');
+  }
+}
+
+Future<void> todaysfetchEvents() async {
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.get(
+        '${baseUrl}api/v1/today_event/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -413,27 +423,77 @@ Future<void> fetchSavedQuotes() async {
           },
         ),
       );
+
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        _inspirationalQuotes.clear();
-        for (var item in data) {
-          _inspirationalQuotes.add(
-            QuoteData(
-              id: item['id'] as int? ?? 0,
-              quote: item['description']?.toString() ?? '',
-              reference: item['author']?.toString() ?? '',
-            ),
+        final List data = response.data;
+        todaysEvents
+          ..clear()
+          ..addAll(
+            data.map((json) {
+              final formattedDate = formatEventDate(json['date'] ?? '');
+              return EventModel(
+                id: json['id'] ?? 0,
+                title: json['title']?.toString() ?? '',
+                startTime: json['start_time']?.toString() ?? '',
+                endTime: json['end_time']?.toString() ?? '',
+                date: formattedDate,
+                location: json['location']?.toString() ?? '',
+                alarmTime: json['alarm_time']?.toString() ?? '',
+                isCompleted: json['is_completed'] ?? false,
+                createdAt: json['created_at']?.toString() ?? '',
+                user: json['user'] ?? 0,
+                category: json['category']?.toString(),
+                isFavorite: json['is_favorite'] ?? false, 
+                userName: json['user_name']?.toString() ?? '', 
+                description: json['description']?.toString() ?? '',                
+              );
+            }).toList(),
           );
-        }
         notifyListeners();
-        debugPrint('🎉 Loaded saved quotes: ${_inspirationalQuotes.length}');
-      } else {
-        debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('⚠️ Error fetching saved quotes: $e');
+      debugPrint('⚠️ Error fetching events: $e');
     }
   }
+
+// Future<void> fetchSavedQuotes() async {
+//   try {
+//     final authService = AuthService();
+//     final token = await authService.getToken();
+//     final dio = Dio();
+//     final baseUrl = dotenv.env['BASE_URL'] ?? '';
+//     final url = '${baseUrl}api/v1/event/my-quotes/';
+
+//     final response = await dio.get(
+//       url,
+//         options: Options(
+//           headers: {
+//             'Authorization': 'Bearer $token',
+//             'Content-Type': 'application/json',
+//           },
+//         ),
+//       );
+//       if (response.statusCode == 200) {
+//         final List<dynamic> data = response.data;
+//         _inspirationalQuotes.clear();
+//         for (var item in data) {
+//           _inspirationalQuotes.add(
+//             QuoteData(
+//               id: item['id'] as int? ?? 0,
+//               quote: item['description']?.toString() ?? '',
+//               reference: item['author']?.toString() ?? '',
+//             ),
+//           );
+//         }
+//         notifyListeners();
+//         debugPrint('🎉 Loaded saved quotes: ${_inspirationalQuotes.length}');
+//       } else {
+//         debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       debugPrint('⚠️ Error fetching saved quotes: $e');
+//     }
+//   }
 
 
   @override

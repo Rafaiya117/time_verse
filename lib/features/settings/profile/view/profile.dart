@@ -18,7 +18,7 @@ class Profile extends StatelessWidget {
 
     //!----------- Trigger only once after first build ------------!
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      profileController.loadUserProfile();
+      profileController.onInit();
     });
 
     return Scaffold(

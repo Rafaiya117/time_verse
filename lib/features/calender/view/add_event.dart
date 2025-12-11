@@ -214,8 +214,8 @@ class AddEventModal extends StatelessWidget {
                     children: List.generate(categories.length, (index) {
                       final category = categories[index];
                       final color = index % 2 == 0
-                          ? AppColors.fourth_color
-                          : AppColors.fifth_color;
+                        ? AppColors.fourth_color
+                        : AppColors.fifth_color;
                       return Row(
                         children: [
                           GestureDetector(

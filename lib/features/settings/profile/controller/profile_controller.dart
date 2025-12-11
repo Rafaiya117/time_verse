@@ -1,8 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_model/auth_model.dart';
+import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/settings/profile/user_service/user_service.dart';
 
 // class ProfileController extends ChangeNotifier{
@@ -30,10 +31,16 @@ class ProfileController extends ChangeNotifier {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  
+  final auth = AuthService();
 
   File? pickedImage;
   User? currentUser;
   bool isLoading = false;
+
+  void onInit() {
+    loadUserProfile();
+  }
 
   Future<void> loadUserProfile() async {
   try {
@@ -46,8 +53,14 @@ class ProfileController extends ChangeNotifier {
       nameController.text = user.name;
       passwordController.text = user.password ?? '';
       dateController.text = user.birthDate ?? '';
+      
+      UserSession().userId = user.id.toString();
+      UserSession().username = user.name;
+      UserSession().profileImageUrl = user.profilePicture; 
+      //await auth.saveUserInfo(user.id.toString(), user.name);
 
-      debugPrint("✅ User data preloaded: ${user.name}");
+      debugPrint("✅ User data preloaded: ${UserSession().username}");
+      debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
     } else {
       debugPrint("⚠️ No user data found");
     }
@@ -74,7 +87,7 @@ class ProfileController extends ChangeNotifier {
     birthDate: dateController.text.trim().isNotEmpty
       ? dateController.text.trim()
       : null,
-    profilePicture: null,
+    profilePicture:null,
     password: passwordController.text.trim().isNotEmpty
       ? passwordController.text.trim()
       : null,
@@ -84,13 +97,15 @@ class ProfileController extends ChangeNotifier {
   notifyListeners();
 
   try {
-    final result = await _userService.updateUserProfile(updatedUser);
+    final result = await _userService.updateUserProfile(updatedUser,profileImage: pickedImage);
     if (result != null) {
       currentUser = result;
       nameController.text = result.name;
       passwordController.text = result.password ?? '';
       dateController.text = result.birthDate ?? '';
+      UserSession().profileImageUrl = result.profilePicture;
 
+        debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully")),
       );
@@ -105,6 +120,7 @@ class ProfileController extends ChangeNotifier {
     );
   } finally {
     isLoading = false;
+    loadUserProfile();
     notifyListeners();
   }
 }
@@ -114,6 +130,7 @@ class ProfileController extends ChangeNotifier {
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
       pickedImage = File(picked.path);
+      debugPrint("✅ Image picked: ${pickedImage}");
       notifyListeners();
     }
   }
