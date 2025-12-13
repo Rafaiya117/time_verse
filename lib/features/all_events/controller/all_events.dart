@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
+import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
-
 import 'package:intl/intl.dart';
 
 class AllEventsController extends ChangeNotifier {
   int selectedIndex = 0;
   final Dio _dio = Dio();
+
+   AllEventsController() {
+    fetchEvents(); 
+  }
 
   void updateIndexFromRoute(String location) {
     final index = appRoutes.indexWhere((r) => location.startsWith(r));
@@ -142,7 +146,7 @@ class AllEventsController extends ChangeNotifier {
       );
 
       debugPrint('📦 API Response Status: ${response.statusCode}');
-      debugPrint('📄 Response data: ${response.data}');
+      debugPrint('📄 Response data---------------------: ${response.data}');
 
       if (response.statusCode == 200) {
         final List data = response.data;
@@ -172,7 +176,29 @@ class AllEventsController extends ChangeNotifier {
                 isFavorite: json['is_favorite'] ?? false,
               );
             }).toList(),
-          );        
+          );
+
+        //   for (var event in _events) {
+        //   if (event.alarmTime == null ||
+        //       event.alarmTime!.isEmpty ||
+        //       event.isCompleted)
+        //     continue;
+
+        //   try {
+        //     final alarmUtc = DateTime.parse(event.alarmTime!).toUtc();
+        //     await NotificationService.scheduleNotification(
+        //       id: event.id,
+        //       title: event.title,
+        //       body: event.description,
+        //       alarmUtc: alarmUtc,
+        //     );
+        //   } catch (e) {
+        //     debugPrint(
+        //       '⚠️ Failed to schedule notification for ${event.title}: $e',
+        //     );
+        //   }
+        // }
+
         notifyListeners();
         debugPrint('🎉 Events added to controller: ${_events.length}');
       } else {

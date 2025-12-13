@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
@@ -19,6 +20,7 @@ class AddEventModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final addEventController = Provider.of<AddEventController>(context, listen: false);
+    String ? selectedCategory;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       addEventController.fetchCategories();
     });
@@ -222,6 +224,7 @@ class AddEventModal extends StatelessWidget {
                             onTap: () {
                               // Debug print the selected category name
                               debugPrint('Selected Category: ${category.name}');
+                              selectedCategory = category.name;
                               // You can also do controller.selectCategory(category) here if needed
                             },
                             child: BulletButton(
@@ -242,7 +245,12 @@ class AddEventModal extends StatelessWidget {
             CustomButton(
               text: "Save",
               onPressed: () async {
-                final timeController = Provider.of<TimePickerController>(context,listen: false,);
+                final timeController = Provider.of<TimePickerController>(
+                  context,
+                  listen: false,
+                );
+
+                // Format times in HH:mm:ss (backend expects only time)
                 final start = timeController.formatTime(
                   timeController.getTime('start'),
                 );
@@ -252,16 +260,36 @@ class AddEventModal extends StatelessWidget {
 
                 final result = await addEventController.createTask(
                   title: addEventController.titleController.text.trim(),
-                  date: addEventController.dateController.text.trim(),
-                  startTime: start,
+                  date: addEventController.dateController.text.trim(), 
+                  startTime: start, 
                   endTime: end,
                   location: addEventController.locationController.text.trim(),
-                  alarmTime: addEventController.alarmTimeController.text.trim(),
-                  categoryName: "Design",
+                  alarmTime:'2025-12-13T15:10:00Z', //addEventController.alarmTimeController.text.trim(),
+                  categoryName: selectedCategory ?? '',
                   note: addEventController.noteController?.text.trim() ?? "",
                 );
-                debugPrint("Create Task Result: $start");
+
+                debugPrint("START TIME SENT => $start");
+                debugPrint("END TIME SENT => $end");
+
                 if (result != null) {
+                  DateTime? alarmUtc;
+                  try {
+                    alarmUtc = DateTime.parse(result['alarm_time']).toUtc();
+                  } catch (e) {
+                    debugPrint(
+                      "⚠️ Alarm time format error: ${result['alarm_time']}",
+                    );
+                  }
+
+                  if (alarmUtc != null) {
+                    await NotificationService.scheduleNotification(
+                      id: result['id'],
+                      title: result['title'],
+                      body: 'Reminder for ${result['title']}',
+                      alarmUtc: alarmUtc,
+                    );
+                  }
                   await showMessageDialog(
                     context,
                     'Saved successfully',
@@ -269,7 +297,8 @@ class AddEventModal extends StatelessWidget {
                     icon: Icons.check_circle_outline,
                     iconColor: Colors.green,
                   );
-                  Future.delayed(Duration(seconds: 2), () {
+
+                  Future.delayed(const Duration(seconds: 2), () {
                     Navigator.pop(context);
                   });
                 } else {

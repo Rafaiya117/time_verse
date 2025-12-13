@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
@@ -905,6 +906,15 @@ class HomeView extends StatelessWidget {
                   ],
                 ),
               ),
+//               ElevatedButton(onPressed: () async{
+//                 await NotificationService.scheduleNotification(
+//   id: 999,
+//   title: 'Test Scheduled Notification',
+//   body: 'This should trigger in 1 minute',
+//   alarmUtc: DateTime.now().toUtc().add(Duration(seconds: 10)),
+// );
+//               }, 
+//               child: Text('Test Notification')),
             ],
           ),
         ),

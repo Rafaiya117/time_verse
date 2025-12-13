@@ -1,59 +1,116 @@
+import 'dart:io';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+  static const String _channelId = 'event_reminder_channel';
 
   static Future<void> init() async {
-    // Initialize timezone package
-    tz.initializeTimeZones();
+  tz.initializeTimeZones();
 
-    // Android initialization
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+  const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
 
-    // iOS initialization
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
+  const InitializationSettings settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
 
-    const InitializationSettings settings =
-        InitializationSettings(android: androidSettings, iOS: iosSettings);
+  await _notifications.initialize(settings);
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    _channelId, 
+    'Event Reminders',
+    description: 'Event notifications',
+    importance: Importance.max,
+    playSound: true, 
+  );
 
-    await _notifications.initialize(settings);
-  }
-
-  static Future<void> scheduleNotification({
-    required int id,
-    required String title,
-    required String body,
-    required DateTime alarmUtc,
-  }) async {
-    final tz.TZDateTime scheduledDate = tz.TZDateTime.from(alarmUtc, tz.local);
-
-    // Don't schedule past notifications
-    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
-
-    await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'event_reminder_channel',       // channel id
-          'Event Reminders',              // channel name
-          channelDescription: 'Event notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-          playSound: true,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      // v13+ parameters
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dateAndTime, // optional, use for repeating
-    );
+  await _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+  if (Platform.isAndroid && await Permission.notification.isDenied) {
+    await Permission.notification.request();
   }
 }
+
+
+static Future<void> scheduleNotification({
+  required int id,
+  required String title,
+  required String body,
+  required DateTime alarmUtc,
+}) async {
+
+  await requestExactAlarmPermission(); 
+  final tz.TZDateTime scheduledDate = tz.TZDateTime.from(alarmUtc, tz.local);
+
+  // Skip past notifications
+  if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
+
+  await _notifications.zonedSchedule(id,title,body,scheduledDate,
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        _channelId,
+        'Event Reminders',
+        channelDescription: 'Event notifications',
+        importance: Importance.max,
+        priority: Priority.max,
+        playSound: true,
+        sound: null,
+        fullScreenIntent: true,
+        enableVibration: true,
+        ),
+
+        iOS: const DarwinNotificationDetails(),
+    ),
+    //androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    matchDateTimeComponents: DateTimeComponents.dateAndTime,
+  );
+  debugPrint('⏰ Notification scheduled for $scheduledDate');
+}
+
+static Future<bool> _hasExactAlarmPermission() async {
+  if (!Platform.isAndroid) return true;
+  final androidPlugin =_notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+  return await androidPlugin?.canScheduleExactNotifications() ?? false;
+}
+
+static Future<void> requestExactAlarmPermission() async {
+  if (!Platform.isAndroid) return;
+
+  final hasPermission = await _hasExactAlarmPermission();
+  if (hasPermission) return;
+
+  final intent = AndroidIntent(
+    action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
+  );
+  await intent.launch();
+}
+
+  static Future<void> syncEventNotifications(List<EventModel> events) async {
+    for (final event in events) {
+      final alarm = event.alarmTime.trim();
+
+      if (alarm.isEmpty || !alarm.contains('T')) continue;
+
+      DateTime alarmUtc;
+      try {
+        alarmUtc = DateTime.parse(alarm);
+      } catch (e) {
+        debugPrint('⚠️ Alarm time format error: $alarm');
+        continue;
+      }
+
+      await scheduleNotification(
+        id: event.id,
+        title: event.title,
+        body: 'Reminder for ${event.title}',
+        alarmUtc: alarmUtc,
+      );
+    }
+  }
+}
+
 //androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle, 

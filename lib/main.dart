@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -46,8 +47,16 @@ void main() async {
   await FCMService.initialize();
   final deepLinkService = DeepLinkService();
   await deepLinkService.init();
-  tz.initializeTimeZones();
   await NotificationService.init();
+  tz.initializeTimeZones();
+  final eventController = AllEventsController();
+  await eventController.fetchEvents();
+//   await NotificationService.scheduleNotification(
+//   id: 999,
+//   title: 'Test Scheduled Notification',
+//   body: 'This should trigger in 1 minute',
+//   alarmUtc: DateTime.now().toUtc().add(Duration(seconds: 10)),
+// );
   runApp(const MyApp());
 }
 

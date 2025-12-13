@@ -32,11 +32,10 @@ class TimePickerController extends ChangeNotifier {
   //   return DateFormat('hh:mm a').format(dt);
   // }
 
-  String formatTime(TimeOfDay? time) {
+String formatTime(TimeOfDay? time) {
   if (time == null) return '';
   final dt = DateTime(0, 1, 1, time.hour, time.minute);
   return DateFormat('HH:mm:ss').format(dt);
-}
-
+  }
 }
 
