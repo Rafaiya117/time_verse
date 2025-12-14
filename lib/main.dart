@@ -54,21 +54,21 @@ void main() async {
 
   runApp(const MyApp());
 
-  await Alarm.set(
-    alarmSettings: AlarmSettings(
-      id: 999,
-      dateTime: DateTime.now().add(const Duration(seconds: 5)),
-      assetAudioPath: 'assets/alarm.mp3',
-      loopAudio: true,
-      vibrate: true,
-      volumeSettings: VolumeSettings.fixed(volume: 1.0),
-      notificationSettings: const NotificationSettings(
-        title: 'Demo Alarm',
-        body: 'This is a test alarm',
-        stopButton: 'STOP',
-      ),
-    ),
-  );
+  // await Alarm.set(
+  //   alarmSettings: AlarmSettings(
+  //     id: 999,
+  //     dateTime: DateTime.now().add(const Duration(seconds: 5)),
+  //     assetAudioPath: 'assets/alarm.mp3',
+  //     loopAudio: true,
+  //     vibrate: true,
+  //     volumeSettings: VolumeSettings.fixed(volume: 1.0),
+  //     notificationSettings: const NotificationSettings(
+  //       title: 'Demo Alarm',
+  //       body: 'This is a test alarm',
+  //       stopButton: 'STOP',
+  //     ),
+  //   ),
+  // );
 }
 
 class MyApp extends StatefulWidget {
