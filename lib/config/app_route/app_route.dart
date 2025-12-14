@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/core/theme/theme_background_wrapper.dart';
 import 'package:time_verse/features/all_events/view/all_events.dart';
@@ -21,7 +22,9 @@ import 'package:time_verse/features/settings/subscription/view/subscription.dart
 import 'package:time_verse/features/settings/terms_condition/view/terms_&_condition.dart';
 import 'package:time_verse/features/splash_screen/splash_screen.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
 final GoRouter appRouter = GoRouter(
+  navigatorKey: navigatorKey,
   initialLocation: '/',
   routes: [
     GoRoute(

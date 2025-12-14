@@ -110,17 +110,11 @@ Future<Map<String, dynamic>?> createTask({
 String _formatAlarmTime(String date, String time) {
   try {
     if (time.trim().isEmpty) {
-      return "${date}T00:00:00Z";
+      return "${date}T00:00:00";
     }
 
-    final regex24Hour = RegExp(r'^\d{2}:\d{2}(:\d{2})?$');
-    if (regex24Hour.hasMatch(time)) {
-      final timeWithSeconds = time.length == 5 ? "$time:00" : time;
-      return "${date}T${timeWithSeconds}Z";
-    }
-
-    final parsedTime = DateFormat("hh:mm a").parse(time);
     final parsedDate = DateFormat("yyyy-MM-dd").parse(date);
+    final parsedTime = DateFormat("HH:mm").parse(time);
 
     final combined = DateTime(
       parsedDate.year,
@@ -130,12 +124,11 @@ String _formatAlarmTime(String date, String time) {
       parsedTime.minute,
     );
 
-    return combined.toUtc().toIso8601String();
+    return combined.toIso8601String(); // ✅ NO Z
   } catch (_) {
-    return "${date}T00:00:00Z";
+    return "${date}T00:00:00";
   }
 }
-
 }
 
 

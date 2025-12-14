@@ -41,47 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC2geqdPj_FHGpXY_b788Mle4tErdfBhy0',
-    appId: '1:830774705235:web:e203437a3ddd357ee91aa6',
-    messagingSenderId: '830774705235',
-    projectId: 'timeverse-f53ff',
-    authDomain: 'timeverse-f53ff.firebaseapp.com',
-    storageBucket: 'timeverse-f53ff.firebasestorage.app',
+    apiKey: 'AIzaSyAY7t78tNsp5fUxlLMYySKwTvZrV3eOe78',
+    appId: '1:670651887856:web:4cdc2a7dbf80ef3cef9235',
+    messagingSenderId: '670651887856',
+    projectId: 'radu-77c94',
+    authDomain: 'radu-77c94.firebaseapp.com',
+    storageBucket: 'radu-77c94.firebasestorage.app',
+    measurementId: 'G-9SPJ6M3KG7',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDYEV21ojpirDypuJ2mrXrKM3CfnWjucH4',
-    appId: '1:830774705235:android:6e253106ae0c785ae91aa6',
-    messagingSenderId: '830774705235',
-    projectId: 'timeverse-f53ff',
-    storageBucket: 'timeverse-f53ff.firebasestorage.app',
+    apiKey: 'AIzaSyCOVsqt-5BMB1p3-0pEz-2--faFbrvkG5Q',
+    appId: '1:670651887856:android:40bfa8c6c644c5cfef9235',
+    messagingSenderId: '670651887856',
+    projectId: 'radu-77c94',
+    storageBucket: 'radu-77c94.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCi9obX5tqgyvRiEPPC4mjm9ER168JF1po',
-    appId: '1:830774705235:ios:02b31248d6fd8b6de91aa6',
-    messagingSenderId: '830774705235',
-    projectId: 'timeverse-f53ff',
-    storageBucket: 'timeverse-f53ff.firebasestorage.app',
+    apiKey: 'AIzaSyDuC4m_IF_JBpHx-3gIVMspbJ2t96oa3rg',
+    appId: '1:670651887856:ios:1077959c70024faeef9235',
+    messagingSenderId: '670651887856',
+    projectId: 'radu-77c94',
+    storageBucket: 'radu-77c94.firebasestorage.app',
     iosBundleId: 'com.example.timeVerse',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCi9obX5tqgyvRiEPPC4mjm9ER168JF1po',
-    appId: '1:830774705235:ios:02b31248d6fd8b6de91aa6',
-    messagingSenderId: '830774705235',
-    projectId: 'timeverse-f53ff',
-    storageBucket: 'timeverse-f53ff.firebasestorage.app',
+    apiKey: 'AIzaSyDuC4m_IF_JBpHx-3gIVMspbJ2t96oa3rg',
+    appId: '1:670651887856:ios:1077959c70024faeef9235',
+    messagingSenderId: '670651887856',
+    projectId: 'radu-77c94',
+    storageBucket: 'radu-77c94.firebasestorage.app',
     iosBundleId: 'com.example.timeVerse',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyC2geqdPj_FHGpXY_b788Mle4tErdfBhy0',
-    appId: '1:830774705235:web:63ac7f6341559bcfe91aa6',
-    messagingSenderId: '830774705235',
-    projectId: 'timeverse-f53ff',
-    authDomain: 'timeverse-f53ff.firebaseapp.com',
-    storageBucket: 'timeverse-f53ff.firebasestorage.app',
+    apiKey: 'AIzaSyAY7t78tNsp5fUxlLMYySKwTvZrV3eOe78',
+    appId: '1:670651887856:web:3dacaa11de9064e4ef9235',
+    messagingSenderId: '670651887856',
+    projectId: 'radu-77c94',
+    authDomain: 'radu-77c94.firebaseapp.com',
+    storageBucket: 'radu-77c94.firebasestorage.app',
+    measurementId: 'G-X0NZV3Q69J',
   );
 
 }

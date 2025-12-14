@@ -3,8 +3,8 @@ import 'package:app_links/app_links.dart';
 
 class DeepLinkService {
   final AppLinks _appLinks = AppLinks();
-  StreamSubscription? _sub;
 
+  StreamSubscription? _sub;
   Future<void> init() async {
     try {
       final Uri? initialUri = await _appLinks.getInitialLink();
@@ -12,7 +12,6 @@ class DeepLinkService {
     } catch (e) {
       print("Failed to get initial link: $e");
     }
-
     _sub = _appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) _handleDeepLink(uri);
@@ -25,7 +24,6 @@ class DeepLinkService {
 
   void _handleDeepLink(Uri uri) {
     print("DeepLink received: $uri");
-
     final code = uri.queryParameters['code'];
     if (code != null) {
       print("OAuth Authorization Code: $code");

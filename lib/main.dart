@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:alarm/alarm.dart';
+import 'package:alarm/utils/alarm_set.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +16,7 @@ import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/services/deeplink_service.dart';
 import 'package:time_verse/config/services/fire_base_service.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
+import 'package:time_verse/core/components/alarm.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
 import 'package:time_verse/core/theme/theme.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
@@ -35,29 +40,35 @@ import 'package:time_verse/features/settings/subscription/controller/subscriptio
 import 'package:time_verse/features/settings/terms_condition/controller/terms_controller.dart';
 import 'package:time_verse/firebase_options.dart';
 import 'package:timezone/data/latest.dart' as tz;
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  //WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await FCMService.initialize();
-  final deepLinkService = DeepLinkService();
-  await deepLinkService.init();
   await NotificationService.init();
   tz.initializeTimeZones();
-  final eventController = AllEventsController();
-  await eventController.fetchEvents();
-//   await NotificationService.scheduleNotification(
-//   id: 999,
-//   title: 'Test Scheduled Notification',
-//   body: 'This should trigger in 1 minute',
-//   alarmUtc: DateTime.now().toUtc().add(Duration(seconds: 10)),
-// );
+  await Alarm.init();
+
   runApp(const MyApp());
+
+  await Alarm.set(
+    alarmSettings: AlarmSettings(
+      id: 999,
+      dateTime: DateTime.now().add(const Duration(seconds: 5)),
+      assetAudioPath: 'assets/alarm.mp3',
+      loopAudio: true,
+      vibrate: true,
+      volumeSettings: VolumeSettings.fixed(volume: 1.0),
+      notificationSettings: const NotificationSettings(
+        title: 'Demo Alarm',
+        body: 'This is a test alarm',
+        stopButton: 'STOP',
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -69,6 +80,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool hasConnection = true;
+  StreamSubscription<AlarmSet>? _ringSubscription;
 
   @override
   void initState() {
@@ -79,6 +91,24 @@ class _MyAppState extends State<MyApp> {
         hasConnection = status != ConnectivityResult.none;
       });
     });
+
+    _ringSubscription = Alarm.ringing.listen((alarmSet) {
+      if (alarmSet.alarms.isEmpty) return;  // nothing to show
+
+      final AlarmSettings alarm = alarmSet.alarms.first;
+
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => ExampleAlarmRingScreen(alarmSettings: alarm),
+        ),
+      );
+    });
+  }
+  @override
+  void dispose() {
+    _ringSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkConnectivity() async {
@@ -121,7 +151,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) {
               final themeProvider = Provider.of<ThemeProvider>(context);
 
-              return MaterialApp.router(
+              return MaterialApp.router( 
                 debugShowCheckedModeBanner: false,
                 title: 'Flutter Demo',
                 theme: lightTheme,  

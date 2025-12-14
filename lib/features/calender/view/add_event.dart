@@ -273,43 +273,34 @@ class AddEventModal extends StatelessWidget {
                 debugPrint("END TIME SENT => $end");
 
                 if (result != null) {
-                  DateTime? alarmUtc;
-                  try {
-                    alarmUtc = DateTime.parse(result['alarm_time']).toUtc();
-                  } catch (e) {
-                    debugPrint(
-                      "⚠️ Alarm time format error: ${result['alarm_time']}",
-                    );
-                  }
+  DateTime? alarmTime;
 
-                  if (alarmUtc != null) {
-                    await NotificationService.scheduleNotification(
-                      id: result['id'],
-                      title: result['title'],
-                      body: 'Reminder for ${result['title']}',
-                      alarmUtc: alarmUtc,
-                    );
-                  }
-                  await showMessageDialog(
-                    context,
-                    'Saved successfully',
-                    title: 'Success',
-                    icon: Icons.check_circle_outline,
-                    iconColor: Colors.green,
-                  );
+  try {
+    alarmTime = DateTime.parse(result['alarm_time']); // ✅ FIX
+  } catch (e) {
+    debugPrint(
+      "⚠️ Alarm time format error: ${result['alarm_time']}",
+    );
+  }
 
-                  Future.delayed(const Duration(seconds: 2), () {
-                    Navigator.pop(context);
-                  });
-                } else {
-                  await showMessageDialog(
-                    context,
-                    'Failed to save',
-                    title: 'Failed',
-                    icon: Icons.error_outline,
-                    iconColor: Colors.red,
-                  );
-                }
+  if (alarmTime != null) {
+    await NotificationService.scheduleNotification(
+      id: result['id'],
+      title: result['title'],
+      body: 'Reminder for ${result['title']}',
+      alarmTime: alarmTime,
+    );
+  }
+
+  await showMessageDialog(
+    context,
+    'Saved successfully',
+    title: 'Success',
+    icon: Icons.check_circle_outline,
+    iconColor: Colors.green,
+  );
+}
+
               },
               gradient: AppGradientColors.button_gradient,
               textColor: AppColors.text_color,

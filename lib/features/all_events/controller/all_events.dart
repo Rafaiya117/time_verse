@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
-import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -177,28 +176,6 @@ class AllEventsController extends ChangeNotifier {
               );
             }).toList(),
           );
-
-        //   for (var event in _events) {
-        //   if (event.alarmTime == null ||
-        //       event.alarmTime!.isEmpty ||
-        //       event.isCompleted)
-        //     continue;
-
-        //   try {
-        //     final alarmUtc = DateTime.parse(event.alarmTime!).toUtc();
-        //     await NotificationService.scheduleNotification(
-        //       id: event.id,
-        //       title: event.title,
-        //       body: event.description,
-        //       alarmUtc: alarmUtc,
-        //     );
-        //   } catch (e) {
-        //     debugPrint(
-        //       '⚠️ Failed to schedule notification for ${event.title}: $e',
-        //     );
-        //   }
-        // }
-
         notifyListeners();
         debugPrint('🎉 Events added to controller: ${_events.length}');
       } else {
@@ -208,4 +185,27 @@ class AllEventsController extends ChangeNotifier {
       debugPrint('⚠️ Error fetching events: $e');
     }
   }
+
+  List<EventModel> getDummyEvents() {
+  final now = DateTime.now().toUtc();
+
+  return [
+    EventModel(
+      id: 1,
+      title: 'Test Alarm 1',
+      description: 'This is your first test alarm.',
+      alarmTime: now.add(const Duration(seconds: 10)).toIso8601String(), 
+      userName: '', 
+      date: '', 
+      startTime: '', 
+      endTime: '', 
+      location: '', 
+      isCompleted: true, 
+      isFavorite: true, 
+      createdAt: '', 
+      user: 26, // 10s from now
+    ),
+  ];
+}
+
 }

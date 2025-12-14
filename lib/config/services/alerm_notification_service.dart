@@ -12,104 +12,85 @@ class NotificationService {
   static const String _channelId = 'event_reminder_channel';
 
   static Future<void> init() async {
-  tz.initializeTimeZones();
+    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-  const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
 
-  const InitializationSettings settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
+    const InitializationSettings settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
 
-  await _notifications.initialize(settings);
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    _channelId, 
-    'Event Reminders',
-    description: 'Event notifications',
-    importance: Importance.max,
-    playSound: true, 
-  );
+    await _notifications.initialize(settings);
 
-  await _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
-  if (Platform.isAndroid && await Permission.notification.isDenied) {
-    await Permission.notification.request();
-  }
-}
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      _channelId,
+      'Event Reminders',
+      description: 'Event notifications',
+      importance: Importance.max,
+      playSound: true,
+    );
 
-
-static Future<void> scheduleNotification({
-  required int id,
-  required String title,
-  required String body,
-  required DateTime alarmUtc,
-}) async {
-
-  await requestExactAlarmPermission(); 
-  final tz.TZDateTime scheduledDate = tz.TZDateTime.from(alarmUtc, tz.local);
-
-  // Skip past notifications
-  if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
-
-  await _notifications.zonedSchedule(id,title,body,scheduledDate,
-    NotificationDetails(
-      android: AndroidNotificationDetails(
-        _channelId,
-        'Event Reminders',
-        channelDescription: 'Event notifications',
-        importance: Importance.max,
-        priority: Priority.max,
-        playSound: true,
-        sound: null,
-        fullScreenIntent: true,
-        enableVibration: true,
-        ),
-
-        iOS: const DarwinNotificationDetails(),
-    ),
-    //androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    matchDateTimeComponents: DateTimeComponents.dateAndTime,
-  );
-  debugPrint('⏰ Notification scheduled for $scheduledDate');
-}
-
-static Future<bool> _hasExactAlarmPermission() async {
-  if (!Platform.isAndroid) return true;
-  final androidPlugin =_notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-  return await androidPlugin?.canScheduleExactNotifications() ?? false;
-}
-
-static Future<void> requestExactAlarmPermission() async {
-  if (!Platform.isAndroid) return;
-
-  final hasPermission = await _hasExactAlarmPermission();
-  if (hasPermission) return;
-
-  final intent = AndroidIntent(
-    action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
-  );
-  await intent.launch();
-}
-
-  static Future<void> syncEventNotifications(List<EventModel> events) async {
-    for (final event in events) {
-      final alarm = event.alarmTime.trim();
-
-      if (alarm.isEmpty || !alarm.contains('T')) continue;
-
-      DateTime alarmUtc;
-      try {
-        alarmUtc = DateTime.parse(alarm);
-      } catch (e) {
-        debugPrint('⚠️ Alarm time format error: $alarm');
-        continue;
-      }
-
-      await scheduleNotification(
-        id: event.id,
-        title: event.title,
-        body: 'Reminder for ${event.title}',
-        alarmUtc: alarmUtc,
-      );
+    await _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+    if (Platform.isAndroid && await Permission.notification.isDenied) {
+      await Permission.notification.request();
     }
+  }
+
+  static Future<void> scheduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime alarmTime, 
+  }) async {
+    await requestExactAlarmPermission();
+
+    final tz.TZDateTime scheduledDate = tz.TZDateTime.from(alarmTime, tz.local);
+
+    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+      debugPrint('⛔ Skipped past alarm: $scheduledDate');
+      return;
+    }
+
+    await _notifications.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          'Event Reminders',
+          channelDescription: 'Event notifications',
+          importance: Importance.max,
+          priority: Priority.max,
+          playSound: true,
+          fullScreenIntent: true,
+          enableVibration: true,
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+
+    debugPrint('⏰ Notification scheduled for $scheduledDate');
+  }
+
+  static Future<bool> _hasExactAlarmPermission() async {
+    if (!Platform.isAndroid) return true;
+
+    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+    return await androidPlugin?.canScheduleExactNotifications() ?? false;
+  }
+
+  static Future<void> requestExactAlarmPermission() async {
+    if (!Platform.isAndroid) return;
+
+    final hasPermission = await _hasExactAlarmPermission();
+    if (hasPermission) return;
+
+    final intent = AndroidIntent(
+      action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
+    );
+    await intent.launch();
   }
 }
 
