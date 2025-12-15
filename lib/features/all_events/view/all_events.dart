@@ -82,7 +82,7 @@ class AllEvents extends StatelessWidget {
                           time: '${event.startTime}-${event.endTime}',
                           location: event.location,
                           isDarkMode: isDarkMode,
-                          onDelete: () =>controller.confirmAndRemoveEvent(context, index), 
+                          onDelete: () {},
                           id: event.id,
                           //controller.removeEvent(index),
                         ),

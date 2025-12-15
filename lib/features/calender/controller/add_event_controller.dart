@@ -110,11 +110,11 @@ Future<Map<String, dynamic>?> createTask({
 String _formatAlarmTime(String date, String time) {
   try {
     if (time.trim().isEmpty) {
-      return "${date}T00:00:00";
+      return "${date}T00:00:00${_localTimeZoneOffset()}";
     }
 
     final parsedDate = DateFormat("yyyy-MM-dd").parse(date);
-    final parsedTime = DateFormat("HH:mm").parse(time);
+    final parsedTime = DateFormat("HH:mm:ss").parse(time); // your formatTime outputs HH:mm:ss
 
     final combined = DateTime(
       parsedDate.year,
@@ -122,13 +122,33 @@ String _formatAlarmTime(String date, String time) {
       parsedDate.day,
       parsedTime.hour,
       parsedTime.minute,
+      parsedTime.second,
     );
 
-    return combined.toIso8601String(); // ✅ NO Z
+    final formatted = "${combined.year.toString().padLeft(4,'0')}-"
+        "${combined.month.toString().padLeft(2,'0')}-"
+        "${combined.day.toString().padLeft(2,'0')}T"
+        "${combined.hour.toString().padLeft(2,'0')}:"
+        "${combined.minute.toString().padLeft(2,'0')}:"
+        "${combined.second.toString().padLeft(2,'0')}"
+        "${_localTimeZoneOffset()}";
+
+    return formatted;
   } catch (_) {
-    return "${date}T00:00:00";
+    return "${date}T00:00:00${_localTimeZoneOffset()}";
   }
 }
+
+// Helper: local offset like +06:00
+String _localTimeZoneOffset() {
+  final offset = DateTime.now().timeZoneOffset;
+  final hours = offset.inHours.abs().toString().padLeft(2,'0');
+  final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2,'0');
+  final sign = offset.isNegative ? '-' : '+';
+  return "$sign$hours:$minutes";
+}
+
+
 }
 
 

@@ -217,7 +217,19 @@ class LoginPage extends StatelessWidget {
               Center(
                 child: GestureDetector(
                   onTap: ()async {
-                    bool signedIn = await googleServices.signIn();
+                    final success  = await googleServices.signIn();
+                    if (success) {
+                      await AppPrefs.setLoggedIn(true);
+                      await AppPrefs.setFirstLaunch(false);
+                      if (context.mounted) context.push('/home');
+                    } else {
+                      if (context.mounted) {
+                        await showMessageDialog(
+                          context,
+                          "Google Sign-In failed",
+                        );
+                      }
+                    }
                     //loginController.startGoogleLogin(); 
                   },
                   child: SvgPicture.asset(

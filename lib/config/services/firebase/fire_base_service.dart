@@ -1,5 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:time_verse/config/services/alerm_notification_service.dart';
+import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 // class FCMService {
 //   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 //   static String? _token;
@@ -21,17 +24,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 //   static String? get token => _token;
 // }
 
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 
 class FCMService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   static String? _token;
 
-  /// Initialize FCM
   static Future<void> initialize() async {
     await _messaging.requestPermission();
 
@@ -39,7 +37,6 @@ class FCMService {
       _token = await _messaging.getToken();
       print('!------------------FCM Token--------------: $_token');
 
-      // Automatically post to backend if token is available
       if (_token != null) {
         await postTokenToBackend(_token!);
       }
@@ -50,23 +47,30 @@ class FCMService {
     _messaging.onTokenRefresh.listen((newToken) async {
       _token = newToken;
       print('🔄 FCM Token refreshed: $newToken');
-
       await postTokenToBackend(newToken);
+    });
+
+    // 🔹 ADD: foreground handler
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      final title = message.notification?.title ?? message.data['title'];
+      final body = message.notification?.body ?? message.data['body'];
+
+      await NotificationService.scheduleNotification(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: title ?? 'Notification',
+        body: body ?? '',
+        alarmTime: DateTime.now().add(const Duration(seconds: 1)),
+      );
     });
   }
 
   static String? get token => _token;
 
-  /// --------------------------
-  /// Post FCM token to backend
-  /// --------------------------
   static Future<void> postTokenToBackend(String token) async {
     try {
       final dio = Dio();
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
       final url = '${baseUrl}api/v1/update-fcm-token/';
-
-      // Get your authorization token
       final authToken = await AuthService().getToken();
 
       final response = await dio.post(

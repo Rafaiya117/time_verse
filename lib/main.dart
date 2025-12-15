@@ -4,19 +4,17 @@ import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
-import 'package:time_verse/config/services/deeplink_service.dart';
-import 'package:time_verse/config/services/fire_base_service.dart';
+import 'package:time_verse/config/services/firebase/fire_base_service.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
-import 'package:time_verse/core/components/alarm.dart';
+import 'package:time_verse/config/services/firebase/firebase_forground.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
 import 'package:time_verse/core/theme/theme.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
@@ -43,16 +41,22 @@ import 'package:timezone/data/latest.dart' as tz;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  runApp(const MyApp());
+  _initBackgroundServices();
+}
+
+Future<void> _initBackgroundServices() async {
+  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
   await FCMService.initialize();
   await NotificationService.init();
+
   tz.initializeTimeZones();
   await Alarm.init();
+}
 
-  runApp(const MyApp());
 
   // await Alarm.set(
   //   alarmSettings: AlarmSettings(
@@ -69,7 +73,7 @@ void main() async {
   //     ),
   //   ),
   // );
-}
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -87,24 +91,20 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _checkConnectivity();
     Connectivity().onConnectivityChanged.listen((status) {
+      if (!mounted) return; 
       setState(() {
         hasConnection = status != ConnectivityResult.none;
       });
     });
 
     _ringSubscription = Alarm.ringing.listen((alarmSet) {
-      if (alarmSet.alarms.isEmpty) return;  // nothing to show
-
-      final AlarmSettings alarm = alarmSet.alarms.first;
-
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (_) => ExampleAlarmRingScreen(alarmSettings: alarm),
-        ),
-      );
+      if (alarmSet.alarms.isEmpty) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        appRouter.push('/alarm');
+      });
     });
   }
+
   @override
   void dispose() {
     _ringSubscription?.cancel();
@@ -113,11 +113,12 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkConnectivity() async {
     final status = await Connectivity().checkConnectivity();
+    if (!mounted) return; 
     setState(() {
       hasConnection = status != ConnectivityResult.none;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -129,40 +130,41 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_) => ThemeProvider()),
             ChangeNotifierProvider(create: (_) => SignupController()),
             ChangeNotifierProvider(create: (_) => LoginController()),
-            ChangeNotifierProvider(create: (_)=>  ForgotPasswordController()),
-            ChangeNotifierProvider(create: (_)=>  OtpController()),
-            ChangeNotifierProvider(create: (_)=>  ResetPasswordController()),
-            ChangeNotifierProvider(create: (_)=>  SettingsController()),
-            ChangeNotifierProvider(create: (_)=>  ProfileController()),
-            ChangeNotifierProvider(create: (_)=>  ChangepassowrdController()),
-            ChangeNotifierProvider(create: (_)=>  SubscriptionController()),
-            ChangeNotifierProvider(create: (_)=>  AddEventController()),
-            ChangeNotifierProvider(create: (_)=>  EventController()),
-            ChangeNotifierProvider(create: (_)=>  SavedQouteController()),
-            ChangeNotifierProvider(create: (_)=>  AllEventsController()),
-            ChangeNotifierProvider(create: (_)=>  CalendarController()),
-            ChangeNotifierProvider(create: (_)=>  BottomNavController()),
-            ChangeNotifierProvider(create: (_)=>  TimePickerController()),
-            ChangeNotifierProvider(create: (_)=>  HomeController()),
-            ChangeNotifierProvider(create: (_)=>  TermsController()), 
-            ChangeNotifierProvider(create: (_)=>  PrivacyController()),          
+            ChangeNotifierProvider(create: (_) => ForgotPasswordController()),
+            ChangeNotifierProvider(create: (_) => OtpController()),
+            ChangeNotifierProvider(create: (_) => ResetPasswordController()),
+            ChangeNotifierProvider(create: (_) => SettingsController()),
+            ChangeNotifierProvider(create: (_) => ProfileController()),
+            ChangeNotifierProvider(create: (_) => ChangepassowrdController()),
+            ChangeNotifierProvider(create: (_) => SubscriptionController()),
+            ChangeNotifierProvider(create: (_) => AddEventController()),
+            ChangeNotifierProvider(create: (_) => EventController()),
+            ChangeNotifierProvider(create: (_) => SavedQouteController()),
+            ChangeNotifierProvider(create: (_) => AllEventsController()),
+            ChangeNotifierProvider(create: (_) => CalendarController()),
+            ChangeNotifierProvider(create: (_) => BottomNavController()),
+            ChangeNotifierProvider(create: (_) => TimePickerController()),
+            ChangeNotifierProvider(create: (_) => HomeController()),
+            ChangeNotifierProvider(create: (_) => TermsController()),
+            ChangeNotifierProvider(create: (_) => PrivacyController()),
           ],
           child: Builder(
             builder: (context) {
               final themeProvider = Provider.of<ThemeProvider>(context);
-
-              return MaterialApp.router( 
+              return MaterialApp.router(
                 debugShowCheckedModeBanner: false,
                 title: 'Flutter Demo',
-                theme: lightTheme,  
-                darkTheme: darkTheme, 
-                themeMode: themeProvider.themeMode, 
+                theme: lightTheme,
+                darkTheme: darkTheme,
+                themeMode: themeProvider.themeMode,
                 routerConfig: appRouter,
                 builder: (context, child) {
-                  return hasConnection ? child! : const NoInternetWidget();
+                  return hasConnection
+                    ? child!
+                    : const NoInternetWidget();
                 },
               );
-            }
+            },
           ),
         );
       },

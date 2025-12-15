@@ -3,14 +3,11 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:time_verse/features/all_events/model/event_model.dart';
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   static const String _channelId = 'event_reminder_channel';
-
   static Future<void> init() async {
     const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -38,7 +35,7 @@ class NotificationService {
     required int id,
     required String title,
     required String body,
-    required DateTime alarmTime, 
+    required DateTime alarmTime,
   }) async {
     await requestExactAlarmPermission();
 
@@ -77,7 +74,6 @@ class NotificationService {
     if (!Platform.isAndroid) return true;
 
     final androidPlugin = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-
     return await androidPlugin?.canScheduleExactNotifications() ?? false;
   }
 

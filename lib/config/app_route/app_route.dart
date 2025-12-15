@@ -1,5 +1,7 @@
+import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:time_verse/core/components/alarm.dart';
 import 'package:time_verse/core/theme/theme_background_wrapper.dart';
 import 'package:time_verse/features/all_events/view/all_events.dart';
 import 'package:time_verse/features/all_events/view/event_details.dart';
@@ -24,7 +26,6 @@ import 'package:time_verse/features/splash_screen/splash_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 final GoRouter appRouter = GoRouter(
-  navigatorKey: navigatorKey,
   initialLocation: '/',
   routes: [
     GoRoute(
@@ -140,6 +141,13 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => ThemedBackgroundWrapper(
         child: HomeView(), 
       ),
+    ),
+    GoRoute(
+      path: '/alarm',
+      builder: (context, state) {
+        final alarm = state.extra as AlarmSettings;
+        return ExampleAlarmRingScreen(alarmSettings: alarm);
+      },
     ),
   ],
 );

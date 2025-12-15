@@ -258,13 +258,16 @@ class AddEventModal extends StatelessWidget {
                   timeController.getTime('end'),
                 );
 
+                final alarm = timeController.formatTime(
+                  timeController.getTime('alarm'),
+                );
                 final result = await addEventController.createTask(
                   title: addEventController.titleController.text.trim(),
                   date: addEventController.dateController.text.trim(), 
                   startTime: start, 
                   endTime: end,
                   location: addEventController.locationController.text.trim(),
-                  alarmTime:'2025-12-13T15:10:00Z', //addEventController.alarmTimeController.text.trim(),
+                  alarmTime:alarm,
                   categoryName: selectedCategory ?? '',
                   note: addEventController.noteController?.text.trim() ?? "",
                 );

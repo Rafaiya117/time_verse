@@ -95,20 +95,8 @@ class AllEventsController extends ChangeNotifier {
 
   List<EventModel> get events => List.unmodifiable(_events);
 
-  void removeEvent(int index) {
-    _events.removeAt(index);
-    notifyListeners();
-  }
-
-  void confirmAndRemoveEvent(BuildContext context, int index) {
-    showRemoveEventDialog(
-      context,
-      onConfirm: () {
-        removeEvent(index);
-      },
-    );
-  }
-
+  // ------------------ Remove event with confirmation ------------------ //
+ 
   // ------------------ Reusable date formatter ------------------ //
   String formatEventDate(String rawDate) {
     final startDateTime = DateTime.tryParse(rawDate);

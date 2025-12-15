@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 class GoogleServices {
   // Use instance for 7.x plugin
@@ -20,7 +23,7 @@ class GoogleServices {
   /// Initialize Google Sign-In
   void init() {
     _googleSignIn.initialize(
-      serverClientId: '', 
+      serverClientId: '266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com', 
     );
   }
 
@@ -28,16 +31,20 @@ class GoogleServices {
   Future<bool> signIn() async {
     try {
       final user = await _googleSignIn.authenticate();
-      if (user == null) return false; // user cancelled
+      if (user == null) return false; 
       _currentUser = user;
 
       final auth = await user.authorizationClient.authorizationForScopes(scopes);
       final accessToken = auth?.accessToken;
       print("ACCESS TOKEN: $accessToken");
 
-      // Optional: get ID token if needed for backend
       final idToken = (await user.authentication)?.idToken;
       print("ID TOKEN: $idToken");
+
+
+      if (accessToken != null && idToken != null) {
+        await sendTokensToApi(idToken);
+      }
 
       return true;
     } catch (e) {
@@ -46,14 +53,12 @@ class GoogleServices {
     }
   }
 
-  /// Sign out
   Future<void> signOut() async {
     await _googleSignIn.disconnect();
     _currentUser = null;
     print("Signed out");
   }
 
-  /// Add an event to the user's primary Google Calendar
   Future<void> addEvent({
     required String summary,
     required DateTime start,
@@ -64,8 +69,7 @@ class GoogleServices {
       return;
     }
 
-    final auth =
-        await _currentUser!.authorizationClient.authorizationForScopes(scopes);
+    final auth = await _currentUser!.authorizationClient.authorizationForScopes(scopes);
 
     final accessToken = auth?.accessToken;
     if (accessToken == null) {
@@ -94,6 +98,31 @@ class GoogleServices {
       print("Event added successfully");
     } else {
       print("Failed to add event: ${response.body}");
+    }
+  }
+
+
+  Future<void> sendTokensToApi(String idToken) async {
+    try {
+      final dio = Dio();
+      String url = 'http://10.10.13.74:5002/api/v1/auth/login/idtoken/';
+      final response = await dio.post(
+        url,
+        data: {'id_token': idToken},
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('✅ Tokens sent successfully: ${response.data}');
+      } else {
+        print('⚠️ Unexpected status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('❌ Error sending tokens: ${e.response?.data ?? e.message}');
     }
   }
 }
