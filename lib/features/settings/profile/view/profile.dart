@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
@@ -15,7 +16,7 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profileController = Provider.of<ProfileController>(context, listen: false);
-
+    final baseurl =  dotenv.env['BASE_URL'];
     //!----------- Trigger only once after first build ------------!
     WidgetsBinding.instance.addPostFrameCallback((_) {
       profileController.onInit();
@@ -46,7 +47,7 @@ class Profile extends StatelessWidget {
                     assetPath: 'assets/images/profile_img.png',
                     pickedImage: controller.pickedImage,
                     imageUrl: controller.currentUser?.profilePicture != null
-                      ? 'http://10.10.13.74:5000/${controller.currentUser!.profilePicture}'
+                      ? '$baseurl${controller.currentUser!.profilePicture}'
                       : null,
                     onCameraTap: controller.pickImage,
                   ),

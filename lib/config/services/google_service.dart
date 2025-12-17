@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 class GoogleServices {
@@ -105,24 +106,30 @@ class GoogleServices {
   Future<void> sendTokensToApi(String idToken) async {
     try {
       final dio = Dio();
-      String url = 'http://10.10.13.74:5002/api/v1/auth/login/idtoken/';
+      const String url = 'http://10.10.13.74:5002/api/v1/auth/login/idtoken/';
+
       final response = await dio.post(
         url,
         data: {'id_token': idToken},
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (response.statusCode == 200) {
-        print('✅ Tokens sent successfully: ${response.data}');
+        final data = response.data;
+
+        // 🔑 SAVE ACCESS TOKEN (minimal change)
+        final accessToken = data['access_token'];
+        if (accessToken != null) {
+          await AuthService().saveToken(accessToken);
+          await AppPrefs.setLoggedIn(true);
+        }
+
+        debugPrint('✅ Google login successful');
       } else {
-        print('⚠️ Unexpected status code: ${response.statusCode}');
+        debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('❌ Error sending tokens: ${e.response?.data ?? e.message}');
+      debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
     }
   }
 }

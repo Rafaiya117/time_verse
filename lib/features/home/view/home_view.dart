@@ -230,8 +230,9 @@ class HomeView extends StatelessWidget {
                           child: Selector<ProfileController, String?>(
                             selector: (_, controller) => controller.currentUser?.profilePicture,
                               builder: (_, profilePicture, __) {
+                                debugPrint('!----$profilePicture');
                                 final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
-                                ? NetworkImage('http://10.10.13.74:5000/$profilePicture')
+                                ? NetworkImage(profilePicture )
                                 : const AssetImage(
                                 'assets/images/profile_img.png',
                               );

@@ -4,7 +4,7 @@ import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart' hide NotificationSettings;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -44,6 +44,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  tz.initializeTimeZones();
+  await Alarm.init();
+  
   runApp(const MyApp());
   _initBackgroundServices();
 }
@@ -53,12 +57,7 @@ Future<void> _initBackgroundServices() async {
   await FCMService.initialize();
   await NotificationService.init();
 
-  tz.initializeTimeZones();
-  await Alarm.init();
-}
-
-
-  // await Alarm.set(
+  //   await Alarm.set(
   //   alarmSettings: AlarmSettings(
   //     id: 999,
   //     dateTime: DateTime.now().add(const Duration(seconds: 5)),
@@ -73,6 +72,10 @@ Future<void> _initBackgroundServices() async {
   //     ),
   //   ),
   // );
+}
+
+
+
 
 
 class MyApp extends StatefulWidget {
@@ -97,10 +100,20 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
+    // _ringSubscription = Alarm.ringing.listen((alarmSet) {
+    //   if (alarmSet.alarms.isEmpty) return;
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     appRouter.push('/alarm');
+    //   });
+    // });
+
     _ringSubscription = Alarm.ringing.listen((alarmSet) {
       if (alarmSet.alarms.isEmpty) return;
+
+      final alarm = alarmSet.alarms.first;
+      debugPrint('==== Alarm time ${alarmSet.alarms.first.id}');
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        appRouter.push('/alarm');
+        appRouter.push('/alarm', extra: alarm);
       });
     });
   }

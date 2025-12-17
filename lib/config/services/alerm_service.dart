@@ -25,6 +25,10 @@ class AlarmHelper {
       );
 
       debugPrint('⏰ Alarm scheduled for ${event.title} at $alarmDateTime');
+      debugPrint(
+  '🕒 Alarm local: $alarmDateTime | now: ${DateTime.now()}'
+);
+
     } catch (e) {
       debugPrint('⚠️ Failed to schedule alarm for ${event.title}: $e');
     }

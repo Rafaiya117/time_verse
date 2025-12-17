@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
+import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -13,7 +14,7 @@ class AllEventsController extends ChangeNotifier {
   final Dio _dio = Dio();
 
    AllEventsController() {
-    fetchEvents(); 
+    fetchAllEvents(); 
   }
 
   void updateIndexFromRoute(String location) {
@@ -113,7 +114,7 @@ class AllEventsController extends ChangeNotifier {
   }
 
   // ------------------ Fetch events from API ------------------ //
-  Future<void> fetchEvents() async {
+  Future<void> fetchAllEvents() async {
     try {
       final authService = AuthService();
       final token = await authService.getToken();
@@ -165,6 +166,12 @@ class AllEventsController extends ChangeNotifier {
             }).toList(),
           );
         notifyListeners();
+        for (final event in _events) {
+          debugPrint('⏱ Backend alarmTime: "${event.alarmTime}"');
+          if (event.alarmTime.isNotEmpty) {
+            await AlarmHelper.scheduleEventAlarm(event);
+          }
+        }
         debugPrint('🎉 Events added to controller: ${_events.length}');
       } else {
         debugPrint('❌ Failed to load events: ${response.statusCode}');
@@ -173,27 +180,4 @@ class AllEventsController extends ChangeNotifier {
       debugPrint('⚠️ Error fetching events: $e');
     }
   }
-
-  List<EventModel> getDummyEvents() {
-  final now = DateTime.now().toUtc();
-
-  return [
-    EventModel(
-      id: 1,
-      title: 'Test Alarm 1',
-      description: 'This is your first test alarm.',
-      alarmTime: now.add(const Duration(seconds: 10)).toIso8601String(), 
-      userName: '', 
-      date: '', 
-      startTime: '', 
-      endTime: '', 
-      location: '', 
-      isCompleted: true, 
-      isFavorite: true, 
-      createdAt: '', 
-      user: 26, // 10s from now
-    ),
-  ];
-}
-
 }

@@ -22,7 +22,7 @@ class AllEvents extends StatelessWidget {
     controller.updateIndexFromRoute(location);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchEvents();
+      controller.fetchAllEvents();
     });
     return Scaffold(
       body: Padding(

@@ -370,7 +370,7 @@ Future<void> fetchEvents() async {
     debugPrint('🌐 Base URL: $baseUrl');
 
     final response = await _dio.get(
-      'http://10.10.13.74:5000/api/v1/next-quite/',
+      '$baseUrl/api/v1/next-quite/',
       options: Options(
         headers: {
           'Authorization': 'Bearer $token',

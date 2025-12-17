@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_model/auth_model.dart';
@@ -38,6 +39,7 @@ class ProfileController extends ChangeNotifier {
   User? currentUser;
   bool isLoading = false;
 
+
   void onInit() {
     loadUserProfile();
   }
@@ -49,21 +51,21 @@ class ProfileController extends ChangeNotifier {
     final user = await _userService.getUserProfile();
 
     if (user != null) {
-      currentUser = user; 
-      nameController.text = user.name;
-      passwordController.text = user.password ?? '';
-      dateController.text = user.birthDate ?? '';
-      
-      UserSession().userId = user.id.toString();
-      UserSession().username = user.name;
-      UserSession().profileImageUrl = user.profilePicture; 
-      //await auth.saveUserInfo(user.id.toString(), user.name);
+  setUser(user); // ✅ normalize profilePicture
+  nameController.text = currentUser!.name;
+  passwordController.text = currentUser!.password ?? '';
+  dateController.text = currentUser!.birthDate ?? '';
+  
+  UserSession().userId = currentUser!.id.toString();
+  UserSession().username = currentUser!.name;
+  UserSession().profileImageUrl = currentUser!.profilePicture;
+  
+  debugPrint("✅ User data preloaded: ${UserSession().username}");
+  debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
+} else {
+  debugPrint("⚠️ No user data found");
+}
 
-      debugPrint("✅ User data preloaded: ${UserSession().username}");
-      debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
-    } else {
-      debugPrint("⚠️ No user data found");
-    }
   } catch (e) {
     debugPrint("❌ Error loading user data: $e");
   } finally {
@@ -134,6 +136,32 @@ class ProfileController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void setUser(User user) {
+  final picture = user.profilePicture;
+
+  user = user.copyWith(
+    profilePicture: _resolveProfilePicture(picture),
+  );
+
+  currentUser = user;
+  notifyListeners();
+}
+
+String? _resolveProfilePicture(String? picture) {
+  final baseurl = dotenv.env['BASE_URL'] ?? '';
+  if (picture == null || picture.isEmpty) return null;
+
+  // Google image (already absolute)
+  if (picture.startsWith('http')) {
+    return picture;
+  }
+
+  // Backend image (relative)
+  return '$baseurl$picture';
+}
+
+
 
   @override
   void dispose() {
