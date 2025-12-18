@@ -36,6 +36,7 @@
 //   );
 // }
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 Future<void> showMessageDialog(
   BuildContext context,
@@ -78,7 +79,9 @@ Future<void> showMessageDialog(
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
             child: const Text('OK'),
           ),
         ],

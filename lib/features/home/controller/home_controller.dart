@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:alarm/alarm.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -9,7 +10,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
+import 'package:time_verse/config/services/alerm_notification_service.dart';
+import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'dart:async';
@@ -33,22 +37,97 @@ class HomeController extends ChangeNotifier {
   int selectedIndex = 0;
   final List<ReviewData> _reviews = [];
   List<ReviewData> get reviews => List.unmodifiable(_reviews);
-  final List<EventModel> todaysEvents = [];
 
+  final List<EventModel> todaysEvents = [];
   bool _isInitialized = false;
 
+  final Dio _dio = Dio();
+
+  // Daily Inspiration Quotes
+  final List<QuoteData> _inspirationalQuotes = [
+    QuoteData(
+      id: 0,
+      quote:
+          "This is the day that the Lord has made; let us rejoice and be glad in it",
+      reference: "Psalm 118:24",
+    ),
+    QuoteData(
+      id: 0,
+      quote:
+          "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
+      reference: "Jeremiah 29:11",
+    ),
+    QuoteData(
+      id: 0,
+      quote:
+          "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
+      reference: "Proverbs 3:5-6",
+    ),
+  ];
+
+  List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
+  List<QuoteData> allQuotes = [];
+
+  String _welcomeMessage = "Welcome to TimeVerse";
+  String get welcomeMessage => _welcomeMessage;
+
+  void updateWelcomeMessage(String message) {
+    _welcomeMessage = message;
+    notifyListeners();
+  }
+
+  int _currentQuoteIndex = 0;
+  Timer? _autoSlideTimer;
+  final PageController _pageController = PageController();
+  int get currentQuoteIndex => _currentQuoteIndex;
+  PageController get pageController => _pageController;
+
+  int _selectedRating = 0;
+  final TextEditingController _feedbackController = TextEditingController();
+  int get selectedRating => _selectedRating;
+  TextEditingController get feedbackController => _feedbackController;
+
+  final GlobalKey quoteShareKey = GlobalKey();
+
+  HomeController() {
+    allQuotes = [..._inspirationalQuotes];
+  }
+
+  /// -------------------- Initialization -------------------- ///
   void initOnce(ProfileController profileController) {
     if (_isInitialized) return;
     _isInitialized = true;
 
     startAutoSlide();
     fetchEvents();
-    todaysfetchEvents();
+    todaysfetchEvents().then((_) {
+      // Schedule alarms for today's events
+      for (final event in todaysEvents) {
+        if (event.alarmTime.isNotEmpty) {
+          AlarmHelper.scheduleEventAlarm(event);
+          NotificationService.scheduleNotification(
+            id: event.id,
+            title: event.title,
+            body: event.description,
+            alarmTime: DateTime.parse(event.alarmTime),
+          );
+        }
+      }
+    });
     fetchReviewsFromApi();
     profileController.loadUserProfile();
+
+    // Listen to alarm triggers in Home screen
+    Alarm.ringing.listen((alarmSet) {
+      if (alarmSet.alarms.isEmpty) return;
+      final alarm = alarmSet.alarms.first;
+      debugPrint('==== Alarm triggered on Home: ${alarm.id}');
+      // Optional: Navigate to alarm screen
+       appRouter.push('/alarm', extra: alarm);
+    });
   }
 
-  
+  /// -------------------- Navigation -------------------- ///
   void updateIndexFromRoute(String location) {
     final index = appRoutes.indexWhere((r) => location.startsWith(r));
     if (index != -1 && index != selectedIndex) {
@@ -63,50 +142,7 @@ class HomeController extends ChangeNotifier {
     context.push(appRoutes[index]);
   }
 
-  // Home-specific functionality can be added here
-  String _welcomeMessage = "Welcome to TimeVerse";
-  
-  String get welcomeMessage => _welcomeMessage;
-
-  void updateWelcomeMessage(String message) {
-    _welcomeMessage = message;
-    notifyListeners();
-  }
-
-  final Dio _dio = Dio();
-  // Daily Inspiration Quotes
-  final List<QuoteData> _inspirationalQuotes = [
-    QuoteData(
-      id: 0,
-      quote: "This is the day that the Lord has made; let us rejoice and be glad in it",
-      reference: "Psalm 118:24",
-    ),
-    QuoteData(
-      id: 0,
-      quote: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
-      reference: "Jeremiah 29:11",
-    ),
-    QuoteData(
-      id: 0,
-      quote: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
-      reference: "Proverbs 3:5-6",
-    ),
-  ];
-
-  List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
-  //!---------------- Default Quote ----------!
-  List<QuoteData> allQuotes = [];
-
-  QuoteController() {
-    allQuotes = [..._inspirationalQuotes];
-  }
-
-  int _currentQuoteIndex = 0;
-  Timer? _autoSlideTimer;
-  final PageController _pageController = PageController();
-  int get currentQuoteIndex => _currentQuoteIndex;
-  PageController get pageController => _pageController;
-
+  /// -------------------- Quote Slider -------------------- ///
   void updateQuoteIndex(int index) {
     _currentQuoteIndex = index;
     notifyListeners();
@@ -144,13 +180,7 @@ class HomeController extends ChangeNotifier {
     _autoSlideTimer?.cancel();
   }
 
-  // Feedback functionality
-  int _selectedRating = 0;
-  final TextEditingController _feedbackController = TextEditingController();
-
-  int get selectedRating => _selectedRating;
-  TextEditingController get feedbackController => _feedbackController;
-
+  /// -------------------- Feedback -------------------- ///
   void updateRating(int rating) {
     _selectedRating = rating;
     notifyListeners();
@@ -164,258 +194,114 @@ class HomeController extends ChangeNotifier {
 
   void submitFeedback() {
     clearFeedback();
+    postReviewToApi();
   }
-  
-  //!---------------- New ----------!
-  final GlobalKey quoteShareKey = GlobalKey();
 
-void shareQuoteAsImage(BuildContext context) async {
-  final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-  if (boundary != null) {
-    final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
+  /// -------------------- Share Quote -------------------- ///
+  void shareQuoteAsImage(BuildContext context) async {
+    final boundary =
+        quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary != null) {
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
 
-    final tempDir = await getTemporaryDirectory();
-    final file = await File('${tempDir.path}/quote.png').create();
-    await file.writeAsBytes(pngBytes);
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/quote.png').create();
+      await file.writeAsBytes(pngBytes);
 
-    // ignore: deprecated_member_use
-    await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration');
-  }
-}
-
-Future<void> fetchQuotesFromApi() async {
-  debugPrint('🚀 Starting fetchQuotesFromApi...');
-
-  try {
-    final response = await _dio.get('http://10.10.13.6:5000/get-quotes');
-    debugPrint('✅ API responded with status: ${response.statusCode}');
-
-    if (response.statusCode == 200 && response.data != null) {
-      final data = response.data;
-      debugPrint('📦 Response body: $data');
-
-      if (data['quotes'] is List) {
-        final List<QuoteData> loadedQuotes = (data['quotes'] as List).map((q) {
-          final parsed = q is String ? jsonDecode(q) : q;
-          debugPrint('💬 Parsed quote: $parsed');
-          return QuoteData(
-            quote: parsed['quote'] ?? '',
-            reference: parsed['event_name'] ?? '',
-          );
-        }).toList();
-
-        _inspirationalQuotes
-          ..clear()
-          ..addAll(loadedQuotes);
-
-        debugPrint('🎉 Loaded ${_inspirationalQuotes.length} quotes');
-        notifyListeners();
-      } else {
-        debugPrint('⚠️ Unexpected quotes format: ${data['quotes']}');
-      }
-    } else {
-      debugPrint('❌ Failed to load quotes: ${response.statusCode}');
+      await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration');
     }
-  } catch (e) {
-    debugPrint('⚠️ Error fetching quotes: $e');
   }
-}
 
-Future<void> fetchReviewsFromApi() async {
-  debugPrint('🚀 Starting fetchReviewsFromApi...');
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    debugPrint('🪪 Token used: $token');
+  /// -------------------- API Calls -------------------- ///
+  Future<void> fetchQuotesFromApi() async {
+    debugPrint('🚀 Starting fetchQuotesFromApi...');
+    try {
+      final response = await _dio.get('http://10.10.13.6:5000/get-quotes');
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data['quotes'] is List) {
+          final List<QuoteData> loadedQuotes = (data['quotes'] as List).map((q) {
+            final parsed = q is String ? jsonDecode(q) : q;
+            return QuoteData(
+              quote: parsed['quote'] ?? '',
+              reference: parsed['event_name'] ?? '',
+            );
+          }).toList();
 
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+          _inspirationalQuotes
+            ..clear()
+            ..addAll(loadedQuotes);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching quotes: $e');
+    }
+  }
 
-    final response = await _dio.get(
-      '${baseUrl}api/v1/event/my-feedbacks/',
-      options: Options(
-        headers: {
+  Future<void> fetchReviewsFromApi() async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+      final response = await _dio.get(
+        '$baseUrl/api/v1/event/my-feedbacks/',
+        options: Options(headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
-        },
-      ),
-    );
+        }),
+      );
 
-    debugPrint('✅ API responded with status: ${response.statusCode}');
-
-    if (response.statusCode == 200 && response.data != null) {
-      final data = response.data;
-      debugPrint('📦 Response body: $data');
-
-      if (data is List) {
-        final List<ReviewData> loadedReviews = data.map((json) {
-          return ReviewData.fromJson(json);
-        }).toList();
+      if (response.statusCode == 200 && response.data is List) {
+        final List<ReviewData> loadedReviews =
+            response.data.map((json) => ReviewData.fromJson(json)).toList();
 
         _reviews
           ..clear()
           ..addAll(loadedReviews);
-
-        debugPrint('🎉 Loaded ${_reviews.length} reviews');
         notifyListeners();
-      } else {
-        debugPrint('⚠️ Unexpected reviews format: $data');
       }
-    } else {
-      debugPrint('❌ Failed to load reviews: ${response.statusCode}');
+    } catch (e) {
+      debugPrint('⚠️ Error fetching reviews: $e');
     }
-  } catch (e) {
-    debugPrint('⚠️ Error fetching reviews: $e');
   }
-}
 
-Future<void> postReviewToApi() async {
-  debugPrint('🚀 Starting postReviewToApi...');
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    debugPrint('🪪 Token used: $token');
+  Future<void> postReviewToApi() async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    if (baseUrl.isEmpty) {
-      debugPrint('⚠️ BASE_URL is empty. Please check your .env file.');
-      return;
-    }
+      final Map<String, dynamic> reviewData = {
+        'rating': _selectedRating,
+        'comments': _feedbackController.text.trim(),
+      };
 
-    final Map<String, dynamic> reviewData = {
-      'rating': _selectedRating,
-      'comments': _feedbackController.text.trim(),
-    };
-
-    debugPrint('📦 Sending review: $reviewData');
-
-    final response = await _dio.post(
-      '${baseUrl}api/v1/event/feedback/',
-      data: jsonEncode(reviewData),
-      options: Options(
-        headers: {
+      final response = await _dio.post(
+        '$baseUrl/api/v1/event/feedback/',
+        data: jsonEncode(reviewData),
+        options: Options(headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
-        },
-      ),
-    );
+        }),
+      );
 
-    debugPrint('✅ POST responded with status: ${response.statusCode}');
-    debugPrint('📥 Response data: ${response.data}');
-
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      debugPrint('🎉 Feedback submitted successfully!');
-      clearFeedback();
-      await fetchReviewsFromApi();
-      notifyListeners();
-    } else {
-      debugPrint('❌ Failed to post review: ${response.statusCode}');
-    }
-  } catch (e, stack) {
-    debugPrint('⚠️ Error posting review: $e');
-    debugPrint('🧩 Stack trace: $stack');
-  }
-}
-
-Future<bool> saveQuoteToFavorite({
-  required int eventId,
-}) async {
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    debugPrint('🚀 Starting saveQuoteToFavorite...');
-
-    final response = await _dio.post(
-      '$baseUrl/api/v1/event/$eventId/favorite/',
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      ),
-    );
-
-    debugPrint('✅ Quote favorited, status: ${response.statusCode}');
-    return response.statusCode == 200 || response.statusCode == 201;
-  } catch (e) {
-    debugPrint('! Error saving quote: $e');
-    return false;
-  }
-}
-
-  // ------------------ Reusable date formatter ------------------ //
-  String formatEventDate(String rawDate) {
-    final startDateTime = DateTime.tryParse(rawDate);
-    if (startDateTime == null) return '';
-
-    final now = DateTime.now();
-    if (startDateTime.year == now.year &&
-        startDateTime.month == now.month &&
-        startDateTime.day == now.day) {
-      return 'Today';
-    } else {
-      return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        clearFeedback();
+        await fetchReviewsFromApi();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error posting review: $e');
     }
   }
 
-Future<void> fetchEvents() async {
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    debugPrint('🚀 Token fetched: $token');
-
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    debugPrint('🌐 Base URL: $baseUrl');
-
-    final response = await _dio.get(
-      '$baseUrl/api/v1/next-quite/',
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      ),
-    );
-
-    debugPrint('📦 API Response Status: ${response.statusCode}');
-    debugPrint('📄 Response data: ${response.data}');
-
-    if (response.statusCode == 200) {
-      final List data = response.data is List ? response.data : [response.data];
-        debugPrint('✅ Number of events fetched: ${data.length}');
-        _inspirationalQuotes
-          ..clear()
-          ..addAll(
-            data.map((json) {
-              final formattedDate = formatEventDate(json['date'] ?? '');
-              debugPrint('💬 Event parsed for quote: ${json['title']} - $formattedDate',);
-            return QuoteData(
-              id: json['id'],
-              quote: json['description']?.toString() ?? '',
-              reference: json['title']?.toString() ?? '',
-            );
-          }),
-        );
-        notifyListeners();
-        debugPrint('🎉 Quotes loaded from events: ${_inspirationalQuotes.length}',);
-      } else {
-      debugPrint('❌ Failed to load events: ${response.statusCode}');
-    }
-  } catch (e) {
-    debugPrint('⚠️......... Error fetching events: $e');
-  }
-}
-
-Future<void> todaysfetchEvents() async {
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+  Future<void> todaysfetchEvents() async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
       final response = await _dio.get(
-        '${baseUrl}api/v1/today_event/',
+        '$baseUrl/api/v1/today_event/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -424,7 +310,7 @@ Future<void> todaysfetchEvents() async {
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data is List) {
         final List data = response.data;
         todaysEvents
           ..clear()
@@ -443,11 +329,55 @@ Future<void> todaysfetchEvents() async {
                 createdAt: json['created_at']?.toString() ?? '',
                 user: json['user'] ?? 0,
                 category: json['category']?.toString(),
-                isFavorite: json['is_favorite'] ?? false, 
-                userName: json['user_name']?.toString() ?? '', 
-                description: json['description']?.toString() ?? '',                
+                isFavorite: json['is_favorite'] ?? false,
+                userName: json['user_name']?.toString() ?? '',
+                description: json['description']?.toString() ?? '',
               );
             }).toList(),
+          );
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching today\'s events: $e');
+    }
+  }
+
+  Future<void> fetchEvents() async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.get(
+        '$baseUrl/api/v1/next-quite/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List data =
+            response.data is List ? response.data : [response.data];
+        if (data.isEmpty) return;
+
+        data.sort((a, b) {
+          final aTime = DateTime.parse(a['created_at']);
+          final bTime = DateTime.parse(b['created_at']);
+          return aTime.compareTo(bTime);
+        });
+
+        final latest = data.last;
+
+        _inspirationalQuotes
+          ..clear()
+          ..add(
+            QuoteData(
+              id: latest['id'],
+              quote: latest['description']?.toString() ?? '',
+              reference: latest['title']?.toString() ?? '',
+            ),
           );
         notifyListeners();
       }
@@ -456,45 +386,41 @@ Future<void> todaysfetchEvents() async {
     }
   }
 
-// Future<void> fetchSavedQuotes() async {
-//   try {
-//     final authService = AuthService();
-//     final token = await authService.getToken();
-//     final dio = Dio();
-//     final baseUrl = dotenv.env['BASE_URL'] ?? '';
-//     final url = '${baseUrl}api/v1/event/my-quotes/';
+  /// -------------------- Helpers -------------------- ///
+  String formatEventDate(String rawDate) {
+    final startDateTime = DateTime.tryParse(rawDate);
+    if (startDateTime == null) return '';
 
-//     final response = await dio.get(
-//       url,
-//         options: Options(
-//           headers: {
-//             'Authorization': 'Bearer $token',
-//             'Content-Type': 'application/json',
-//           },
-//         ),
-//       );
-//       if (response.statusCode == 200) {
-//         final List<dynamic> data = response.data;
-//         _inspirationalQuotes.clear();
-//         for (var item in data) {
-//           _inspirationalQuotes.add(
-//             QuoteData(
-//               id: item['id'] as int? ?? 0,
-//               quote: item['description']?.toString() ?? '',
-//               reference: item['author']?.toString() ?? '',
-//             ),
-//           );
-//         }
-//         notifyListeners();
-//         debugPrint('🎉 Loaded saved quotes: ${_inspirationalQuotes.length}');
-//       } else {
-//         debugPrint('❌ Failed to fetch saved quotes: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       debugPrint('⚠️ Error fetching saved quotes: $e');
-//     }
-//   }
+    final now = DateTime.now();
+    if (startDateTime.year == now.year &&
+        startDateTime.month == now.month &&
+        startDateTime.day == now.day) {
+      return 'Today';
+    } else {
+      return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);
+    }
+  }
 
+  Future<bool> saveQuoteToFavorite({required int eventId}) async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.post(
+        '$baseUrl/api/v1/event/$eventId/favorite/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      debugPrint('⚠️ Error saving quote: $e');
+      return false;
+    }
+  }
 
   @override
   void dispose() {

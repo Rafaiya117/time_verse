@@ -8,13 +8,12 @@ import 'package:timezone/timezone.dart' as tz;
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   static const String _channelId = 'event_reminder_channel';
+
   static Future<void> init() async {
     const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-
     const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
 
     const InitializationSettings settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
-
     await _notifications.initialize(settings);
 
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -42,7 +41,7 @@ class NotificationService {
     final tz.TZDateTime scheduledDate = tz.TZDateTime.from(alarmTime, tz.local);
 
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-      debugPrint('⛔ Skipped past alarm: $scheduledDate');
+      debugPrint('⛔ Skipped past notification: $scheduledDate');
       return;
     }
 
@@ -62,7 +61,10 @@ class NotificationService {
           fullScreenIntent: true,
           enableVibration: true,
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+        ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
@@ -89,5 +91,6 @@ class NotificationService {
     await intent.launch();
   }
 }
+
 
 //androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle, 

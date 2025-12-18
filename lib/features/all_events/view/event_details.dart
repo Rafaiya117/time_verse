@@ -128,7 +128,7 @@ class EventDetails extends StatelessWidget {
                                   children: [
                                     const TextSpan(text: 'Today • '),
                                     TextSpan(
-                                      text:eventController.eventDetail?.startTime ??'2:00 PM  ',
+                                      text:eventController.eventDetail?.startTime ??'0:00 PM  ',
                                       style: GoogleFonts.outfit(
                                         color: isDarkMode
                                           ? AppColors.third_color
@@ -194,38 +194,44 @@ class EventDetails extends StatelessWidget {
                                 ),
                                 child: Column(
                                   children: [
-                                    Consumer<EventController>(
-                                    builder: (context, eventController, _) =>
-                                    RepaintBoundary(
-                                      key: eventController.quoteShareKey,
-                                      child: Text(
-                                        eventController.eventDetail?.description ??eventController.quoteText,
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 17.sp,
-                                          fontWeight: FontWeight.normal,
-                                          color: isDarkMode
-                                            ? AppColors.text_color
-                                            : AppColors.heading_color,
+                                  // Quotation text centered vertically
+                                  Flexible(
+                                    child: Center(
+                                      child: Consumer<EventController>(
+                                        builder:(context,eventController,_,) => RepaintBoundary(
+                                          key: eventController.quoteShareKey,
+                                            child: Text(
+                                              eventController.eventDetail?.description ??
+                                              eventController.quoteText,
+                                              textAlign:TextAlign.center,
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 16.sp,
+                                                fontWeight:FontWeight.normal,
+                                                color: isDarkMode? AppColors.text_color
+                                                : AppColors.heading_color,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                        // Name at the bottom
+                                        Consumer<EventController>(
+                                          builder:(context,eventController,_,) => Text(
+                                            'Name ${eventController.eventDetail?.userName ?? 'xyz'}',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 12.6.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.fourth_color,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(height: 40.h),
-                                    Text(
-                                      'Name ${eventController.eventDetail?.userName??'xyz'}',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 13.6.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.fourth_color,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        );
+                              ],
+                            );
                           },
                         ),
                       ),

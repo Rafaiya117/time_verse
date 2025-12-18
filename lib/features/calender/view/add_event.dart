@@ -276,34 +276,30 @@ class AddEventModal extends StatelessWidget {
                 debugPrint("END TIME SENT => $end");
 
                 if (result != null) {
-  DateTime? alarmTime;
-
-  try {
-    alarmTime = DateTime.parse(result['alarm_time']); // ✅ FIX
-  } catch (e) {
-    debugPrint(
-      "⚠️ Alarm time format error: ${result['alarm_time']}",
-    );
-  }
-
-  if (alarmTime != null) {
-    await NotificationService.scheduleNotification(
-      id: result['id'],
-      title: result['title'],
-      body: 'Reminder for ${result['title']}',
-      alarmTime: alarmTime,
-    );
-  }
-
-  await showMessageDialog(
-    context,
-    'Saved successfully',
-    title: 'Success',
-    icon: Icons.check_circle_outline,
-    iconColor: Colors.green,
-  );
-}
-
+                  DateTime? alarmTime;
+                  try {
+                    alarmTime = DateTime.parse(result['alarm_time']); // ✅ FIX
+                  } catch (e) {
+                    debugPrint(
+                      "⚠️ Alarm time format error: ${result['alarm_time']}",
+                    );
+                  }
+                  if (alarmTime != null) {
+                    await NotificationService.scheduleNotification(
+                      id: result['id'],
+                      title: result['title'],
+                      body: '${result['description']}',
+                      alarmTime: alarmTime,
+                    );
+                  }
+                  await showMessageDialog(
+                    context,
+                    'Saved successfully',
+                    title: 'Success',
+                    icon: Icons.check_circle_outline,
+                    iconColor: Colors.green,
+                  );
+                }
               },
               gradient: AppGradientColors.button_gradient,
               textColor: AppColors.text_color,

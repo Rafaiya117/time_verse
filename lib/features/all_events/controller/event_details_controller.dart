@@ -86,12 +86,8 @@ class EventController extends ChangeNotifier {
 }
 
 String formatTime(String timeString) {
-  try {
-    final DateTime dt = DateTime.parse(timeString); // handles ISO automatically
-    return DateFormat("hh:mm a").format(dt);
-  } catch (_) {
-    return timeString; // fallback if parsing fails
+    final utc = DateTime.parse(timeString);
+    final local = utc.toLocal();
+    return DateFormat('hh:mm a').format(local);
   }
-}
-
 }

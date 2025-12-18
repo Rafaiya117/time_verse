@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:time_verse/features/all_events/controller/all_events.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -67,7 +68,7 @@ Future<Map<String, dynamic>?> createTask({
   final baseUrl = dotenv.env['BASE_URL'] ?? '';
   final authService = AuthService();
   final accessToken = await authService.getToken();
-
+  final allevent =  AllEventsController();
   try {
     final url = Uri.parse("$baseUrl/api/v1/event/create/");
     final formattedAlarmTime = _formatAlarmTime(date, alarmTime);
@@ -100,6 +101,7 @@ Future<Map<String, dynamic>?> createTask({
       debugPrint("✅ Event created successfully: ${response.data}");
       return response.data;
     }
+    allevent.fetchAllEvents();
   } catch (e) {
     debugPrint("❌ Exception: $e");
   }
@@ -148,6 +150,16 @@ String _localTimeZoneOffset() {
   return "$sign$hours:$minutes";
 }
 
+void dispose() {
+    titleController.dispose();
+    dateController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    locationController.dispose();
+    alarmTimeController.dispose();
+    noteController.dispose();
+    super.dispose();
+  }
 
 }
 
