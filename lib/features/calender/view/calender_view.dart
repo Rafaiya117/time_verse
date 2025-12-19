@@ -59,6 +59,7 @@ Widget build(BuildContext context) {
                           child: EventCard(
                             id: event.id,
                             title: event.title,
+                            sub_title: '',
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
                             location: event.location,

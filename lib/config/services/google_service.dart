@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:time_verse/config/app_route/app_prefernce.dart';
@@ -106,8 +107,9 @@ class GoogleServices {
   Future<void> sendTokensToApi(String idToken) async {
     try {
       final dio = Dio();
-      const String url = 'http://10.10.13.74:5002/api/v1/auth/login/idtoken/';
-
+      final baseurl = dotenv.env['BASE_URL'];
+      final String url = '$baseurl/api/v1/auth/login/idtoken/';
+  
       final response = await dio.post(
         url,
         data: {'id_token': idToken},

@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
@@ -47,22 +48,9 @@ class HomeController extends ChangeNotifier {
   final List<QuoteData> _inspirationalQuotes = [
     QuoteData(
       id: 0,
-      quote:
-          "This is the day that the Lord has made; let us rejoice and be glad in it",
+      quote:"This is the day that the Lord has made; let us rejoice and be glad in it",
       reference: "Psalm 118:24",
-    ),
-    QuoteData(
-      id: 0,
-      quote:
-          "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
-      reference: "Jeremiah 29:11",
-    ),
-    QuoteData(
-      id: 0,
-      quote:
-          "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
-      reference: "Proverbs 3:5-6",
-    ),
+    ),    
   ];
 
   List<QuoteData> get inspirationalQuotes => _inspirationalQuotes;
@@ -100,20 +88,23 @@ class HomeController extends ChangeNotifier {
 
     startAutoSlide();
     fetchEvents();
-    todaysfetchEvents().then((_) {
-      // Schedule alarms for today's events
-      for (final event in todaysEvents) {
-        if (event.alarmTime.isNotEmpty) {
-          AlarmHelper.scheduleEventAlarm(event);
-          NotificationService.scheduleNotification(
-            id: event.id,
-            title: event.title,
-            body: event.description,
-            alarmTime: DateTime.parse(event.alarmTime),
-          );
-        }
-      }
-    });
+    todaysfetchEvents().then((_) async {
+  if (await _alarmsAlreadyScheduled()) return;
+
+  for (final event in todaysEvents) {
+    if (event.alarmTime.isNotEmpty) {
+      await AlarmHelper.scheduleEventAlarm(event);
+      NotificationService.scheduleNotification(
+        id: event.id,
+        title: event.title,
+        body: event.description,
+        alarmTime: DateTime.parse(event.alarmTime),
+      );
+    }
+  }
+  await _markAlarmsScheduled();
+});
+
     fetchReviewsFromApi();
     profileController.loadUserProfile();
 
@@ -341,6 +332,19 @@ class HomeController extends ChangeNotifier {
       debugPrint('⚠️ Error fetching today\'s events: $e');
     }
   }
+
+  Future<bool> _alarmsAlreadyScheduled() async {
+  final prefs = await SharedPreferences.getInstance();
+  final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  return prefs.getBool('alarms_scheduled_$todayKey') ?? false;
+}
+
+Future<void> _markAlarmsScheduled() async {
+  final prefs = await SharedPreferences.getInstance();
+  final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  await prefs.setBool('alarms_scheduled_$todayKey', true);
+}
+
 
   Future<void> fetchEvents() async {
     try {

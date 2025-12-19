@@ -96,8 +96,6 @@ class AllEventsController extends ChangeNotifier {
 
   List<EventModel> get events => List.unmodifiable(_events);
 
-  // ------------------ Remove event with confirmation ------------------ //
- 
   // ------------------ Reusable date formatter ------------------ //
   String formatEventDate(String rawDate) {
     final startDateTime = DateTime.tryParse(rawDate);
@@ -178,6 +176,28 @@ class AllEventsController extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('⚠️ Error fetching events: $e');
+    }
+  }
+
+  Future<bool> deleteEvent(int eventId) async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.delete(
+        '$baseUrl/api/v1/evenet/delete/$eventId/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      debugPrint('⚠️ Error deleting event: $e');
+      return false;
     }
   }
 }

@@ -74,17 +74,45 @@ class AllEvents extends StatelessWidget {
                     itemCount: controller.events.length,
                     itemBuilder: (context, index) {
                       final EventModel event = controller.events[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom:20.0),
-                        child: EventCard(
-                          title: event.title,
-                          date: event.date,
-                          time: '${event.startTime}-${event.endTime}',
-                          location: event.location,
-                          isDarkMode: isDarkMode,
-                          onDelete: () {},
-                          id: event.id,
-                          //controller.removeEvent(index),
+
+                      return Dismissible(
+                        key: ValueKey(event.id), // 🔹 required for animation
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          color: Colors.red,
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        confirmDismiss: (_) async {
+                          final success = await controller.deleteEvent(
+                            event.id,
+                          );
+
+                          if (!success) {
+                            debugPrint('❌ Failed to delete event');
+                          }
+                          return success; // 🔥 triggers smooth pop
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: EventCard(
+                            title: event.title,
+                            sub_title: event.description,
+                            date: event.date,
+                            time: '${event.startTime}-${event.endTime}',
+                            location: event.location,
+                            isDarkMode: isDarkMode,
+                            onDelete: () async {
+                              final success = await controller.deleteEvent(
+                                event.id,
+                              );
+                              if (!success) {
+                                debugPrint('❌ Failed to delete event');
+                              }
+                            },
+                            id: event.id,
+                          ),
                         ),
                       );
                     },
@@ -92,6 +120,7 @@ class AllEvents extends StatelessWidget {
                 );
               },
             ),
+
             // SizedBox(height: 10.h),
             //   Center(
             //     child: CustomButton(

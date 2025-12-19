@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/features/auth/auth_model/auth_model.dart';
@@ -9,6 +10,7 @@ import 'package:time_verse/features/auth/auth_model/auth_model.dart';
 class AuthService {
   late final Dio _dio;
   final String _baseUrl = dotenv.env['BASE_URL'] ?? '';
+  late final String? _token;
 
   AuthService() {
     _dio = Dio(BaseOptions(
@@ -30,10 +32,31 @@ class AuthService {
     return prefs.getString('access_token');
   }
 
-  Future<void> clearToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('access_token');
+  // Future<void> clearToken() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.remove('access_token');
+  // }
+
+Future<void> clearToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('access_token');
+  
+  _token = null; 
+}
+
+
+// ---------------- USER INFO ---------------- //
+
+  Future<int?> getUserId() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) return null;
+
+    final decodedToken = JwtDecoder.decode(token);
+
+    // adjust key if backend uses a different name
+    return decodedToken['user_id'] ?? decodedToken['id'];
   }
+
 
   Future<Options> _authorizedHeader() async {
     final token = await getToken();

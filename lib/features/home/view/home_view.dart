@@ -168,7 +168,9 @@ class HomeView extends StatelessWidget {
     final location = GoRouterState.of(context).uri.toString();
     homeController.updateIndexFromRoute(location);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final logoPath =  'assets/images/logo.png';
+    final String logoPath = isDarkMode
+        ? 'assets/images/logo.png' 
+        : 'assets/images/logo_light.png';
     // Start auto-slide when widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       homeController.initOnce(profileController);
@@ -520,33 +522,33 @@ class HomeView extends StatelessWidget {
                               ),
                               SizedBox(height: 5.h),
                               // DOT INDICATORS
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  homeController.inspirationalQuotes.length > 5 ? 5
-                                  : homeController.inspirationalQuotes.length,
-                                  (i) {
-                                    final index = i + (homeController.currentQuoteIndex ~/5) *5;
-                                    final actualIndex = index % homeController.inspirationalQuotes.length;
-                                    return GestureDetector(
-                                      onTap: () => homeController.goToQuote(actualIndex),
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(horizontal: 4.w,),
-                                        width:homeController.currentQuoteIndex == actualIndex
-                                          ? 12.w: 8.w,
-                                        height: homeController.currentQuoteIndex == actualIndex
-                                          ? 12.h: 8.h,
-                                        decoration: BoxDecoration(
-                                          color:homeController.currentQuoteIndex == actualIndex
-                                            ? (isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFF8C00))
-                                            : (isDarkMode ? Colors.grey[600]: Colors.grey[400]),
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.center,
+                              //   children: List.generate(
+                              //     homeController.inspirationalQuotes.length > 5 ? 5
+                              //     : homeController.inspirationalQuotes.length,
+                              //     (i) {
+                              //       final index = i + (homeController.currentQuoteIndex ~/5) *5;
+                              //       final actualIndex = index % homeController.inspirationalQuotes.length;
+                              //       return GestureDetector(
+                              //         onTap: () => homeController.goToQuote(actualIndex),
+                              //         child: Container(
+                              //           margin: EdgeInsets.symmetric(horizontal: 4.w,),
+                              //           width:homeController.currentQuoteIndex == actualIndex
+                              //             ? 12.w: 8.w,
+                              //           height: homeController.currentQuoteIndex == actualIndex
+                              //             ? 12.h: 8.h,
+                              //           decoration: BoxDecoration(
+                              //             color:homeController.currentQuoteIndex == actualIndex
+                              //               ? (isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFF8C00))
+                              //               : (isDarkMode ? Colors.grey[600]: Colors.grey[400]),
+                              //             shape: BoxShape.circle,
+                              //           ),
+                              //         ),
+                              //       );
+                              //     },
+                              //   ),
+                              // ),
                             ],
                           );
                         },

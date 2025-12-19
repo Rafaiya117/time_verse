@@ -245,60 +245,68 @@ class AddEventModal extends StatelessWidget {
             CustomButton(
               text: "Save",
               onPressed: () async {
-                final timeController = Provider.of<TimePickerController>(
-                  context,
-                  listen: false,
-                );
+                // 🔹 SHOW LOADER
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) =>const Center(child: CircularProgressIndicator()),);
 
-                // Format times in HH:mm:ss (backend expects only time)
-                final start = timeController.formatTime(
-                  timeController.getTime('start'),
-                );
-                final end = timeController.formatTime(
-                  timeController.getTime('end'),
-                );
-
-                final alarm = timeController.formatTime(
-                  timeController.getTime('alarm'),
-                );
-                final result = await addEventController.createTask(
-                  title: addEventController.titleController.text.trim(),
-                  date: addEventController.dateController.text.trim(), 
-                  startTime: start, 
-                  endTime: end,
-                  location: addEventController.locationController.text.trim(),
-                  alarmTime:alarm,
-                  categoryName: selectedCategory ?? '',
-                  note: addEventController.noteController?.text.trim() ?? "",
-                );
-
-                debugPrint("START TIME SENT => $start");
-                debugPrint("END TIME SENT => $end");
-
-                if (result != null) {
-                  DateTime? alarmTime;
-                  try {
-                    alarmTime = DateTime.parse(result['alarm_time']); // ✅ FIX
-                  } catch (e) {
-                    debugPrint(
-                      "⚠️ Alarm time format error: ${result['alarm_time']}",
-                    );
-                  }
-                  if (alarmTime != null) {
-                    await NotificationService.scheduleNotification(
-                      id: result['id'],
-                      title: result['title'],
-                      body: '${result['description']}',
-                      alarmTime: alarmTime,
-                    );
-                  }
-                  await showMessageDialog(
+                try {
+                  final timeController = Provider.of<TimePickerController>(
                     context,
-                    'Saved successfully',
-                    title: 'Success',
-                    icon: Icons.check_circle_outline,
-                    iconColor: Colors.green,
+                    listen: false,
                   );
+
+                  // Format times in HH:mm:ss (backend expects only time)
+                  final start = timeController.formatTime(
+                    timeController.getTime('start'),
+                  );
+                  final end = timeController.formatTime(
+                    timeController.getTime('end'),
+                  );
+
+                  final alarm = timeController.formatTime(
+                    timeController.getTime('alarm'),
+                  );
+                  final result = await addEventController.createTask(
+                    title: addEventController.titleController.text.trim(),
+                    date: addEventController.dateController.text.trim(),
+                    startTime: start,
+                    endTime: end,
+                    location: addEventController.locationController.text.trim(),
+                    alarmTime: alarm,
+                    categoryName: selectedCategory ?? '',
+                    note: addEventController.noteController?.text.trim() ?? "",
+                  );
+                  debugPrint("START TIME SENT => $start");
+                  debugPrint("END TIME SENT => $end");
+                  if (result != null) {
+                    DateTime? alarmTime;
+                    try {
+                      alarmTime = DateTime.parse(result['alarm_time']);
+                    } catch (e) {
+                      debugPrint(
+                        "⚠️ Alarm time format error: ${result['alarm_time']}",
+                      );
+                    }
+                    if (alarmTime != null) {
+                      await NotificationService.scheduleNotification(
+                        id: result['id'],
+                        title: result['title'],
+                        body: '${result['description']}',
+                        alarmTime: alarmTime,
+                      );
+                    }
+                    await showMessageDialog(
+                      context,
+                      'Saved successfully',
+                      title: 'Success',
+                      icon: Icons.check_circle_outline,
+                      iconColor: Colors.green,
+                    );
+                  }
+                } finally {
+                  Navigator.of(context, rootNavigator: true).pop();
                 }
               },
               gradient: AppGradientColors.button_gradient,
