@@ -3,10 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
+import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/calender/widget/custom_chip.dart';
@@ -163,7 +165,7 @@ class AddEventModal extends StatelessWidget {
             SizedBox(height: 16.h,),
             CustomInputField(
               label: '',
-              hintText: 'Enter Address *',
+              hintText: 'Enter Address',
               controller: addEventController.locationController,
               isPassword: false,
               fontSize: 12.sp,
@@ -222,10 +224,8 @@ class AddEventModal extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              // Debug print the selected category name
                               debugPrint('Selected Category: ${category.name}');
                               selectedCategory = category.name;
-                              // You can also do controller.selectCategory(category) here if needed
                             },
                             child: BulletButton(
                               label: category.name,
@@ -245,55 +245,47 @@ class AddEventModal extends StatelessWidget {
             CustomButton(
               text: "Save",
               onPressed: () async {
-                // 🔹 SHOW LOADER
                 showDialog(
                   context: context,
                   barrierDismissible: false,
                   builder: (_) =>const Center(child: CircularProgressIndicator()),);
-
-                try {
-                  final timeController = Provider.of<TimePickerController>(
-                    context,
-                    listen: false,
-                  );
-
+                  try {
+                  final timeController = Provider.of<TimePickerController>(context,listen: false,);
                   // Format times in HH:mm:ss (backend expects only time)
-                  final start = timeController.formatTime(
-                    timeController.getTime('start'),
-                  );
-                  final end = timeController.formatTime(
-                    timeController.getTime('end'),
-                  );
+                  final start = timeController.formatTime(timeController.getTime('start'),);
+                  final end = timeController.formatTime(timeController.getTime('end'),);
+                  final alarm = timeController.formatTime(timeController.getTime('alarm'),);
 
-                  final alarm = timeController.formatTime(
-                    timeController.getTime('alarm'),
-                  );
                   final result = await addEventController.createTask(
                     title: addEventController.titleController.text.trim(),
                     date: addEventController.dateController.text.trim(),
                     startTime: start,
                     endTime: end,
-                    location: addEventController.locationController.text.trim(),
+                    location:addEventController.locationController.text.trim().isEmpty ? null : addEventController.locationController.text.trim(),
                     alarmTime: alarm,
-                    categoryName: selectedCategory ?? '',
+                    categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
                     note: addEventController.noteController?.text.trim() ?? "",
                   );
+
                   debugPrint("START TIME SENT => $start");
                   debugPrint("END TIME SENT => $end");
+
                   if (result != null) {
+                    final eventModel = EventModel.fromMap(result);
+                    await AlarmHelper.scheduleEventAlarm(eventModel);
+
                     DateTime? alarmTime;
                     try {
                       alarmTime = DateTime.parse(result['alarm_time']);
                     } catch (e) {
-                      debugPrint(
-                        "⚠️ Alarm time format error: ${result['alarm_time']}",
-                      );
+                      debugPrint("⚠️ Alarm time format error: ${result['alarm_time']}",);
                     }
+
                     if (alarmTime != null) {
                       await NotificationService.scheduleNotification(
                         id: result['id'],
                         title: result['title'],
-                        body: '${result['description']}',
+                        body: result['description'],
                         alarmTime: alarmTime,
                       );
                     }
@@ -304,10 +296,17 @@ class AddEventModal extends StatelessWidget {
                       icon: Icons.check_circle_outline,
                       iconColor: Colors.green,
                     );
+                     Navigator.of(context).pop();
                   }
-                } finally {
-                  Navigator.of(context, rootNavigator: true).pop();
-                }
+                } catch (e) {
+                  await showMessageDialog(
+                    context,
+                    'Failed to save event: $e',
+                    title: 'Error',
+                    icon: Icons.error_outline,
+                    iconColor: Colors.red,
+                  );
+                } 
               },
               gradient: AppGradientColors.button_gradient,
               textColor: AppColors.text_color,

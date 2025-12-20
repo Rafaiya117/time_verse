@@ -66,7 +66,7 @@ class AllEvents extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 20.h,),
+            //SizedBox(height: 20.h,),
             Consumer<AllEventsController>(
               builder: (context, controller, _) {
                 return Expanded(

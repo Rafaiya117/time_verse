@@ -24,7 +24,6 @@ import 'package:time_verse/features/settings/subscription/view/subscription.dart
 import 'package:time_verse/features/settings/terms_condition/view/terms_&_condition.dart';
 import 'package:time_verse/features/splash_screen/splash_screen.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [

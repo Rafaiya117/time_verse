@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:alarm/utils/alarm_set.dart';
@@ -20,7 +19,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
   @override
   void initState() {
     super.initState();
-
+    debugPrint('********${widget.alarmSettings}********');
     _subscription = Alarm.ringing.listen((alarms) {
       if (alarms.containsId(widget.alarmSettings.id)) return;
       if (mounted) Navigator.pop(context);
@@ -35,15 +34,17 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final notification = widget.alarmSettings.notificationSettings;
     return Scaffold(
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text(
-              'Alarm ${widget.alarmSettings.id} is ringing',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+           Text('Alarm ringing for ${notification?.title ?? 'Alarm Ringing'}'),
+           Padding(
+             padding: const EdgeInsets.all(12.0),
+             child: Text(notification?.body ?? ''),
+           ),
             const Text('🔔', style: TextStyle(fontSize: 80)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -34,7 +34,7 @@ class EventCard extends StatelessWidget {
         context.push('/event_details', extra: id);
       },
       child: Container(
-        width: 327.w,
+        width: double.infinity,
         height: 200.h,
         decoration: BoxDecoration(
           color: isDarkMode ? AppColors.containers_bgd : Color(0xFFF4F6F5),

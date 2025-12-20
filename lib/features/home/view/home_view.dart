@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
@@ -302,8 +301,7 @@ class HomeView extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 15.h),
-            
+            SizedBox(height: 15.h),            
             Container(
               height: 80.h,
               child: ListView.builder(
@@ -328,50 +326,49 @@ class HomeView extends StatelessWidget {
                             color: isToday 
                               ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
                               : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          date.day.toString(),
-                          style: GoogleFonts.outfit(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: isToday 
-                              ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
-                              : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                          SizedBox(height: 4.h),
+                          Text(
+                            date.day.toString(),
+                            style: GoogleFonts.outfit(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isToday ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color) : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 30.h),            
-            // Daily Inspiration Section
-            Text(
-              'Daily Inspiration',
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.w600,
-                fontSize: 18.sp,
-                color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
-              ),
-            ),
-            SizedBox(height: 20.h),            
-            Container(
-              width: 360.w,
-              height: 421.h,
-              decoration: BoxDecoration(
-                color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: AppColors.third_color.withOpacity(0.3),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal:24.w, vertical: 100.h),
-                child: Column(
-                  children: [
+              SizedBox(height: 30.h),            
+              // Daily Inspiration Section
+              Text(
+                'Daily Inspiration',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18.sp,
+                  color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
+                ),
+              ),
+              SizedBox(height: 20.h),            
+              Container(
+                width: 360.w,
+                height: 421.h,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    // ignore: deprecated_member_use
+                    color: AppColors.third_color.withOpacity(0.3),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal:24.w, vertical: 100.h),
+                  child: Column(
+                    children: [
                     // Quote icon
                     // Container(
                     //   width: 48.w,
@@ -557,7 +554,6 @@ class HomeView extends StatelessWidget {
                     // Action buttons
                     Row(
                       children: [
-                        // Save button
                         Flexible(
                           child: Container(
                             height: 48.h,
@@ -681,9 +677,8 @@ class HomeView extends StatelessWidget {
             SizedBox(height: 16.h),            
             // Schedule events list
             Consumer<HomeController>(
-                builder: (context, controller, _) {
-                  final events = controller.todaysEvents;
-
+              builder: (context, controller, _) {
+                final events = controller.todaysEvents;
                   if (events.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -724,7 +719,6 @@ class HomeView extends StatelessWidget {
               )
             ),            
             SizedBox(height: 30.h),            
-            // What Our Users Are Saying section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -755,24 +749,22 @@ class HomeView extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16.h),            
-            // User testimonial
             Consumer<HomeController>(
-                builder: (context, controller, _) {
-                  if (controller.reviews.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No reviews available.',
-                        style: GoogleFonts.outfit(
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 14.sp,
-                        ),
+              builder: (context, controller, _) {
+                if (controller.reviews.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No reviews available.',
+                      style: GoogleFonts.outfit(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 14.sp,
                       ),
-                    );
-                  }
-
-                  return Column(
-                    children: List.generate(controller.reviews.length, (index) {
-                      final review = controller.reviews[index];
+                    ),
+                  );
+                }
+                return Column(
+                  children: List.generate(controller.reviews.length, (index) {
+                    final review = controller.reviews[index];
                       return Container(
                         width: double.infinity,
                         margin: EdgeInsets.only(bottom: 12.h),
@@ -909,15 +901,6 @@ class HomeView extends StatelessWidget {
                   ],
                 ),
               ),
-//               ElevatedButton(onPressed: () async{
-//                 await NotificationService.scheduleNotification(
-//   id: 999,
-//   title: 'Test Scheduled Notification',
-//   body: 'This should trigger in 1 minute',
-//   alarmUtc: DateTime.now().toUtc().add(Duration(seconds: 10)),
-// );
-//               }, 
-//               child: Text('Test Notification')),
             ],
           ),
         ),
@@ -984,14 +967,14 @@ class HomeView extends StatelessWidget {
                     fontSize: 14.sp,
                     // ignore: deprecated_member_use
                     color: isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    )
+          ],
+        ),
+      )
     );
   }
 

@@ -32,23 +32,24 @@ class EventModel {
   });
 
   factory EventModel.fromMap(Map<String, dynamic> map) {
-    return EventModel(
-      id: map['id'] ?? 0,
-      userName: map['user_name'] ?? '',
-      title: map['title'] ?? '',
-      description: map['description'] ?? '',
-      date: map['date'] ?? '',
-      startTime: map['start_time'] ?? '',
-      endTime: map['end_time'] ?? '',
-      location: map['location'] ?? '',
-      alarmTime: map['alarm_time'] ?? '',
-      isCompleted: map['is_completed'] ?? false,
-      isFavorite: map['is_favorite'] ?? false,
-      createdAt: map['created_at'] ?? '',
-      user: map['user'] ?? 0,
-      category: map['category'],
-    );
-  }
+  return EventModel(
+    id: map['id'] ?? 0,
+    userName: map['user_name'] ?? '',
+    title: map['title'] ?? '',
+    description: map['description'] ?? '',
+    date: map['date'] ?? '',
+    startTime: map['start_time'] ?? '',
+    endTime: map['end_time'] ?? '',
+    location: map['location'] ?? '',
+    alarmTime: map['alarm_time'] ?? '',
+    isCompleted: map['is_completed'] ?? false,
+    isFavorite: map['is_favorite'] ?? false,
+    createdAt: map['created_at'] ?? '',
+    user: map['user'] ?? 0,
+    category: map['category']?.toString(),
+  );
+}
+
 
   Map<String, dynamic> toMap() {
     return {

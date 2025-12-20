@@ -59,31 +59,37 @@ Future<Map<String, dynamic>?> createTask({
   required String date,
   required String startTime,
   required String endTime,
-  required String location,
+  String? location,
   required String alarmTime,
-  required String categoryName,
+  String? categoryName,
   bool isCompleted = false,
   String? note,
 }) async {
   final baseUrl = dotenv.env['BASE_URL'] ?? '';
   final authService = AuthService();
   final accessToken = await authService.getToken();
-  final allevent =  AllEventsController();
+
   try {
     final url = Uri.parse("$baseUrl/api/v1/event/create/");
     final formattedAlarmTime = _formatAlarmTime(date, alarmTime);
 
-    final body = {
+    final Map<String, dynamic> body = {
       "title": title,
       "date": date,
       "start_time": startTime,
       "end_time": endTime,
-      "location": location,
       "alarm_time": formattedAlarmTime,
-      "category_name": categoryName,
       "is_completed": isCompleted,
       "type_event_description": note ?? "",
     };
+
+    if (location != null && location.trim().isNotEmpty) {
+      body["location"] = location.trim();
+    }
+
+    if (categoryName != null && categoryName.trim().isNotEmpty) {
+      body["category_name"] = categoryName.trim();
+    }
 
     final response = await _dio.post(
       url.toString(),
@@ -101,13 +107,11 @@ Future<Map<String, dynamic>?> createTask({
       debugPrint("✅ Event created successfully: ${response.data}");
       return response.data;
     }
-    allevent.fetchAllEvents();
   } catch (e) {
     debugPrint("❌ Exception: $e");
   }
   return null;
 }
-
 
 String _formatAlarmTime(String date, String time) {
   try {

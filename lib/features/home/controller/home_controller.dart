@@ -89,23 +89,23 @@ class HomeController extends ChangeNotifier {
     startAutoSlide();
     fetchEvents();
     todaysfetchEvents().then((_) async {
-  if (await _alarmsAlreadyScheduled()) return;
+      if (await _alarmsAlreadyScheduled()) return;
 
-  for (final event in todaysEvents) {
-    if (event.alarmTime.isNotEmpty) {
-      await AlarmHelper.scheduleEventAlarm(event);
-      NotificationService.scheduleNotification(
-        id: event.id,
-        title: event.title,
-        body: event.description,
-        alarmTime: DateTime.parse(event.alarmTime),
-      );
-    }
-  }
-  await _markAlarmsScheduled();
-});
+      for (final event in todaysEvents) {
+        if (event.alarmTime.isNotEmpty) {
+          await AlarmHelper.scheduleEventAlarm(event);
+          NotificationService.scheduleNotification(
+            id: event.id,
+            title: event.title,
+            body: event.description,
+            alarmTime: DateTime.parse(event.alarmTime),
+          );
+        }
+      }
+    await _markAlarmsScheduled();
+  });
 
-    fetchReviewsFromApi();
+  fetchReviewsFromApi();
     profileController.loadUserProfile();
 
     // Listen to alarm triggers in Home screen
@@ -190,8 +190,7 @@ class HomeController extends ChangeNotifier {
 
   /// -------------------- Share Quote -------------------- ///
   void shareQuoteAsImage(BuildContext context) async {
-    final boundary =
-        quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary != null) {
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ImageByteFormat.png);
@@ -205,49 +204,25 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  /// -------------------- API Calls -------------------- ///
-  Future<void> fetchQuotesFromApi() async {
-    debugPrint('🚀 Starting fetchQuotesFromApi...');
-    try {
-      final response = await _dio.get('http://10.10.13.6:5000/get-quotes');
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-        if (data['quotes'] is List) {
-          final List<QuoteData> loadedQuotes = (data['quotes'] as List).map((q) {
-            final parsed = q is String ? jsonDecode(q) : q;
-            return QuoteData(
-              quote: parsed['quote'] ?? '',
-              reference: parsed['event_name'] ?? '',
-            );
-          }).toList();
 
-          _inspirationalQuotes
-            ..clear()
-            ..addAll(loadedQuotes);
-          notifyListeners();
-        }
-      }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching quotes: $e');
-    }
-  }
-
-  Future<void> fetchReviewsFromApi() async {
-    try {
-      final token = await AuthService().getToken();
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
-      final response = await _dio.get(
-        '$baseUrl/api/v1/event/my-feedbacks/',
-        options: Options(headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        }),
+Future<void> fetchReviewsFromApi() async {
+  try {
+    final token = await AuthService().getToken();
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    final response = await _dio.get(
+      '$baseUrl/api/v1/event/my-feedbacks/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
       );
 
       if (response.statusCode == 200 && response.data is List) {
-        final List<ReviewData> loadedReviews =
-            response.data.map((json) => ReviewData.fromJson(json)).toList();
+        final List<dynamic> dataList = response.data as List<dynamic>;
 
+        final List<ReviewData> loadedReviews = dataList.map((json) => ReviewData.fromJson(json as Map<String, dynamic>)).toList();
         _reviews
           ..clear()
           ..addAll(loadedReviews);
@@ -257,6 +232,7 @@ class HomeController extends ChangeNotifier {
       debugPrint('⚠️ Error fetching reviews: $e');
     }
   }
+
 
   Future<void> postReviewToApi() async {
     try {
@@ -333,7 +309,7 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  Future<bool> _alarmsAlreadyScheduled() async {
+Future<bool> _alarmsAlreadyScheduled() async {
   final prefs = await SharedPreferences.getInstance();
   final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
   return prefs.getBool('alarms_scheduled_$todayKey') ?? false;
@@ -362,8 +338,7 @@ Future<void> _markAlarmsScheduled() async {
       );
 
       if (response.statusCode == 200) {
-        final List data =
-            response.data is List ? response.data : [response.data];
+        final List data = response.data is List ? response.data : [response.data];
         if (data.isEmpty) return;
 
         data.sort((a, b) {
@@ -397,8 +372,8 @@ Future<void> _markAlarmsScheduled() async {
 
     final now = DateTime.now();
     if (startDateTime.year == now.year &&
-        startDateTime.month == now.month &&
-        startDateTime.day == now.day) {
+      startDateTime.month == now.month &&
+      startDateTime.day == now.day) {
       return 'Today';
     } else {
       return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);
