@@ -88,7 +88,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool hasConnection = true;
   StreamSubscription<AlarmSet>? _ringSubscription;
-
+  bool _isAlarmLaunch = false;
   @override
   void initState() {
     super.initState();
@@ -108,12 +108,13 @@ class _MyAppState extends State<MyApp> {
     // });
 
     _ringSubscription = Alarm.ringing.listen((alarmSet) {
-      if (alarmSet.alarms.isEmpty) return;
+      if (alarmSet.alarms.isEmpty || _isAlarmLaunch) return;
 
+      _isAlarmLaunch = true;
       final alarm = alarmSet.alarms.first;
-      debugPrint('==== Alarm time ${alarmSet.alarms.first.id}');
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        appRouter.push('/alarm', extra: alarm);
+        appRouter.go('/alarm', extra: alarm);
       });
     });
   }

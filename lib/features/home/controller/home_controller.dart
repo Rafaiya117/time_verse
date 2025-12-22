@@ -59,6 +59,8 @@ class HomeController extends ChangeNotifier {
   String _welcomeMessage = "Welcome to TimeVerse";
   String get welcomeMessage => _welcomeMessage;
 
+  bool isAlarmRinging = false;
+
   void updateWelcomeMessage(String message) {
     _welcomeMessage = message;
     notifyListeners();
@@ -110,11 +112,13 @@ class HomeController extends ChangeNotifier {
 
     // Listen to alarm triggers in Home screen
     Alarm.ringing.listen((alarmSet) {
-      if (alarmSet.alarms.isEmpty) return;
-      final alarm = alarmSet.alarms.first;
-      debugPrint('==== Alarm triggered on Home: ${alarm.id}');
-      // Optional: Navigate to alarm screen
-       appRouter.push('/alarm', extra: alarm);
+      isAlarmRinging = alarmSet.alarms.isNotEmpty;
+      notifyListeners();
+      // if (alarmSet.alarms.isEmpty) return;
+      // final alarm = alarmSet.alarms.first;
+      // debugPrint('==== Alarm triggered on Home: ${alarm.id}');
+      // // Optional: Navigate to alarm screen
+      //  appRouter.push('/alarm', extra: alarm);
     });
   }
 
