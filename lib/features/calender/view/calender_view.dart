@@ -17,8 +17,8 @@ Widget build(BuildContext context) {
   final isDarkMode = Theme.of(context).brightness == Brightness.dark;
   final controller = Provider.of<CalendarController>(context, listen: false);
   WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchUpcomingEvents();
-    });
+    controller.fetchUpcomingEvents();
+  });
   return Scaffold(
     body: Stack(
       children: [
@@ -43,16 +43,16 @@ Widget build(BuildContext context) {
                     color: isDarkMode
                       ? AppColors.text_color
                       : AppColors.heading_color,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 16.h),
-              Consumer<CalendarController>(
-                builder: (context, controller, _) {
-                  return Expanded(
-                    child: ListView.builder(
-                      itemCount: controller.events.length,
-                      itemBuilder: (context, index) {
+                SizedBox(height: 16.h),
+                Consumer<CalendarController>(
+                  builder: (context, controller, _) {
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: controller.events.length,
+                        itemBuilder: (context, index) {
                         final EventModel event = controller.events[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 20.0),
@@ -78,6 +78,6 @@ Widget build(BuildContext context) {
       ],
     ),
     bottomNavigationBar: const CustomBottomNavBar(),
-  );
-}
+    );
+  }
 }

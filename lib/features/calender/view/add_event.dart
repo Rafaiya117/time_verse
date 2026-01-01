@@ -22,7 +22,6 @@ class AddEventModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final addEventController = Provider.of<AddEventController>(context, listen: false);
-    String ? selectedCategory;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       addEventController.fetchCategories();
     });
@@ -219,7 +218,6 @@ class AddEventModal extends StatelessWidget {
                     children: List.generate(categories.length, (index) {
                       final category = categories[index];
                       final baseColor = index % 2 == 0 ? AppColors.fourth_color: AppColors.fifth_color;
-                      // ✅ Highlight if selected
                       final color = controller.selectedCategory == category.name ? AppColors.heading_color : baseColor;
                       return Row(
                         children: [
@@ -264,7 +262,7 @@ class AddEventModal extends StatelessWidget {
                     endTime: end,
                     location:addEventController.locationController.text.trim().isEmpty ? null : addEventController.locationController.text.trim(),
                     alarmTime: alarm,
-                    categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
+                    categoryName: addEventController.selectedCategory?.isEmpty == true ? null : addEventController.selectedCategory,
                     note: addEventController.noteController?.text.trim() ?? "",
                   );
 
