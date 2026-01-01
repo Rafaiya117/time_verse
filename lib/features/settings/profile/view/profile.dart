@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_header.dart';
@@ -74,9 +75,12 @@ class Profile extends StatelessWidget {
                   SizedBox(height: 20.h),
                   DateField(
                     label: 'Date of Birth',
-                    selectedDate: DateTime.tryParse(controller.dateController.text) ??
-                    DateTime(1995, 5, 23),
-                    onDateSelected: (newDate) {},
+                    selectedDate:
+                      DateTime.tryParse(controller.dateController.text) ??
+                      DateTime(1995, 5, 23),
+                    onDateSelected: (newDate) {
+                      controller.setBirthDate(newDate);
+                    },
                   ),
                   SizedBox(height: 20.h),
                   CustomButton(

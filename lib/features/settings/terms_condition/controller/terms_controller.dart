@@ -7,6 +7,12 @@ class TermsController extends ChangeNotifier {
   String title = '';
   String description = '';
   bool isLoading = false;
+  bool isChecked = false;
+
+  void toggleCheckbox(bool? value) { 
+    isChecked = value ?? false;
+    notifyListeners(); 
+  }
 
   Future<void> loadTerms() async {
     isLoading = true;

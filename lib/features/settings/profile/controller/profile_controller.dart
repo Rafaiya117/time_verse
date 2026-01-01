@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_model/auth_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -161,6 +162,10 @@ String? _resolveProfilePicture(String? picture) {
   return '$baseurl$picture';
 }
 
+  void setBirthDate(DateTime date) { 
+    dateController.text = DateFormat('yyyy-MM-dd').format(date); 
+    notifyListeners(); 
+  }
 
 
   @override

@@ -40,28 +40,28 @@ class TermsAndCondition extends StatelessWidget {
                       alignment: Alignment.topLeft,
                       child: RichText(
                         text: TextSpan(
-                          style: GoogleFonts.outfit(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.normal,
-                            color: isDarkMode
+                        style: GoogleFonts.outfit(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.normal,
+                          color: isDarkMode
+                            ? AppColors.text_color
+                            : const Color(0xFF373F4B),
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Clause \n\n',
+                            style: GoogleFonts.lato(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.sp,
+                               color: isDarkMode
                                 ? AppColors.text_color
                                 : const Color(0xFF373F4B),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: 'Clause \n\n',
-                              style: GoogleFonts.lato(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20.sp,
-                                color: isDarkMode
-                                    ? AppColors.text_color
-                                    : const Color(0xFF373F4B),
-                              ),
                             ),
-                            TextSpan(
-                              text: controller.description.isNotEmpty
-                                  ? controller.description
-                                  : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.\n\n',
+                          ),
+                          TextSpan(
+                            text: controller.description.isNotEmpty
+                              ? controller.description
+                              : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.\n\n',
                             ),
                           ],
                         ),
@@ -72,20 +72,24 @@ class TermsAndCondition extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Checkbox(
-                    value: false,
-                    onChanged: (bool? value) {},
-                    activeColor: AppColors.third_color,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14.sp,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppColors.text_color
-                            : AppColors.heading_color,
+                  Consumer<TermsController>(
+                  builder: (context, controller, _) {
+                    return Checkbox(
+                      value: controller.isChecked,
+                      onChanged: controller.toggleCheckbox,
+                      activeColor: AppColors.third_color,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                   );
+                  },
+                ),
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14.sp,
+                      color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.text_color
+                        : AppColors.heading_color,
                       ),
                       children: [
                         const TextSpan(text: 'I agree to '),
