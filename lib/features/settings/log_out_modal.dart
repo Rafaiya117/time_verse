@@ -30,7 +30,7 @@ void showLogoutDialog(BuildContext context) {
               ),
               SizedBox(height: 20.h),
               Text(
-                'Delete Account',
+                'Logout',
                 style: GoogleFonts.outfit(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,

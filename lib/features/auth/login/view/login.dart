@@ -110,7 +110,7 @@ class LoginPage extends StatelessWidget {
                               :AppColors.heading_color,
                               ),
                             ),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.35,),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.28,),
                             // SizedBox(width: 95.w,),
                             //Spacer(),
                             TextButton(

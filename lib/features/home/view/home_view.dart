@@ -888,12 +888,17 @@ class HomeView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Center(
-                      child: Text(
+                      child: GestureDetector(
+                        onTap: (){
+                          context.push('/subscription');
+                        },
+                        child: Text(
                         'Go Premium',
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.w600,
                           fontSize: 16.sp,
                           color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

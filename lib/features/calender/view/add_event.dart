@@ -92,7 +92,7 @@ class AddEventModal extends StatelessWidget {
                   ),
                 ),
                 style: TextStyle(
-                  color: Colors.white,
+                  color: isDarkMode?AppColors.text_color:AppColors.heading_color,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
                 ),
@@ -195,7 +195,8 @@ class AddEventModal extends StatelessWidget {
             SizedBox(height: 16.h,),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Consumer<AddEventController>(
+              child: 
+              Consumer<AddEventController>(
                 builder: (context, controller, _) {
                   final categories = controller.categories;
                   if (categories.isEmpty) {
@@ -217,15 +218,15 @@ class AddEventModal extends StatelessWidget {
                   return Row(
                     children: List.generate(categories.length, (index) {
                       final category = categories[index];
-                      final color = index % 2 == 0
-                        ? AppColors.fourth_color
-                        : AppColors.fifth_color;
+                      final baseColor = index % 2 == 0 ? AppColors.fourth_color: AppColors.fifth_color;
+                      // ✅ Highlight if selected
+                      final color = controller.selectedCategory == category.name ? AppColors.heading_color : baseColor;
                       return Row(
                         children: [
                           GestureDetector(
                             onTap: () {
                               debugPrint('Selected Category: ${category.name}');
-                              selectedCategory = category.name;
+                              controller.selectCategory(category.name);
                             },
                             child: BulletButton(
                               label: category.name,
@@ -322,3 +323,49 @@ class AddEventModal extends StatelessWidget {
     );
   }
 }
+
+// Consumer<AddEventController>(
+//                 builder: (context, controller, _) {
+//                   final categories = controller.categories;
+//                   if (categories.isEmpty) {
+//                     return Row(
+//                       children: List.generate(3, (index) {
+//                         return Row(
+//                           children: [
+//                             BulletButton(
+//                               label: 'Loading...',
+//                               color: AppColors.fourth_color,
+//                               iconPath: 'assets/icons/bullet_point.svg',
+//                             ),
+//                             SizedBox(width: 16.w),
+//                           ],
+//                         );
+//                       }),
+//                     );
+//                   }
+//                   return Row(
+//                     children: List.generate(categories.length, (index) {
+//                       final category = categories[index];
+//                       final color = index % 2 == 0
+//                         ? AppColors.fourth_color
+//                         : AppColors.fifth_color;
+//                       return Row(
+//                         children: [
+//                           GestureDetector(
+//                             onTap: () {
+//                               debugPrint('Selected Category: ${category.name}');
+//                               selectedCategory = category.name;
+//                             },
+//                             child: BulletButton(
+//                               label: category.name,
+//                               color: color,
+//                               iconPath: 'assets/icons/bullet_point.svg',
+//                             ),
+//                           ),
+//                           SizedBox(width: 16.w),
+//                         ],
+//                       );
+//                     }),
+//                   );
+//                 },
+//               ),

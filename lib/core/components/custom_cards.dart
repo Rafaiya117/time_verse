@@ -122,7 +122,7 @@ class PhaseCard extends StatelessWidget {
                   text: "Payment",
                     onPressed: () {
                       //context.push('/signup');
-                      context.push('/settings');
+                      //context.push('/settings');
                     },
                     gradient: AppGradientColors.button_gradient,
                     textColor: AppColors.text_color,

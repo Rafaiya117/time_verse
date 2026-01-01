@@ -57,7 +57,7 @@ class Signup extends StatelessWidget {
               ),
               SizedBox(height: 20.h,),
               CustomInputField(
-                label: 'First Name *',
+                label: 'Full Name *',
                 hintText: 'Enter your fullname',
                 controller: signup_controller.nameController,
                 isPassword: false,

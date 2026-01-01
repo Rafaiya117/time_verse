@@ -42,27 +42,24 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
           ),
           const SizedBox(height: 8),
             TableCalendar(
-              firstDay: DateTime(2025, 1, 1),
-              lastDay: DateTime(2025, 12, 30),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              // onDaySelected: (selectedDay, focusedDay) {
-              //   setState(() {
-              //     _selectedDay = selectedDay;
-              //     _focusedDay = focusedDay;
-              //   });
-              //   Navigator.pop(context); 
-              // },
-              onDaySelected: (selectedDay, focusedDay) {
+            firstDay: DateTime(2025, 1, 1),
+            lastDay: DateTime(2025, 12, 30),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            enabledDayPredicate: (day) { 
+            return day.isAfter(DateTime(2025, 1, 1).subtract(const Duration(days: 1))) && day.isBefore(DateTime(2025, 12, 31)); },
+            onDaySelected: (selectedDay, focusedDay) {
+              if (selectedDay.isBefore(DateTime.now())) {
+                return; 
+              }
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
-              // Update the controller with formatted date
-              widget.controller.text = DateFormat('yyyy-MM-dd',).format(selectedDay);
-              debugPrint("Selected date: ${widget.controller.text}");
-              Navigator.pop(context);
-            },
+                widget.controller.text = DateFormat('yyyy-MM-dd',).format(selectedDay);
+                debugPrint("Selected date: ${widget.controller.text}");
+                Navigator.pop(context);
+              },
               calendarStyle: CalendarStyle(
                 selectedDecoration: BoxDecoration(
                   color: isDarkMode?AppColors.fourth_color:AppColors.heading_color,
@@ -91,10 +88,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
               daysOfWeekStyle:DaysOfWeekStyle(
                 weekdayStyle: TextStyle(color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
                 weekendStyle: TextStyle(color: isDarkMode?AppColors.fourth_color:AppColors.heading_color),
-              ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

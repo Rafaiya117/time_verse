@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:time_verse/features/all_events/controller/all_events.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,6 +16,7 @@ class AddEventController extends ChangeNotifier {
   TextEditingController locationController = TextEditingController();
   TextEditingController alarmTimeController = TextEditingController();
   TextEditingController noteController = TextEditingController();
+    String? selectedCategory;
 
   Future<Options> _authorizedHeader() async {
     final token = await AuthService().getToken();
@@ -154,7 +153,14 @@ String _localTimeZoneOffset() {
   return "$sign$hours:$minutes";
 }
 
-void dispose() {
+void selectCategory(String categoryName) { 
+  selectedCategory = categoryName; 
+  notifyListeners(); 
+}
+
+
+@override
+  void dispose() {
     titleController.dispose();
     dateController.dispose();
     startTimeController.dispose();

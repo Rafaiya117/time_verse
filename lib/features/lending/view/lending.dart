@@ -35,7 +35,7 @@ class LandingScreen extends StatelessWidget {
             ),
             SizedBox(height: 20.h,),
             Text(
-              'Join your Future Schedule into wisdom',
+              'Turn your Future Schedule into wisdom',
               style: GoogleFonts.greatVibes(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.normal,
@@ -53,7 +53,7 @@ class LandingScreen extends StatelessWidget {
             ),
             SizedBox(height: 10.h,),
             Text(
-              'Connect your daily journey with\n cosmic wisdom and divine\n gaidance',
+              'Connect your daily journey with\n cosmic wisdom and divine\n guidance',
               textAlign: TextAlign.center,
               style:GoogleFonts.inter(
                 fontWeight: FontWeight.normal,
