@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_model/auth_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -49,24 +50,31 @@ class ProfileController extends ChangeNotifier {
   try {
     isLoading = true;
     notifyListeners();
+
     final user = await _userService.getUserProfile();
 
     if (user != null) {
-  setUser(user); // ✅ normalize profilePicture
-  nameController.text = currentUser!.name;
-  passwordController.text = currentUser!.password ?? '';
-  dateController.text = currentUser!.birthDate ?? '';
-  
-  UserSession().userId = currentUser!.id.toString();
-  UserSession().username = currentUser!.name;
-  UserSession().profileImageUrl = currentUser!.profilePicture;
-  
-  debugPrint("✅ User data preloaded: ${UserSession().username}");
-  debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
-} else {
-  debugPrint("⚠️ No user data found");
-}
+      // 🔥 Merge Google profile from UserSession if available
+      final mergedUser = user.copyWith(
+        name: UserSession().username ?? user.name,
+        profilePicture: UserSession().profileImageUrl ?? user.profilePicture,
+      );
 
+      setUser(mergedUser); // ✅ normalize profilePicture
+
+      nameController.text = currentUser!.name;
+      passwordController.text = currentUser!.password ?? '';
+      dateController.text = currentUser!.birthDate ?? '';
+
+      UserSession().userId = currentUser!.id.toString();
+      UserSession().username = currentUser!.name;
+      UserSession().profileImageUrl = currentUser!.profilePicture;
+
+      debugPrint("✅ User data preloaded: ${UserSession().username}");
+      debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
+    } else {
+      debugPrint("⚠️ No user data found");
+    }
   } catch (e) {
     debugPrint("❌ Error loading user data: $e");
   } finally {
@@ -77,6 +85,17 @@ class ProfileController extends ChangeNotifier {
 
    
   Future<void> updateProfile(BuildContext context) async {
+  // ✅ BLOCK update for Google login users
+  final isGoogleLogin = await AppPrefs.isGoogleLogin();
+  if (isGoogleLogin) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Google profile cannot be updated from here"),
+      ),
+    );
+    return;
+  }
+
   if (nameController.text.trim().isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Name cannot be empty")),
@@ -88,19 +107,23 @@ class ProfileController extends ChangeNotifier {
     id: currentUser?.id ?? 0,
     name: nameController.text.trim(),
     birthDate: dateController.text.trim().isNotEmpty
-      ? dateController.text.trim()
-      : null,
-    profilePicture:null,
+        ? dateController.text.trim()
+        : null,
+    profilePicture: null,
     password: passwordController.text.trim().isNotEmpty
-      ? passwordController.text.trim()
-      : null,
+        ? passwordController.text.trim()
+        : null,
   );
 
   isLoading = true;
   notifyListeners();
 
   try {
-    final result = await _userService.updateUserProfile(updatedUser,profileImage: pickedImage);
+    final result = await _userService.updateUserProfile(
+      updatedUser,
+      profileImage: pickedImage,
+    );
+
     if (result != null) {
       currentUser = result;
       nameController.text = result.name;
@@ -108,7 +131,8 @@ class ProfileController extends ChangeNotifier {
       dateController.text = result.birthDate ?? '';
       UserSession().profileImageUrl = result.profilePicture;
 
-        debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
+      debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully")),
       );
@@ -128,6 +152,7 @@ class ProfileController extends ChangeNotifier {
   }
 }
 
+
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -138,9 +163,19 @@ class ProfileController extends ChangeNotifier {
     }
   }
 
-  void setUser(User user) {
-  final picture = user.profilePicture;
+//   void setUser(User user) {
+//   final picture = user.profilePicture;
 
+//   user = user.copyWith(
+//     profilePicture: _resolveProfilePicture(picture),
+//   );
+
+//   currentUser = user;
+//   notifyListeners();
+// }
+
+void setUser(User user) {
+  final picture = user.profilePicture;
   user = user.copyWith(
     profilePicture: _resolveProfilePicture(picture),
   );

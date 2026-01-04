@@ -15,8 +15,10 @@ class DatePickerDialog extends StatefulWidget {
 }
 
 class _DatePickerDialogState extends State<DatePickerDialog> {
-  DateTime _focusedDay = DateTime(2025, 9, 6);
-  DateTime? _selectedDay = DateTime(2025, 9, 6);
+  final DateTime _today = DateTime.now();
+  late DateTime _focusedDay = _today;
+  DateTime? _selectedDay;
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -41,22 +43,25 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
             ),
           ),
           const SizedBox(height: 8),
-            TableCalendar(
-            firstDay: DateTime(2025, 1, 1),
-            lastDay: DateTime(2025, 12, 30),
-            focusedDay: _focusedDay,
+          TableCalendar(
+            firstDay: DateTime(_today.year, 1, 1),
+            lastDay: DateTime(_today.year, 12, 31),
+            focusedDay: _focusedDay ?? _today,
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            enabledDayPredicate: (day) { 
-            return day.isAfter(DateTime(2025, 1, 1).subtract(const Duration(days: 1))) && day.isBefore(DateTime(2025, 12, 31)); },
+            enabledDayPredicate: (day) {
+              return !day.isBefore(DateTime(_today.year, 1, 1)) &&
+                !day.isAfter(DateTime(_today.year, 12, 31));
+            },
             onDaySelected: (selectedDay, focusedDay) {
-              if (selectedDay.isBefore(DateTime.now())) {
-                return; 
-              }
+              final DateTime today = DateTime(_today.year, _today.month, _today.day);
+                if (selectedDay.isBefore(today)) {
+                  return;
+                }
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
-                widget.controller.text = DateFormat('yyyy-MM-dd',).format(selectedDay);
+              widget.controller.text = DateFormat('yyyy-MM-dd',).format(selectedDay);
                 debugPrint("Selected date: ${widget.controller.text}");
                 Navigator.pop(context);
               },

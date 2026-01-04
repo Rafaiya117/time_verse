@@ -5,6 +5,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/app_route/app_prefernce.dart';
+import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_image_uploader.dart';
@@ -20,6 +22,7 @@ class Signup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final googleServices = GoogleServices();
     final signup_controller = Provider.of<SignupController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final String logoAsset = isDarkMode
@@ -200,7 +203,21 @@ class Signup extends StatelessWidget {
               SizedBox(height: 30.h,),
               Center(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    final success  = await googleServices.signIn();
+                    if (success) {
+                      await AppPrefs.setLoggedIn(true);
+                      await AppPrefs.setFirstLaunch(false);
+                      if (context.mounted) context.push('/home');
+                    } else {
+                      if (context.mounted) {
+                        await showMessageDialog(
+                          context,
+                          "Google Sign-In failed",
+                        );
+                      }
+                    }
+                  },
                   child: SvgPicture.asset(
                     'assets/icons/gmail.svg',
                     width: 35.w,

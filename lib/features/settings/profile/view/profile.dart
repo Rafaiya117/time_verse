@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_header.dart';
@@ -48,7 +47,9 @@ class Profile extends StatelessWidget {
                     assetPath: 'assets/images/profile_img.png',
                     pickedImage: controller.pickedImage,
                     imageUrl: controller.currentUser?.profilePicture != null
-                      ? '$baseurl${controller.currentUser!.profilePicture}'
+                      ? (controller.currentUser!.profilePicture!.startsWith('http',)
+                      ? controller.currentUser!.profilePicture
+                      : '$baseurl${controller.currentUser!.profilePicture}')
                       : null,
                     onCameraTap: controller.pickImage,
                   ),

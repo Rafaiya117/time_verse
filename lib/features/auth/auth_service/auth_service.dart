@@ -42,6 +42,7 @@ Future<void> clearToken() async {
   await prefs.remove('access_token');
   
   _token = null; 
+  debugPrint('✅ Token cleared from storage and memory.$_token');
 }
 
 

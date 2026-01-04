@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:time_verse/config/app_route/app_prefernce.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 class GoogleServices {
@@ -12,8 +13,8 @@ class GoogleServices {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   GoogleSignInAccount? _currentUser;
+  final String serverClientId = '266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com';
 
-  // Scopes for Google Calendar API
   final List<String> scopes = [
     'email',
     'profile',
@@ -25,7 +26,7 @@ class GoogleServices {
   /// Initialize Google Sign-In
   void init() {
     _googleSignIn.initialize(
-      serverClientId: dotenv.env['Service_Client_ID'], 
+      serverClientId: serverClientId,
     );
   }
 
@@ -33,8 +34,16 @@ class GoogleServices {
   Future<bool> signIn() async {
     try {
       final user = await _googleSignIn.authenticate();
-      if (user == null) return false; 
+      if (user == null) return false;
+
       _currentUser = user;
+
+      if (_currentUser != null) {
+        UserSession().username = _currentUser!.displayName;
+        UserSession().profileImageUrl = _currentUser!.photoUrl;
+        debugPrint("✅ Google Name: ${_currentUser!.displayName}");
+        debugPrint("✅ Google Photo: ${_currentUser!.photoUrl}");
+      }
 
       final auth = await user.authorizationClient.authorizationForScopes(scopes);
       final accessToken = auth?.accessToken;
@@ -43,8 +52,7 @@ class GoogleServices {
       final idToken = (await user.authentication)?.idToken;
       print("ID TOKEN: $idToken");
 
-
-      if (accessToken != null && idToken != null) {
+      if (idToken != null) {
         await sendTokensToApi(idToken);
       }
 
@@ -58,9 +66,12 @@ class GoogleServices {
   Future<void> signOut() async {
     await _googleSignIn.disconnect();
     _currentUser = null;
+    await AuthService().clearToken();
+    await AppPrefs.setLoggedIn(false);
     print("Signed out");
   }
 
+  /// ✅ FIXED: use authorizationHeaders instead of accessToken
   Future<void> addEvent({
     required String summary,
     required DateTime start,
@@ -71,26 +82,28 @@ class GoogleServices {
       return;
     }
 
-    final auth = await _currentUser!.authorizationClient.authorizationForScopes(scopes);
-
-    final accessToken = auth?.accessToken;
-    if (accessToken == null) {
-      print("Failed to get access token");
-      return;
-    }
-
-    final url = Uri.parse('https://www.googleapis.com/calendar/v3/calendars/primary/events');
+    // ✅ Google handles access token internally
+    final headers = await _currentUser!.authorizationClient.authorizationHeaders(scopes);
+    final url = Uri.parse(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    );
 
     final body = {
       "summary": summary,
-      "start": {"dateTime": start.toIso8601String(), "timeZone": "UTC"},
-      "end": {"dateTime": end.toIso8601String(), "timeZone": "UTC"},
+      "start": {
+        "dateTime": start.toIso8601String(),
+        "timeZone": "UTC",
+      },
+      "end": {
+        "dateTime": end.toIso8601String(),
+        "timeZone": "UTC",
+      },
     };
 
     final response = await http.post(
       url,
       headers: {
-        'Authorization': 'Bearer $accessToken',
+        ...?headers,
         'Content-Type': 'application/json',
       },
       body: jsonEncode(body),
@@ -103,13 +116,12 @@ class GoogleServices {
     }
   }
 
-
   Future<void> sendTokensToApi(String idToken) async {
     try {
       final dio = Dio();
       final baseurl = dotenv.env['BASE_URL'];
       final String url = '$baseurl/api/v1/auth/login/idtoken/';
-  
+
       final response = await dio.post(
         url,
         data: {'id_token': idToken},
@@ -119,14 +131,13 @@ class GoogleServices {
       if (response.statusCode == 200) {
         final data = response.data;
 
-        // 🔑 SAVE ACCESS TOKEN (minimal change)
         final accessToken = data['access_token'];
         if (accessToken != null) {
           await AuthService().saveToken(accessToken);
           await AppPrefs.setLoggedIn(true);
         }
 
-        debugPrint('✅ Google login successful');
+        debugPrint('✅ Google login successful $response');
       } else {
         debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
       }

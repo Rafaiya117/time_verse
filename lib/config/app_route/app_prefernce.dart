@@ -6,6 +6,7 @@ class AppPrefs {
   static const _rememberMeKey = 'remember_me';
   static const _savedEmailKey = 'saved_email';
   static const _savedPasswordKey = 'saved_password';
+  static const _isGoogleLoginKey = 'is_google_login';
 
   /// ✅ Login persistence
   static Future<void> setLoggedIn(bool value) async {
@@ -18,6 +19,17 @@ class AppPrefs {
     return prefs.getBool(_isLoggedInKey) ?? false;
   }
 
+  /// ✅ Google login persistence
+  static Future<void> setGoogleLogin(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isGoogleLoginKey, value);
+  }
+
+  static Future<bool> isGoogleLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isGoogleLoginKey) ?? false;
+  }
+
   /// ✅ Landing page shown only first time
   static Future<bool> isFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,11 +40,9 @@ class AppPrefs {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isFirstLaunchKey, value);
   }
-  
 
   /// ✅ Remember Me
-  static Future<void> saveRememberMe(
-    bool remember, String email, String password) async {
+  static Future<void> saveRememberMe(bool remember,String email,String password,) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_rememberMeKey, remember);
     if (remember) {
