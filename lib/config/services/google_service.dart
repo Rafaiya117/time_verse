@@ -25,7 +25,7 @@ class GoogleServices {
   /// Initialize Google Sign-In
   void init() {
     _googleSignIn.initialize(
-      serverClientId: '266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com', 
+      serverClientId: dotenv.env['Service_Client_ID'], 
     );
   }
 
