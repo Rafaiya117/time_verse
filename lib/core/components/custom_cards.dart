@@ -116,23 +116,22 @@ class PhaseCard extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
-                if (isSelected && buttonText != null)
-              Center(
-                child: CustomButton(
-                  text: "Payment",
-                    onPressed: () {
-                      //context.push('/signup');
-                      //context.push('/settings');
-                    },
-                    gradient: AppGradientColors.button_gradient,
-                    textColor: AppColors.text_color,
-                    fontFamily: 'outfit',
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.normal,
-                    height: 51.h,
-                    width: double.infinity,
-                  ),
-                ),
+                // Replace the existing if (isSelected && buttonText != null) block with this
+if (buttonText != null)
+  Center(
+    child: CustomButton(
+      text: buttonText!, // use the buttonText from constructor
+      onPressed: onButtonPressed!, // no forced !, safe
+      gradient: AppGradientColors.button_gradient,
+      textColor: AppColors.text_color,
+      fontFamily: 'outfit',
+      fontSize: 16.sp,
+      fontWeight: FontWeight.normal,
+      height: 51.h,
+      width: double.infinity,
+    ),
+  ),
+
               ],
             ),
           ),

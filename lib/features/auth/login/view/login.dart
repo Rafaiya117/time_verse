@@ -51,7 +51,7 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 20.h,),
               Center(
                 child: Text(
-                  'Welcome Back',
+                  'Welcome to InfiQuote',
                   style: GoogleFonts.outfit(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w500,
@@ -239,6 +239,18 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(height: 20.h,),
+               Center(
+                 child: Text(
+                  'Tap to sign in with Google',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: isDarkMode?AppColors.text_color: AppColors.heading_color    ,
+                  ),
+                ),
+               ),
               SizedBox(height: 120.h,),
               Center(
                 child: SizedBox(

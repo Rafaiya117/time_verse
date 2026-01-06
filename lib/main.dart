@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/config/services/firebase/fire_base_service.dart';
@@ -47,6 +48,9 @@ void main() async {
 
   tz.initializeTimeZones();
   await Alarm.init();
+
+  // ignore: deprecated_member_use
+  await Purchases.configure(PurchasesConfiguration("test_ycrlNQZtYxkPQmlbiDOcfvPMxwA"));
   
   runApp(const MyApp());
   _initBackgroundServices();
