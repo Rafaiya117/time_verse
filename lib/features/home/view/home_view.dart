@@ -465,7 +465,7 @@ class HomeView extends StatelessWidget {
                         return Column(
                           children: [
                             SizedBox(
-                                height: 120.h,
+                              height: 120.h,
                                 child: GestureDetector(
                                   onPanStart: (_) => homeController.stopAutoSlide(),
                                   onPanEnd: (_) => homeController.startAutoSlide(),
@@ -473,46 +473,51 @@ class HomeView extends StatelessWidget {
                                   onTapUp: (_) => homeController.startAutoSlide(),
                                   child: RepaintBoundary(
                                     key: homeController.quoteShareKey,
-                                    child: PageView.builder(
-                                      controller: homeController.pageController,
-                                      itemCount: homeController.inspirationalQuotes.length,
-                                      onPageChanged: (index) {
-                                        homeController.updateQuoteIndex(index);
-                                      },
-                                      itemBuilder: (context, index) {
-                                        final quote = homeController.inspirationalQuotes[index];
-                                        return Column(
-                                          mainAxisAlignment:MainAxisAlignment.center,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                quote.quote,
-                                                textAlign: TextAlign.center,
-                                                style: GoogleFonts.outfit(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16.sp,
-                                                  color: isDarkMode
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                                  height: 1.4,
+                                    child: Container(
+                                      color: const Color(0xFF051123),
+                                      padding: EdgeInsets.symmetric(horizontal: 16.w,),
+                                      child: DefaultTextStyle(
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          height: 1.4,
+                                        ),
+                                        child: PageView.builder(
+                                          controller:homeController.pageController,
+                                          itemCount: homeController.inspirationalQuotes.length,
+                                          onPageChanged: (index) {
+                                            homeController.updateQuoteIndex(index,);
+                                          },
+                                          itemBuilder: (context, index) {
+                                            final quote = homeController.inspirationalQuotes[index];
+                                            return Column(
+                                              mainAxisAlignment:MainAxisAlignment.center,
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    quote.quote,
+                                                    textAlign: TextAlign.center,
+                                                    style: GoogleFonts.outfit(
+                                                      fontWeight:FontWeight.w500,
+                                                      fontSize: 16.sp,
+                                                      color: Colors.white, 
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                            SizedBox(height: 16.h),
-                                            Text(
-                                              quote.reference,
-                                              style: GoogleFonts.outfit(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 14.sp,
-                                                color: isDarkMode
-                                                  ? const Color(0xFFFFD700)
-                                                  : const Color(0xFFFF8C00),
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
+                                                SizedBox(height: 16.h),
+                                                Text(
+                                                  quote.reference,
+                                                  style: GoogleFonts.outfit(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 14.sp,
+                                                    color: const Color(0xFFFFD700,), // 🔒 lock color
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -571,7 +576,6 @@ class HomeView extends StatelessWidget {
                                 debugPrint('Saving quote with ID: ${currentQuote.id}',);
                                 final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
                                   if (success) {
-                                    // Replace SnackBar with dialog
                                     await showMessageDialog(
                                       context,
                                       "Quote saved successfully!",
@@ -586,6 +590,7 @@ class HomeView extends StatelessWidget {
                                   children: [
                                     SvgPicture.asset(
                                       'assets/icons/download.svg',
+                                      // ignore: deprecated_member_use
                                       color: isDarkMode
                                         ? Colors.white
                                         : const Color(0xFF4A90E2),
@@ -682,7 +687,6 @@ class HomeView extends StatelessWidget {
                   if (events.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
                   return Column(
                     children: events.map((event) {
                       return Column(

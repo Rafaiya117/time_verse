@@ -32,10 +32,18 @@ class SavedQouteController extends ChangeNotifier{
     notifyListeners();
   }
 
+  // void shareSelectedQuotes(BuildContext context) {
+  //   final quotesToShare = selectedQuotes.map((i) => savedQuotes[i]['quoteText']).join('\n\n');
+  //   // ignore: deprecated_member_use
+  //   Share.share(quotesToShare); 
+  // }
+
   void shareSelectedQuotes(BuildContext context) {
-    final quotesToShare = selectedQuotes.map((i) => savedQuotes[i]['quoteText']).join('\n\n');
+    if (selectedQuotes.isEmpty) return;
+    final quotesToShare = selectedQuotes.map((i) => savedQuotes[i]['quoteText']).where((q) => q != null && q.toString().trim().isNotEmpty).join('\n\n');
+    if (quotesToShare.trim().isEmpty) return;
     // ignore: deprecated_member_use
-    Share.share(quotesToShare); 
+    Share.share(quotesToShare);
   }
 
   Future<void> fetchSavedQuotes() async {

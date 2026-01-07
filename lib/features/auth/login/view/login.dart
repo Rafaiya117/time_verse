@@ -51,7 +51,7 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 20.h,),
               Center(
                 child: Text(
-                  'Welcome to InfiQuote',
+                  'Welcome to InfiniQuote',
                   style: GoogleFonts.outfit(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w500,

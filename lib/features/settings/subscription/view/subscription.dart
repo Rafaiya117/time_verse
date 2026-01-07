@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_cards.dart';
 import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/utils/colors.dart';
@@ -61,61 +60,85 @@ class Subscription extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24.h),
-
-              // 🔹 Subscription Cards populated from offerings
               AnimatedBuilder(
                 animation: controller,
                 builder: (context, _) {
                   final packages = controller.availablePackages;
-
                   if (packages.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
-                  debugPrint(
-                      '*********** Available Packages: ${packages.length} ***********');
-
+                  debugPrint('*********** Available Packages: ${packages.length} ***********');
                   return Column(
                     children: List.generate(packages.length, (index) {
-                      final package = packages[index]; // Capture package
-
+                      final package = packages[index]; 
                       return Column(
                         children: [
                           GestureDetector(
                             onTap: () => controller.selectCard(index),
                             child: PhaseCard(
-                              // Populate title/subtitle from package
                               title: package.storeProduct.title,
                               subtitle: package.storeProduct.description,
                               isDarkMode: isDarkMode,
                               isSelected: controller.isCardSelected(index),
                               buttonText: index == 0 ? 'Pay Now' : 'Upgrade',
-                              onButtonPressed: () {
+                              onButtonPressed: () async {
                                 debugPrint(
-                                    'Purchasing package: ${package.storeProduct.title}');
-                                controller.purchasePackage(package);
+                                  'Purchasing package: ${package.storeProduct.title}',
+                                );
+                                try {
+                                  await controller.purchasePackage(package);
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text('Purchase Successful'),
+                                      content: Text(
+                                        'You have successfully purchased:\n\n${package.storeProduct.title}',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } catch (e) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text('Purchase Failed'),
+                                      content: Text(e.toString()),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: const Text('Close'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
                               },
-                              // Keep static feature items as they are
                               items: [
                                 {
                                   'title': '1. App Store Optimization (ASO)',
                                   'details':
-                                      '• Monitor download numbers daily\n'
-                                      '• Respond to any initial reviews\n'
-                                      '• Update screenshots based on feedback',
+                                    '• Monitor download numbers daily\n'
+                                    '• Respond to any initial reviews\n'
+                                    '• Update screenshots based on feedback',
                                 },
                                 {
                                   'title': '2. Initial User Support',
                                   'details':
-                                      '• Set up a simple support email\n'
-                                      '• Create a FAQ section in-app',
+                                    '• Set up a simple support email\n'
+                                    '• Create a FAQ section in-app',
                                 },
                                 {
                                   'title': '3. Basic Analytics',
                                   'details':
-                                      '• Track daily active users\n'
-                                      '• Monitor API usage\n'
-                                      '• Identify crash reports',
+                                    '• Track daily active users\n'
+                                    '• Monitor API usage\n'
+                                    '• Identify crash reports',
                                 },
                               ],
                             ),
@@ -135,8 +158,8 @@ class Subscription extends StatelessWidget {
                   fontSize: 13.6.sp,
                   fontWeight: FontWeight.w500,
                   color: isDarkMode
-                      ? AppColors.text_color
-                      : const Color(0xFF373F4B),
+                    ? AppColors.text_color
+                    : const Color(0xFF373F4B),
                 ),
               ),
               SizedBox(height: 20.h),
@@ -147,8 +170,8 @@ class Subscription extends StatelessWidget {
                   fontSize: 10.2.sp,
                   fontWeight: FontWeight.normal,
                   color: isDarkMode
-                      ? AppColors.text_color
-                      : const Color(0xFF373F4B),
+                    ? AppColors.text_color
+                    : const Color(0xFF373F4B),
                 ),
               ),
               SizedBox(height: 20.h),
@@ -168,8 +191,8 @@ class Subscription extends StatelessWidget {
                       fontSize: 10.2.sp,
                       fontWeight: FontWeight.normal,
                       color: isDarkMode
-                          ? AppColors.text_color
-                          : const Color(0xFF373F4B),
+                        ? AppColors.text_color
+                        : const Color(0xFF373F4B),
                     ),
                   ),
                 ],
