@@ -15,7 +15,7 @@ class ForgotPassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final forgotpassword_controller = Provider.of<ForgotPasswordController>(context, listen: false);
+    final forgotpasswordController = Provider.of<ForgotPasswordController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color secondaryTextColor = isDarkMode 
         ? AppColors.fourth_color 
@@ -63,7 +63,7 @@ class ForgotPassword extends StatelessWidget {
               CustomInputField(
                 label: 'Email Address *',
                 hintText: 'Enter your email...',
-                controller: forgotpassword_controller.emailController,
+                controller: forgotpasswordController.emailController,
                 isPassword: false,
                 fontSize: 12,
               ),
@@ -72,11 +72,11 @@ class ForgotPassword extends StatelessWidget {
                 child: CustomButton(
                   text: "Recover Account",
                   onPressed: () async {
-                    if (forgotpassword_controller.validateLoginFields()) {
-                      final success = await forgotpassword_controller.sendForgotPasswordEmail();
+                    if (forgotpasswordController.validateLoginFields()) {
+                      final success = await forgotpasswordController.sendForgotPasswordEmail();
                       if (success) {
                         if (context.mounted) {
-                          final email = forgotpassword_controller.emailController
+                          final email = forgotpasswordController.emailController
                             .text.trim();
                           final encodedEmail = Uri.encodeComponent(email);
                           context.push('/otp?email=$encodedEmail');
@@ -85,7 +85,7 @@ class ForgotPassword extends StatelessWidget {
                         if (context.mounted) {
                           await showMessageDialog(
                             context,
-                            forgotpassword_controller.errorMessage ?? 'Request failed',
+                            forgotpasswordController.errorMessage ?? 'Request failed',
                           );
                         }
                       }

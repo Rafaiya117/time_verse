@@ -158,7 +158,7 @@ class ProfileController extends ChangeNotifier {
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
       pickedImage = File(picked.path);
-      debugPrint("✅ Image picked: ${pickedImage}");
+      debugPrint("✅ Image picked: $pickedImage");
       notifyListeners();
     }
   }

@@ -1,5 +1,4 @@
 import 'package:alarm/model/alarm_settings.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/core/components/alarm.dart';
 import 'package:time_verse/core/theme/theme_background_wrapper.dart';

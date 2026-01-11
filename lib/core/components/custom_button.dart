@@ -25,7 +25,7 @@ class CustomButton extends StatelessWidget {
   final Widget? leadingIcon;
 
   const CustomButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.width,
@@ -42,7 +42,7 @@ class CustomButton extends StatelessWidget {
     this.borderColor,
     this.borderGradient,
     this.leadingIcon,
-  }) : super(key: key);
+  });
 
   TextStyle _buildTextStyle() {
     final baseStyle = TextStyle(

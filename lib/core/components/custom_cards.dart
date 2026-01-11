@@ -16,7 +16,7 @@ class PhaseCard extends StatelessWidget {
   final VoidCallback? onButtonPressed;
 
   const PhaseCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     required this.items,
@@ -24,7 +24,7 @@ class PhaseCard extends StatelessWidget {
     this.isSelected = false,
     this.buttonText,
     this.onButtonPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

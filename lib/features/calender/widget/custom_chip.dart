@@ -9,11 +9,11 @@ class BulletButton extends StatelessWidget {
   final String iconPath;
 
   const BulletButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.color,
     required this.iconPath,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

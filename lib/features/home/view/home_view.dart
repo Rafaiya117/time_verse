@@ -262,7 +262,7 @@ class HomeView extends StatelessWidget {
             ),
             //SizedBox(height: 10.h),            
             Text(
-              '${UserSession().formattedUsername}',
+              UserSession().formattedUsername,
               style: GoogleFonts.outfit(
                 fontWeight: FontWeight.normal,
                 fontSize: 34.sp,
@@ -302,7 +302,7 @@ class HomeView extends StatelessWidget {
               ),
             ),
             SizedBox(height: 15.h),            
-            Container(
+            SizedBox(
               height: 80.h,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,

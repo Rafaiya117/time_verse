@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Needed for Path
+// Needed for Path
 
 // class CustomPolygonClipper extends CustomClipper<Path> {
 //   @override

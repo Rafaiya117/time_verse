@@ -23,7 +23,7 @@ class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final googleServices = GoogleServices();
-    final signup_controller = Provider.of<SignupController>(context, listen: false);
+    final signupController = Provider.of<SignupController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final String logoAsset = isDarkMode
       ? 'assets/images/logo.png' 
@@ -62,7 +62,7 @@ class Signup extends StatelessWidget {
               CustomInputField(
                 label: 'Full Name *',
                 hintText: 'Enter your fullname',
-                controller: signup_controller.nameController,
+                controller: signupController.nameController,
                 isPassword: false,
                 fontSize: 12,
               ),
@@ -70,7 +70,7 @@ class Signup extends StatelessWidget {
               CustomInputField(
                 label: 'Email Address *',
                 hintText: 'Enter your email...',
-                controller: signup_controller.emailController,
+                controller: signupController.emailController,
                 isPassword: false,
                 fontSize: 12,
               ),
@@ -81,7 +81,7 @@ class Signup extends StatelessWidget {
                     child: CustomInputField(
                       label: 'Password *',
                       hintText: 'Enter your password...',
-                      controller: signup_controller.passwordController,
+                      controller: signupController.passwordController,
                       isPassword: true,
                       fontSize: 12,
                     ),
@@ -91,7 +91,7 @@ class Signup extends StatelessWidget {
                     child: CustomInputField(
                       label: 'Confirm Password *',
                       hintText: 'Enter confirm password...',
-                      controller: signup_controller.confirm_passwordController,
+                      controller: signupController.confirm_passwordController,
                       isPassword: true,
                       fontSize: 12,
                     ),
@@ -137,15 +137,15 @@ class Signup extends StatelessWidget {
                 child: CustomButton(
                   text: "Continue",
                   onPressed: () async {
-                    if (signup_controller.validateSignupFields()) {
-                      final success = await signup_controller.signupUser();
+                    if (signupController.validateSignupFields()) {
+                      final success = await signupController.signupUser();
                       if (success) {
                         if (context.mounted) context.push('/login');
                       } else {
                         if (context.mounted) {
                           await showMessageDialog(
                             context,
-                            signup_controller.signupError ?? 'Signup failed',
+                            signupController.signupError ?? 'Signup failed',
                           );
                         }
                       }

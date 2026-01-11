@@ -31,7 +31,7 @@ class EventController extends ChangeNotifier {
       await file.writeAsBytes(pngBytes);
 
       // ignore: deprecated_member_use
-      await Share.shareXFiles([XFile(file.path)], text: '✨ ${quoteText}');
+      await Share.shareXFiles([XFile(file.path)], text: '✨ $quoteText');
     } catch (e) {
       debugPrint('⚠️ Error sharing quote: $e');
     }

@@ -12,7 +12,7 @@ class ChangePassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final changepassowrd_controller = Provider.of<ChangepassowrdController>(context, listen: false);
+    final changepassowrdController = Provider.of<ChangepassowrdController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Padding(
@@ -28,7 +28,7 @@ class ChangePassword extends StatelessWidget {
             CustomInputField(
               label: '',
               hintText: 'Old Password',
-              controller: changepassowrd_controller.old_passwordController,
+              controller: changepassowrdController.old_passwordController,
               isPassword: true,
               fontSize: 16.sp,
               height: 44.h,
@@ -41,7 +41,7 @@ class ChangePassword extends StatelessWidget {
             CustomInputField(
               label: '',
               hintText: 'New Password',
-              controller: changepassowrd_controller.new_passwordController,
+              controller: changepassowrdController.new_passwordController,
               isPassword: true,
               fontSize: 16.sp,
               height: 44.h,
@@ -54,7 +54,7 @@ class ChangePassword extends StatelessWidget {
             CustomInputField(
               label: '',
               hintText: 'Confirm Password',
-              controller: changepassowrd_controller.confirm_passwordController,
+              controller: changepassowrdController.confirm_passwordController,
               isPassword: true,
               fontSize: 16.sp,
               height: 44.h,
@@ -67,7 +67,7 @@ class ChangePassword extends StatelessWidget {
             CustomButton(
               text: "Update",
               onPressed: () {
-               changepassowrd_controller.changePassword(context);
+               changepassowrdController.changePassword(context);
               },
               gradient: AppGradientColors.button_gradient,
               textColor: AppColors.text_color,

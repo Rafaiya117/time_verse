@@ -13,7 +13,7 @@ class GoogleServices {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   GoogleSignInAccount? _currentUser;
-  final String serverClientId = '266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com';
+  final String serverClientId = '436776654983-l40ovblu1a15ou62j4l2i3ub9ju8us44.apps.googleusercontent.com';
 
   final List<String> scopes = [
     'email',
@@ -34,7 +34,6 @@ class GoogleServices {
   Future<bool> signIn() async {
     try {
       final user = await _googleSignIn.authenticate();
-      if (user == null) return false;
 
       _currentUser = user;
 
@@ -49,7 +48,7 @@ class GoogleServices {
       final accessToken = auth?.accessToken;
       print("ACCESS TOKEN: $accessToken");
 
-      final idToken = (await user.authentication)?.idToken;
+      final idToken = (user.authentication).idToken;
       print("ID TOKEN: $idToken");
 
       if (idToken != null) {

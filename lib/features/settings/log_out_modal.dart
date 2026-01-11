@@ -17,7 +17,7 @@ void showLogoutDialog(BuildContext context) {
       backgroundColor: Theme.of(context).dialogBackgroundColor,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-        child: Container(
+        child: SizedBox(
           width: 327.w,
           height: 218.h,
           child: Column(

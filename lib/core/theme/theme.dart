@@ -52,8 +52,7 @@ final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
   ).copyWith(
     onSurface: AppColors.l_text_clr, 
-    primary: AppColors.third_color, 
-    background: AppColors.background_color,
+    primary: AppColors.third_color,
     surface: AppColors.container, 
   ),
   appBarTheme: AppBarTheme( 
@@ -81,8 +80,7 @@ final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
   ).copyWith(
     onSurface: AppColors.text_color, 
-    primary: AppColors.third_color, 
-    background: AppColors.containers_bgd,
+    primary: AppColors.third_color,
     surface: AppColors.containers_bgd,
   ),
   

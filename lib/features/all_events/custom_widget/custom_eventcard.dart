@@ -16,7 +16,7 @@ class EventCard extends StatelessWidget {
   final bool isDarkMode;
 
   const EventCard({
-    Key? key,
+    super.key,
     required this.id,
     required this.sub_title,
     required this.title,
@@ -25,7 +25,7 @@ class EventCard extends StatelessWidget {
     required this.location,
     required this.onDelete,
     required this.isDarkMode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

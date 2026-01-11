@@ -42,10 +42,10 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-           Text('Alarm ringing for ${notification?.title ?? 'Alarm Ringing'}'),
+           Text('Alarm ringing for ${notification.title ?? 'Alarm Ringing'}'),
            Padding(
              padding: const EdgeInsets.all(12.0),
-             child: Text(notification?.body ?? ''),
+             child: Text(notification.body ?? ''),
            ),
             const Text('🔔', style: TextStyle(fontSize: 80)),
             Row(
@@ -70,7 +70,6 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     await Alarm.stop(widget.alarmSettings.id);
-
                     if (!mounted) return;
                     appRouter.go('/');
                   },

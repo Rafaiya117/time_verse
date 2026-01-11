@@ -61,7 +61,7 @@ class ProfileImagePicker extends StatelessWidget {
             right: -4.w,
             child: GestureDetector(
               onTap: onCameraTap,
-              child: Container(
+              child: SizedBox(
                 width: 32.w,
                 height: 32.w,
                 child: Center(

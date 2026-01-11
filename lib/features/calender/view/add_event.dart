@@ -263,7 +263,7 @@ class AddEventModal extends StatelessWidget {
                     location:addEventController.locationController.text.trim().isEmpty ? null : addEventController.locationController.text.trim(),
                     alarmTime: alarm,
                     categoryName: addEventController.selectedCategory?.isEmpty == true ? null : addEventController.selectedCategory,
-                    note: addEventController.noteController?.text.trim() ?? "",
+                    note: addEventController.noteController.text.trim() ?? "",
                   );
 
                   debugPrint("START TIME SENT => $start");
