@@ -1,4 +1,4 @@
-package com.example.time_verse
+package com.infiniquote.app
 
 import io.flutter.embedding.android.FlutterActivity
 

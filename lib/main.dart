@@ -50,7 +50,7 @@ void main() async {
   await Alarm.init();
 
   // ignore: deprecated_member_use
-  await Purchases.configure(PurchasesConfiguration("test_BQgLjxhDyZghRPnwBFQAVRSnpSI "));
+  await Purchases.configure(PurchasesConfiguration("test_ycrlNQZtYxkPQmlbiDOcfvPMxwA"));
   
   runApp(const MyApp());
   _initBackgroundServices();

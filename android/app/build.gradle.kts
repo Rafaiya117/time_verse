@@ -8,13 +8,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.time_verse"
+    namespace = "com.infiniquote.app"
     compileSdk = 35
     ndkVersion = "27.0.12077973"
 
     defaultConfig {
-        applicationId = "com.example.time_verse"
-        minSdk = 23
+        applicationId = "com.infiniquote.app"
+        minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"

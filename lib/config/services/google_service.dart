@@ -13,7 +13,7 @@ class GoogleServices {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   GoogleSignInAccount? _currentUser;
-  final String serverClientId = '436776654983-l40ovblu1a15ou62j4l2i3ub9ju8us44.apps.googleusercontent.com';
+  final String serverClientId = '468767271373-igakn4plmbu2io7ocqph0miemm38lumq.apps.googleusercontent.com';
 
   final List<String> scopes = [
     'email',

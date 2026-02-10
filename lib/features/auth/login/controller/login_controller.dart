@@ -67,19 +67,19 @@ class LoginController extends ChangeNotifier{
     notifyListeners();
   }
 
-  Future<void> startGoogleLogin() async {
-    final url = Uri.parse("http://10.10.13.74:5000/google_auth/google/login");
+  // Future<void> startGoogleLogin() async {
+  //   final url = Uri.parse("http://10.10.13.74:5000/google_auth/google/login");
 
-    try {
-      // Open in external browser
-      if (!await launchUrl(
-        url,
-        mode: LaunchMode.externalApplication,
-      )) {
-        print("Could not launch login url");
-      }
-    } catch (e) {
-      print("Error launching login url: $e");
-    }
-  }
+  //   try {
+  //     // Open in external browser
+  //     if (!await launchUrl(
+  //       url,
+  //       mode: LaunchMode.externalApplication,
+  //     )) {
+  //       print("Could not launch login url");
+  //     }
+  //   } catch (e) {
+  //     print("Error launching login url: $e");
+  //   }
+  // }
 }
