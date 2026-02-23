@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
@@ -295,7 +296,7 @@ class AddEventModal extends StatelessWidget {
                       icon: Icons.check_circle_outline,
                       iconColor: Colors.green,
                     );
-                     Navigator.of(context).pop();
+                    context.pop();
                   }
                 } catch (e) {
                   await showMessageDialog(
