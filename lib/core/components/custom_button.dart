@@ -93,7 +93,18 @@ class CustomButton extends StatelessWidget {
             leadingIcon!,
             SizedBox(width: 8.w),
           ],
-          Text(text, style: _buildTextStyle()),
+          //Text(text, style: _buildTextStyle()),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _buildTextStyle(),
+              ),
+            ),
+          ),
         ],
       ),
     );

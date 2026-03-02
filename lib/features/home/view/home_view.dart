@@ -207,41 +207,38 @@ class HomeView extends StatelessWidget {
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
-                      onTap: () {
-                        context.push('/profile');
-                      },
-                      child: Container(
-                        width: 40.w,
-                        height: 40.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
-                            width: 2,
-                          ),
-                        ),
-                        child: 
-                        // ClipOval(
-                        //   child: Image.asset(
-                        //     'assets/images/profile_img.png',
-                        //     fit: BoxFit.cover,
-                        //   ),
-                        // ),
-                        ClipOval(
-                          child: Selector<ProfileController, String?>(
-                            selector: (_, controller) => controller.currentUser?.profilePicture,
-                              builder: (_, profilePicture, __) {
-                                debugPrint('!----$profilePicture');
-                                final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
-                                ? NetworkImage(profilePicture )
-                                : const AssetImage(
-                                'assets/images/profile_img.png',
-                              );
-                              return Image(
-                                image: imageProvider as ImageProvider,
-                                fit: BoxFit.cover,
-                              );
-                            },
+                        onTap: () {
+                          context.push('/profile');
+                        },
+                        child: SizedBox(
+                          width: 40.w,
+                          height: 40.w, // ✅ FIX: use same scaling unit to prevent stretch
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isDarkMode
+                                  ? AppColors.text_color
+                                  : AppColors.heading_color,
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipOval(
+                              child: Selector<ProfileController, String?>(
+                                selector: (_, controller) => controller.currentUser?.profilePicture,
+                                builder: (_, profilePicture, __) {
+                                  debugPrint('!----$profilePicture');
+
+                                  final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
+                                    ? NetworkImage(profilePicture): const AssetImage(
+                                      'assets/images/profile_img.png',
+                                    );
+                                  return Image(
+                                    image: imageProvider as ImageProvider,
+                                    fit: BoxFit.cover,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -774,9 +771,7 @@ class HomeView extends StatelessWidget {
                         margin: EdgeInsets.only(bottom: 12.h),
                         padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
-                          color: isDarkMode
-                            ? AppColors.containers_bgd
-                            : AppColors.background_color,
+                          color: isDarkMode? AppColors.containers_bgd: AppColors.background_color,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: isDarkMode
@@ -814,9 +809,7 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14.sp,
-                                        color: isDarkMode
-                                          ? Colors.white
-                                          : Colors.black,
+                                        color: isDarkMode? Colors.white: Colors.black,
                                       ),
                                     ),
                                     Row(
