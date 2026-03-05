@@ -59,7 +59,8 @@ class FCMService {
         id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         title: title ?? 'Notification',
         body: body ?? '',
-        alarmTime: DateTime.now().add(const Duration(seconds: 1)),
+        alarmTime: DateTime.now().add(const Duration(seconds: 1)), 
+        payload: message.messageId,
       );
     });
   }

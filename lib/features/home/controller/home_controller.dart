@@ -99,7 +99,7 @@ class HomeController extends ChangeNotifier {
             id: event.id,
             title: event.title,
             body: event.description,
-            alarmTime: DateTime.parse(event.alarmTime),
+            alarmTime: DateTime.parse(event.alarmTime), payload: event.id,
           );
         }
       }

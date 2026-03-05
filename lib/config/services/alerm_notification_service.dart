@@ -34,7 +34,7 @@ class NotificationService {
     required int id,
     required String title,
     required String body,
-    required DateTime alarmTime,
+    required DateTime alarmTime, required payload,
   }) async {
     await requestExactAlarmPermission();
 

@@ -682,7 +682,14 @@ class HomeView extends StatelessWidget {
               builder: (context, controller, _) {
                 final events = controller.todaysEvents;
                   if (events.isEmpty) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Text(
+                      'No review yet',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14.sp,
+                        color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
+                      ),
+                    );
                   }
                   return Column(
                     children: events.map((event) {

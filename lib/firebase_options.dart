@@ -41,49 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAY7t78tNsp5fUxlLMYySKwTvZrV3eOe78',
-    appId: '1:670651887856:web:4cdc2a7dbf80ef3cef9235',
-    messagingSenderId: '670651887856',
-    projectId: 'radu-77c94',
-    authDomain: 'radu-77c94.firebaseapp.com',
-    storageBucket: 'radu-77c94.firebasestorage.app',
-    measurementId: 'G-9SPJ6M3KG7',
+    apiKey: 'AIzaSyDH-uG-mQWBps4PVoBeWevkPE2m7IWwfbQ',
+    appId: '1:1045548957686:web:3ec1017864a1e75705d1d7',
+    messagingSenderId: '1045548957686',
+    projectId: 'infiniqoute-b3200',
+    authDomain: 'infiniqoute-b3200.firebaseapp.com',
+    storageBucket: 'infiniqoute-b3200.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCOVsqt-5BMB1p3-0pEz-2--faFbrvkG5Q',
-    appId: '1:670651887856:android:40bfa8c6c644c5cfef9235',
-    messagingSenderId: '670651887856',
-    projectId: 'radu-77c94',
-    storageBucket: 'radu-77c94.firebasestorage.app',
+    apiKey: 'AIzaSyCn3c2z1IRYn_Fs7B3JUxph5_n9UfrEa0g',
+    appId: '1:1045548957686:android:e756ec93aa150a7505d1d7',
+    messagingSenderId: '1045548957686',
+    projectId: 'infiniqoute-b3200',
+    storageBucket: 'infiniqoute-b3200.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDuC4m_IF_JBpHx-3gIVMspbJ2t96oa3rg',
-    appId: '1:670651887856:ios:1077959c70024faeef9235',
-    messagingSenderId: '670651887856',
-    projectId: 'radu-77c94',
-    storageBucket: 'radu-77c94.firebasestorage.app',
-    iosBundleId: 'com.example.timeVerse',
+    apiKey: 'AIzaSyDksL_Zqg89HYb0_nXrPaQxrAYGeCgNLIQ',
+    appId: '1:1045548957686:ios:0b227f7d093b5dd105d1d7',
+    messagingSenderId: '1045548957686',
+    projectId: 'infiniqoute-b3200',
+    storageBucket: 'infiniqoute-b3200.firebasestorage.app',
+    iosBundleId: 'com.infiniquote.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDuC4m_IF_JBpHx-3gIVMspbJ2t96oa3rg',
-    appId: '1:670651887856:ios:1077959c70024faeef9235',
-    messagingSenderId: '670651887856',
-    projectId: 'radu-77c94',
-    storageBucket: 'radu-77c94.firebasestorage.app',
-    iosBundleId: 'com.example.timeVerse',
+    apiKey: 'AIzaSyDksL_Zqg89HYb0_nXrPaQxrAYGeCgNLIQ',
+    appId: '1:1045548957686:ios:0b227f7d093b5dd105d1d7',
+    messagingSenderId: '1045548957686',
+    projectId: 'infiniqoute-b3200',
+    storageBucket: 'infiniqoute-b3200.firebasestorage.app',
+    iosBundleId: 'com.infiniquote.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAY7t78tNsp5fUxlLMYySKwTvZrV3eOe78',
-    appId: '1:670651887856:web:3dacaa11de9064e4ef9235',
-    messagingSenderId: '670651887856',
-    projectId: 'radu-77c94',
-    authDomain: 'radu-77c94.firebaseapp.com',
-    storageBucket: 'radu-77c94.firebasestorage.app',
-    measurementId: 'G-X0NZV3Q69J',
+    apiKey: 'AIzaSyDH-uG-mQWBps4PVoBeWevkPE2m7IWwfbQ',
+    appId: '1:1045548957686:web:bacb01525b006e4f05d1d7',
+    messagingSenderId: '1045548957686',
+    projectId: 'infiniqoute-b3200',
+    authDomain: 'infiniqoute-b3200.firebaseapp.com',
+    storageBucket: 'infiniqoute-b3200.firebasestorage.app',
   );
-
 }

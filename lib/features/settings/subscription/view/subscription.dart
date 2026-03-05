@@ -44,8 +44,8 @@ class Subscription extends StatelessWidget {
                   fontSize: 20.4.sp,
                   fontWeight: FontWeight.normal,
                   color: isDarkMode
-                      ? AppColors.text_color
-                      : const Color(0xFF373F4B),
+                    ? AppColors.text_color
+                    : const Color(0xFF373F4B),
                 ),
               ),
               SizedBox(height: 10.h),
@@ -55,8 +55,8 @@ class Subscription extends StatelessWidget {
                   fontSize: 11.9.sp,
                   fontWeight: FontWeight.normal,
                   color: isDarkMode
-                      ? AppColors.text_color
-                      : const Color(0xFF373F4B),
+                    ? AppColors.text_color
+                    : const Color(0xFF373F4B),
                 ),
               ),
               SizedBox(height: 24.h),
@@ -82,11 +82,9 @@ class Subscription extends StatelessWidget {
                               isSelected: controller.isCardSelected(index),
                               buttonText: index == 0 ? 'Pay Now' : 'Upgrade',
                               onButtonPressed: () async {
-                                debugPrint(
-                                  'Purchasing package: ${package.storeProduct.title}',
-                                );
-                                try {
-                                  await controller.purchasePackage(package);
+                                debugPrint('Purchasing package: ${package.storeProduct.title}',);
+                                await controller.purchasePackage(package);
+                                if (controller.purchaseStatus == "success") {
                                   showDialog(
                                     context: context,
                                     builder: (_) => AlertDialog(
@@ -103,15 +101,35 @@ class Subscription extends StatelessWidget {
                                       ],
                                     ),
                                   );
-                                } catch (e) {
+                                } else if (controller.purchaseStatus == "cancelled") {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text('Purchase Cancelled'),
+                                      content: const Text(
+                                        'You cancelled the purchase.',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
                                   showDialog(
                                     context: context,
                                     builder: (_) => AlertDialog(
                                       title: const Text('Purchase Failed'),
-                                      content: Text(e.toString()),
+                                      content: const Text(
+                                        'Something went wrong. Please try again.',
+                                      ),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.pop(context),
+                                          onPressed: () =>
+                                              Navigator.pop(context),
                                           child: const Text('Close'),
                                         ),
                                       ],

@@ -41,18 +41,32 @@ import 'package:time_verse/firebase_options.dart';
 import 'package:timezone/data/latest.dart' as tz;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    if (e.toString().contains('duplicate-app')) {
+      Firebase.app();
+    } else {
+      rethrow;
+    }
+  }
+
+  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
 
   tz.initializeTimeZones();
   await Alarm.init();
 
-  // ignore: deprecated_member_use
-  await Purchases.configure(PurchasesConfiguration("test_ycrlNQZtYxkPQmlbiDOcfvPMxwA"));
-  
+  await Purchases.configure(
+    PurchasesConfiguration(dotenv.env['REVENUE_CAT_API']!),
+  );
+
   runApp(const MyApp());
+
   _initBackgroundServices();
 }
 

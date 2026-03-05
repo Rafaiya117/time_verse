@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class SubscriptionController extends ChangeNotifier {
@@ -15,6 +16,9 @@ class SubscriptionController extends ChangeNotifier {
   Offerings? offerings;
   bool isPurchasing = false;
 
+  // ✅ Purchase status
+  String? purchaseStatus; // success | cancelled | failed
+
   // ✅ Load offerings
   Future<void> loadOfferings() async {
     try {
@@ -26,18 +30,45 @@ class SubscriptionController extends ChangeNotifier {
     }
   }
 
-
   Future<void> purchasePackage(Package package) async {
     try {
       isPurchasing = true;
+      purchaseStatus = null;
       notifyListeners();
 
-      // ignore: deprecated_member_use
-      final purchaseResult = await Purchases.purchasePackage(package);
-      final customerInfo = purchaseResult.customerInfo; 
-      debugPrint("Purchase successful: ${customerInfo.entitlements.active}");
+      final purchaseResult =
+          await Purchases.purchasePackage(package);
+
+      final customerInfo = purchaseResult.customerInfo;
+
+      // ✅ SUCCESS
+      if (customerInfo.entitlements.active.isNotEmpty) {
+        purchaseStatus = "success";
+        debugPrint("Purchase Success");
+      } else {
+        purchaseStatus = "failed";
+        debugPrint("Purchase Failed: No active entitlements");
+      }
+
+    } on PlatformException catch (e) {
+
+      // ✅ CANCELLED
+      if (e.code == '1' ||
+          e.message?.contains('cancelled') == true ||
+          e.toString().contains('PurchaseCancelledError')) {
+
+        purchaseStatus = "cancelled";
+        debugPrint("Purchase Cancelled");
+
+      } else {
+        // ❌ FAILED
+        purchaseStatus = "failed";
+        debugPrint("Purchase Failed: $e");
+      }
+
     } catch (e) {
-      debugPrint("Purchase failed: $e");
+      purchaseStatus = "failed";
+      debugPrint("Purchase Failed: $e");
     } finally {
       isPurchasing = false;
       notifyListeners();

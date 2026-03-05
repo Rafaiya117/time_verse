@@ -26,14 +26,18 @@ android {
         applicationId = "com.infiniquote.app"
         minSdk = flutter.minSdkVersion
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
  
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
+    }
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
     }
  
     kotlinOptions {
@@ -52,6 +56,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

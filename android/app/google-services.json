@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "670651887856",
-    "project_id": "radu-77c94",
-    "storage_bucket": "radu-77c94.firebasestorage.app"
+    "project_number": "1045548957686",
+    "project_id": "infiniqoute-b3200",
+    "storage_bucket": "infiniqoute-b3200.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:670651887856:android:40bfa8c6c644c5cfef9235",
+        "mobilesdk_app_id": "1:1045548957686:android:e756ec93aa150a7505d1d7",
         "android_client_info": {
           "package_name": "com.infiniquote.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCOVsqt-5BMB1p3-0pEz-2--faFbrvkG5Q"
+          "current_key": "AIzaSyCn3c2z1IRYn_Fs7B3JUxph5_n9UfrEa0g"
         }
       ],
       "services": {
