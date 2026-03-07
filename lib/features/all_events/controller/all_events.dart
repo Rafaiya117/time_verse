@@ -1,9 +1,11 @@
+import 'package:alarm/alarm.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:intl/intl.dart';
@@ -31,66 +33,66 @@ class AllEventsController extends ChangeNotifier {
   }
   
   final List<EventModel> _events = [
-   EventModel(
-      title: 'Soccer Practice & Fun',
-      date: 'Today',
-      startTime: '4.00 PM',
-      location: 'City Sports Complex', 
-      id:0, 
-      userName: '', 
-      description: '', 
-      endTime: '', 
-      alarmTime: '', 
-      isCompleted: false, 
-      createdAt: '', 
-      user: 0, 
-      isFavorite: false,
-    ),
-    EventModel(
-      title: 'Emma\'s 10th Birthday Party',
-      date: 'Saturday, Sep 19,2025',
-      startTime: '3.00 - 6:00 PM',
-      location: '123 Oak Street, Springfield', 
-      id: 0, 
-      userName: '', 
-      description: '', 
-      endTime: '', 
-      alarmTime: '', 
-      isCompleted: false, 
-      createdAt: '', 
-      user: 0, 
-      isFavorite: false,
-    ),
-    EventModel(
-      title: 'Soccer Practice & Fun',
-      date: 'Today',
-      startTime: '4.00 PM',
-      location: 'City Sports Complex', 
-      id:0, 
-      userName: '', 
-      description: '', 
-      endTime: '', 
-      alarmTime: '', 
-      isCompleted: false, 
-      createdAt: '', 
-      user: 0, 
-      isFavorite: false,
-    ),
-    EventModel(
-      title: 'Emma\'s 10th Birthday Party',
-      date: 'Saturday, Sep 19,2025',
-      startTime: '3.00 - 6:00 PM',
-      location: '123 Oak Street, Springfield', 
-      id: 0, 
-      userName: '', 
-      description: '', 
-      endTime: '', 
-      alarmTime: '', 
-      isCompleted: false, 
-      createdAt: '', 
-      user: 0, 
-      isFavorite: false,
-    ),
+  //  EventModel(
+  //     title: 'Soccer Practice & Fun',
+  //     date: 'Today',
+  //     startTime: '4.00 PM',
+  //     location: 'City Sports Complex', 
+  //     id:0, 
+  //     userName: '', 
+  //     description: '', 
+  //     endTime: '', 
+  //     alarmTime: '', 
+  //     isCompleted: false, 
+  //     createdAt: '', 
+  //     user: 0, 
+  //     isFavorite: false,
+  //   ),
+  //   EventModel(
+  //     title: 'Emma\'s 10th Birthday Party',
+  //     date: 'Saturday, Sep 19,2025',
+  //     startTime: '3.00 - 6:00 PM',
+  //     location: '123 Oak Street, Springfield', 
+  //     id: 0, 
+  //     userName: '', 
+  //     description: '', 
+  //     endTime: '', 
+  //     alarmTime: '', 
+  //     isCompleted: false, 
+  //     createdAt: '', 
+  //     user: 0, 
+  //     isFavorite: false,
+  //   ),
+  //   EventModel(
+  //     title: 'Soccer Practice & Fun',
+  //     date: 'Today',
+  //     startTime: '4.00 PM',
+  //     location: 'City Sports Complex', 
+  //     id:0, 
+  //     userName: '', 
+  //     description: '', 
+  //     endTime: '', 
+  //     alarmTime: '', 
+  //     isCompleted: false, 
+  //     createdAt: '', 
+  //     user: 0, 
+  //     isFavorite: false,
+  //   ),
+  //   EventModel(
+  //     title: 'Emma\'s 10th Birthday Party',
+  //     date: 'Saturday, Sep 19,2025',
+  //     startTime: '3.00 - 6:00 PM',
+  //     location: '123 Oak Street, Springfield', 
+  //     id: 0, 
+  //     userName: '', 
+  //     description: '', 
+  //     endTime: '', 
+  //     alarmTime: '', 
+  //     isCompleted: false, 
+  //     createdAt: '', 
+  //     user: 0, 
+  //     isFavorite: false,
+  //   ),
   ];
 
   List<EventModel> get events => List.unmodifiable(_events);
@@ -112,71 +114,65 @@ class AllEventsController extends ChangeNotifier {
 
   // ------------------ Fetch events from API ------------------ //
   Future<void> fetchAllEvents() async {
-    try {
-      final authService = AuthService();
-      final token = await authService.getToken();
-      debugPrint('🚀 Token fetched: $token');
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
-      debugPrint('🌐 Base URL: $baseUrl');
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-      final response = await _dio.get(
-        '${baseUrl}api/v1/event/',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
+    final response = await _dio.get(
+      '${baseUrl}api/v1/event/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
 
-      debugPrint('📦 API Response Status: ${response.statusCode}');
-      debugPrint('📄 Response data---------------------: ${response.data}');
+    if (response.statusCode == 200) {
+      final List data = response.data;
 
-      if (response.statusCode == 200) {
-        final List data = response.data;
-        debugPrint('✅ Number of events fetched: ${data.length}');
+      final currentUserId = int.tryParse(UserSession().userId ?? '');
+      _events
+        ..clear()
+        ..addAll(
+          data.where((json) => json['user'] == currentUserId).map((json) {
+            final formattedDate = formatEventDate(json['date'] ?? '');
 
-        _events
-          ..clear()
-          ..addAll(
-            data.map((json) {
-              final formattedDate = formatEventDate(json['date'] ?? '');
-              debugPrint('💬 Event parsed: ${json['title']} - $formattedDate');
+            return EventModel(
+              id: json['id'] ?? 0,
+              userName: json['user_name']?.toString() ?? '',
+              title: json['title']?.toString() ?? '',
+              description:json['description']?.toString() ?? '',
+              date: formattedDate,
+              startTime:json['start_time']?.toString() ?? '',
+              endTime: json['end_time']?.toString() ?? '',
+              location: json['location']?.toString() ?? '',
+              alarmTime:json['alarm_time']?.toString() ?? '',
+              isCompleted: json['is_completed'] ?? false,
+              createdAt:json['created_at']?.toString() ?? '',
+              user: json['user'] ?? 0,
+              category: json['category']?.toString(),
+              isFavorite: json['is_favorite'] ?? false,
+            );
+          }).toList(),
+        );
 
-              return EventModel(
-                id: json['id'] ?? 0,
-                userName: json['user_name']?.toString() ?? '',
-                title: json['title']?.toString() ?? '',
-                description: json['description']?.toString() ?? '',
-                date: formattedDate,
-                startTime: json['start_time']?.toString() ?? '',
-                endTime: json['end_time']?.toString() ?? '',
-                location: json['location']?.toString() ?? '',
-                alarmTime: json['alarm_time']?.toString() ?? '',
-                isCompleted: json['is_completed'] ?? false,
-                createdAt: json['created_at']?.toString() ?? '',
-                user: json['user'] ?? 0,
-                category: json['category']?.toString(),
-                isFavorite: json['is_favorite'] ?? false,
-              );
-            }).toList(),
-          );
-        notifyListeners();
-        for (final event in _events) {
-          debugPrint('⏱ Backend alarmTime: "${event.alarmTime}"');
-          if (event.alarmTime.isNotEmpty) {
-            await AlarmHelper.scheduleEventAlarm(event);
-          }
+      notifyListeners();
+
+      await Alarm.stopAll();
+
+      for (final event in _events) {
+        if (event.alarmTime.isNotEmpty) {
+          await AlarmHelper.scheduleEventAlarm(event);
         }
-        debugPrint('🎉 Events added to controller: ${_events.length}');
-      } else {
-        debugPrint('❌ Failed to load events: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching events: $e');
     }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching events: $e');
   }
+}
 
   Future<bool> deleteEvent(int eventId) async {
     try {

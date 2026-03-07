@@ -11,8 +11,6 @@ class UserSession {
   String? username;
   String? profileImageUrl;
 
-  //!------breaks name ------------!
-
   String get formattedUsername {
     if (username == null || username!.trim().isEmpty) return '';
 

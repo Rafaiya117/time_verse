@@ -41,117 +41,114 @@ class ProfileController extends ChangeNotifier {
   User? currentUser;
   bool isLoading = false;
 
-
   void onInit() {
     loadUserProfile();
   }
 
   Future<void> loadUserProfile() async {
-  try {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final user = await _userService.getUserProfile();
+
+      if (user != null) {
+        // 🔥 Merge Google profile from UserSession if available
+        final mergedUser = user.copyWith(
+          name: UserSession().username ?? user.name,
+          profilePicture: UserSession().profileImageUrl ?? user.profilePicture,
+        );
+
+        setUser(mergedUser); // ✅ normalize profilePicture
+
+        nameController.text = currentUser!.name;
+        passwordController.text = currentUser!.password ?? '';
+        dateController.text = currentUser!.birthDate ?? '';
+
+        UserSession().userId = currentUser!.id.toString();
+        UserSession().username = currentUser!.name;
+        UserSession().profileImageUrl = currentUser!.profilePicture;
+
+        debugPrint("✅ User data preloaded: ${UserSession().username}");
+        debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
+      } else {
+        debugPrint("⚠️ No user data found");
+      }
+    } catch (e) {
+      debugPrint("❌ Error loading user data: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateProfile(BuildContext context) async {
+    // ✅ BLOCK update for Google login users
+    final isGoogleLogin = await AppPrefs.isGoogleLogin();
+    if (isGoogleLogin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Google profile cannot be updated from here"),
+        ),
+      );
+      return;
+    }
+
+    if (nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Name cannot be empty")),
+      ); 
+      return; 
+    }
+
+    final updatedUser = User(
+      id: currentUser?.id ?? 0,
+      name: nameController.text.trim(),
+      birthDate: dateController.text.trim().isNotEmpty
+          ? dateController.text.trim()
+          : null,
+      profilePicture: null,
+      password: passwordController.text.trim().isNotEmpty
+          ? passwordController.text.trim()
+          : null,
+    );
+
     isLoading = true;
     notifyListeners();
 
-    final user = await _userService.getUserProfile();
-
-    if (user != null) {
-      // 🔥 Merge Google profile from UserSession if available
-      final mergedUser = user.copyWith(
-        name: UserSession().username ?? user.name,
-        profilePicture: UserSession().profileImageUrl ?? user.profilePicture,
+    try {
+      final result = await _userService.updateUserProfile(
+        updatedUser,
+        profileImage: pickedImage,
       );
 
-      setUser(mergedUser); // ✅ normalize profilePicture
+      if (result != null) {
+        currentUser = result;
+        nameController.text = result.name;
+        passwordController.text = result.password ?? '';
+        dateController.text = result.birthDate ?? '';
+        UserSession().profileImageUrl = result.profilePicture;
 
-      nameController.text = currentUser!.name;
-      passwordController.text = currentUser!.password ?? '';
-      dateController.text = currentUser!.birthDate ?? '';
+        debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
 
-      UserSession().userId = currentUser!.id.toString();
-      UserSession().username = currentUser!.name;
-      UserSession().profileImageUrl = currentUser!.profilePicture;
-
-      debugPrint("✅ User data preloaded: ${UserSession().username}");
-      debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
-    } else {
-      debugPrint("⚠️ No user data found");
-    }
-  } catch (e) {
-    debugPrint("❌ Error loading user data: $e");
-  } finally {
-    isLoading = false;
-    notifyListeners();
-  }
-}
-
-   
-  Future<void> updateProfile(BuildContext context) async {
-  // ✅ BLOCK update for Google login users
-  final isGoogleLogin = await AppPrefs.isGoogleLogin();
-  if (isGoogleLogin) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Google profile cannot be updated from here"),
-      ),
-    );
-    return;
-  }
-
-  if (nameController.text.trim().isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Name cannot be empty")),
-    ); 
-    return; 
-  }
-
-  final updatedUser = User(
-    id: currentUser?.id ?? 0,
-    name: nameController.text.trim(),
-    birthDate: dateController.text.trim().isNotEmpty
-        ? dateController.text.trim()
-        : null,
-    profilePicture: null,
-    password: passwordController.text.trim().isNotEmpty
-        ? passwordController.text.trim()
-        : null,
-  );
-
-  isLoading = true;
-  notifyListeners();
-
-  try {
-    final result = await _userService.updateUserProfile(
-      updatedUser,
-      profileImage: pickedImage,
-    );
-
-    if (result != null) {
-      currentUser = result;
-      nameController.text = result.name;
-      passwordController.text = result.password ?? '';
-      dateController.text = result.birthDate ?? '';
-      UserSession().profileImageUrl = result.profilePicture;
-
-      debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
-
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile updated successfully")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to update profile")),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated successfully")),
+        const SnackBar(content: Text("Something went wrong. Please try again.")),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to update profile")),
-      );
+    } finally {
+      isLoading = false;
+      loadUserProfile();
+      notifyListeners();
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Something went wrong. Please try again.")),
-    );
-  } finally {
-    isLoading = false;
-    loadUserProfile();
-    notifyListeners();
   }
-}
-
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
@@ -163,45 +160,50 @@ class ProfileController extends ChangeNotifier {
     }
   }
 
-//   void setUser(User user) {
-//   final picture = user.profilePicture;
+  void setUser(User user) {
+    final picture = user.profilePicture;
+    user = user.copyWith(
+      profilePicture: _resolveProfilePicture(picture),
+    );
 
-//   user = user.copyWith(
-//     profilePicture: _resolveProfilePicture(picture),
-//   );
-
-//   currentUser = user;
-//   notifyListeners();
-// }
-
-void setUser(User user) {
-  final picture = user.profilePicture;
-  user = user.copyWith(
-    profilePicture: _resolveProfilePicture(picture),
-  );
-
-  currentUser = user;
-  notifyListeners();
-}
-
-String? _resolveProfilePicture(String? picture) {
-  final baseurl = dotenv.env['BASE_URL'] ?? '';
-  if (picture == null || picture.isEmpty) return null;
-
-  // Google image (already absolute)
-  if (picture.startsWith('http')) {
-    return picture;
+    currentUser = user;
+    notifyListeners();
   }
 
-  // Backend image (relative)
-  return '$baseurl$picture';
-}
+  String? _resolveProfilePicture(String? picture) {
+    final baseurl = dotenv.env['BASE_URL'] ?? '';
+    if (picture == null || picture.isEmpty) return null;
+
+    // Google image (already absolute)
+    if (picture.startsWith('http')) {
+      return picture;
+    }
+
+    // Backend image (relative)
+    return '$baseurl$picture';
+  }
 
   void setBirthDate(DateTime date) { 
     dateController.text = DateFormat('yyyy-MM-dd').format(date); 
     notifyListeners(); 
   }
 
+  /// ------------------ NEW: Clear profile on logout ------------------ ///
+  void clearProfile() {
+    currentUser = null;
+    pickedImage = null;
+
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    dateController.clear();
+
+    UserSession().userId = null;
+    UserSession().username = null;
+    UserSession().profileImageUrl = null;
+
+    notifyListeners();
+  }
 
   @override
   void dispose() {
@@ -212,3 +214,4 @@ String? _resolveProfilePicture(String? picture) {
     super.dispose();
   }
 }
+

@@ -1,11 +1,15 @@
+import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
+import 'package:time_verse/features/home/controller/home_controller.dart';
+import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
 void showLogoutDialog(BuildContext context) {
   showDialog(
@@ -76,9 +80,24 @@ void showLogoutDialog(BuildContext context) {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
+                        // Show loading dialog
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const Center(child: CircularProgressIndicator()),
+                        );
+
+                        await Alarm.stopAll();
                         await AppPrefs.setLoggedIn(false);
                         await AuthService().clearToken();
-                        context.push('/login');
+                        context.read<HomeController>().todaysEvents.clear();
+                        context.read<ProfileController>().clearProfile();
+
+                        await Future.delayed(const Duration(milliseconds: 800));
+                        if (context.mounted) {
+                          Navigator.pop(context); // close loader
+                          context.go('/login');
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pink,

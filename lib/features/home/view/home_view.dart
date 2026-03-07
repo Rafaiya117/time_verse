@@ -10,6 +10,7 @@ import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
@@ -656,57 +657,82 @@ class HomeView extends StatelessWidget {
             SizedBox(height: 30.h),
             // Today's Schedule section
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Today\'s Schedule',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18.sp,
-                    color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Today\'s Schedule',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18.sp,
+                      color: isDarkMode
+                          ? AppColors.fourth_color
+                          : AppColors.heading_color,
+                    ),
                   ),
-                ),
-                Text(
-                  '5 events',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14.sp,
-                    color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
+
+                  Consumer<HomeController>(
+                    builder: (context, controller, _) {
+                      final events = controller.todaysEvents;
+
+                      return Text(
+                        events.isEmpty
+                            ? 'No event yet'
+                            : '${events.length} events',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14.sp,
+                          color: isDarkMode
+                              ? AppColors.fourth_color
+                              : AppColors.heading_color,
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             SizedBox(height: 16.h),            
             // Schedule events list
             Consumer<HomeController>(
               builder: (context, controller, _) {
-                final events = controller.todaysEvents;
-                  if (events.isEmpty) {
-                    return Text(
-                      'No review yet',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14.sp,
-                        color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
-                      ),
-                    );
-                  }
-                  return Column(
-                    children: events.map((event) {
+                final authService = AuthService();
+                  return FutureBuilder<int?>(
+                    future: authService.getUserIdFromToken(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox();
+
+                      final currentUserId = snapshot.data;
+                      final events = controller.todaysEvents.where((e) => e.user == currentUserId).toList();
+
+                      if (events.isEmpty) {
+                        return Text(
+                          'No review yet',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14.sp,
+                            color: isDarkMode
+                              ? AppColors.fourth_color
+                              : AppColors.heading_color,
+                            ),
+                          );
+                        }
                       return Column(
-                        children: [
-                          _buildScheduleEvent(
-                            context,
-                            event.title,
-                            '${event.startTime} - ${event.endTime}',
-                            Colors.grey,
-                            isDarkMode,
-                            lightModeBackgroundColor: AppColors.l_schedule_clr1,
-                          ),
-                          SizedBox(height: 12.h),
-                        ],
+                        children: events.map((event) {
+                          return Column(
+                            children: [
+                              _buildScheduleEvent(
+                                context,
+                                event.title,
+                                '${event.startTime} - ${event.endTime}',
+                                Colors.grey,
+                                isDarkMode,
+                                lightModeBackgroundColor:AppColors.l_schedule_clr1,
+                              ),
+                              SizedBox(height: 12.h),
+                            ],
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
+                    },
                   );
                 },
               ),

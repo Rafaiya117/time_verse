@@ -90,21 +90,28 @@ class HomeController extends ChangeNotifier {
     startAutoSlide();
     fetchEvents();
     todaysfetchEvents().then((_) async {
-      if (await _alarmsAlreadyScheduled()) return;
+      if (todaysEvents.isEmpty) return;
+
+      final userId = todaysEvents.first.user;
+
+      if (await _alarmsAlreadyScheduled(userId)) return;
 
       for (final event in todaysEvents) {
         if (event.alarmTime.isNotEmpty) {
           await AlarmHelper.scheduleEventAlarm(event);
+
           NotificationService.scheduleNotification(
             id: event.id,
             title: event.title,
             body: event.description,
-            alarmTime: DateTime.parse(event.alarmTime), payload: event.id,
+            alarmTime: DateTime.parse(event.alarmTime),
+            payload: event.id,
           );
         }
       }
-    await _markAlarmsScheduled();
-  });
+
+      await _markAlarmsScheduled(userId);
+    });
 
   fetchReviewsFromApi();
     profileController.loadUserProfile();
@@ -312,16 +319,16 @@ Future<void> fetchReviewsFromApi() async {
     }
   }
 
-Future<bool> _alarmsAlreadyScheduled() async {
+Future<bool> _alarmsAlreadyScheduled(int userId) async {
   final prefs = await SharedPreferences.getInstance();
   final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  return prefs.getBool('alarms_scheduled_$todayKey') ?? false;
+  return prefs.getBool('alarms_scheduled_${userId}_$todayKey') ?? false;
 }
 
-Future<void> _markAlarmsScheduled() async {
+Future<void> _markAlarmsScheduled(int userId) async {
   final prefs = await SharedPreferences.getInstance();
   final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  await prefs.setBool('alarms_scheduled_$todayKey', true);
+  await prefs.setBool('alarms_scheduled_${userId}_$todayKey', true);
 }
 
 

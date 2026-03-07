@@ -45,6 +45,14 @@ Future<void> clearToken() async {
   debugPrint('✅ Token cleared from storage and memory.$_token');
 }
 
+Future<int?> getUserIdFromToken() async {
+  final token = await getToken();
+  if (token == null) return null;
+
+  final decoded = JwtDecoder.decode(token);
+  return decoded['user']; // adjust if your token uses another field
+}
+
 
 // ---------------- USER INFO ---------------- //
 
