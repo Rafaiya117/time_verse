@@ -13,6 +13,7 @@ import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/login/controller/login_controller.dart';
+import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -153,6 +154,7 @@ class LoginPage extends StatelessWidget {
                         }
                         await AppPrefs.setLoggedIn(true);
                         await AppPrefs.setFirstLaunch(false);
+                         await context.read<ProfileController>().loadUserProfile(); 
                         if (context.mounted) context.push('/home');
                       } else {
                         if (context.mounted) {

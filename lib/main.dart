@@ -125,14 +125,26 @@ class _MyAppState extends State<MyApp> {
     //   });
     // });
 
-    _ringSubscription = Alarm.ringing.listen((alarmSet) {
-      if (alarmSet.alarms.isEmpty || _isAlarmLaunch) return;
+  //   _ringSubscription = Alarm.ringing.listen((alarmSet) {
+  //     if (alarmSet.alarms.isEmpty || _isAlarmLaunch) return;
 
-      _isAlarmLaunch = true;
-      final alarm = alarmSet.alarms.first;
+  //     _isAlarmLaunch = true;
+  //     final alarm = alarmSet.alarms.first;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        appRouter.go('/alarm', extra: alarm);
+  //     WidgetsBinding.instance.addPostFrameCallback((_) {
+  //       appRouter.go('/alarm', extra: alarm);
+  //     });
+  //   });
+  // }
+
+  _ringSubscription = Alarm.ringing.listen((alarmSet) {
+  if (alarmSet.alarms.isEmpty) return;
+  final alarm = alarmSet.alarms.first;
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!mounted) return;
+    // Always navigate using push
+    appRouter.push('/alarm', extra: alarm);
       });
     });
   }

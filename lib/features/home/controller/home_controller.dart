@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'dart:async';
@@ -41,7 +42,11 @@ class HomeController extends ChangeNotifier {
   final List<EventModel> todaysEvents = [];
   bool _isInitialized = false;
 
-  final Dio _dio = Dio();
+  final Dio _dio =  Dio(BaseOptions(
+    baseUrl: dotenv.env['BASE_URL'] ?? '',
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 10),
+  ));
 
   // Daily Inspiration Quotes
   final List<QuoteData> _inspirationalQuotes = [
@@ -83,50 +88,54 @@ class HomeController extends ChangeNotifier {
   }
 
   /// -------------------- Initialization -------------------- ///
-  void initOnce(ProfileController profileController) {
-    if (_isInitialized) return;
-    _isInitialized = true;
+ void initOnce(ProfileController profileController) {
+  if (_isInitialized) return;
+  _isInitialized = true;
 
-    startAutoSlide();
-    fetchEvents();
-    todaysfetchEvents().then((_) async {
-      if (todaysEvents.isEmpty) return;
+  startAutoSlide();
 
-      final userId = todaysEvents.first.user;
+  /// 🔥 Load profile FIRST
+  profileController.loadUserProfile().then((_) async {
 
-      if (await _alarmsAlreadyScheduled(userId)) return;
+    /// 🔥 Now fetch events AFTER user is available
+    await fetchEvents();              // ← MOVED HERE
 
-      for (final event in todaysEvents) {
-        if (event.alarmTime.isNotEmpty) {
-          await AlarmHelper.scheduleEventAlarm(event);
+    await fetchReviewsFromApi();
 
-          NotificationService.scheduleNotification(
-            id: event.id,
-            title: event.title,
-            body: event.description,
-            alarmTime: DateTime.parse(event.alarmTime),
-            payload: event.id,
-          );
-        }
+    /// 🔥 Then load today's events
+    await todaysfetchEvents(profileController);
+
+    debugPrint("TODAYS EVENTS LENGTH: ${todaysEvents.length}");
+
+    if (todaysEvents.isEmpty) return;
+
+    final userId = profileController.currentUser?.id;
+    if (userId == null) return;
+
+    if (await _alarmsAlreadyScheduled(userId)) return;
+
+    for (final event in todaysEvents) {
+      if (event.alarmTime.isNotEmpty) {
+        await AlarmHelper.scheduleEventAlarm(event);
+
+        NotificationService.scheduleNotification(
+          id: event.id,
+          title: event.title,
+          body: event.description,
+          alarmTime: DateTime.parse(event.alarmTime),
+          payload: event.id,
+        );
       }
+    }
 
-      await _markAlarmsScheduled(userId);
-    });
+    await _markAlarmsScheduled(userId);
+  });
 
-  fetchReviewsFromApi();
-    profileController.loadUserProfile();
-
-    // Listen to alarm triggers in Home screen
-    Alarm.ringing.listen((alarmSet) {
-      isAlarmRinging = alarmSet.alarms.isNotEmpty;
-      notifyListeners();
-      // if (alarmSet.alarms.isEmpty) return;
-      // final alarm = alarmSet.alarms.first;
-      // debugPrint('==== Alarm triggered on Home: ${alarm.id}');
-      // // Optional: Navigate to alarm screen
-      //  appRouter.push('/alarm', extra: alarm);
-    });
-  }
+  Alarm.ringing.listen((alarmSet) {
+    isAlarmRinging = alarmSet.alarms.isNotEmpty;
+    notifyListeners();
+  });
+}
 
   /// -------------------- Navigation -------------------- ///
   void updateIndexFromRoute(String location) {
@@ -231,7 +240,6 @@ Future<void> fetchReviewsFromApi() async {
 
       if (response.statusCode == 200 && response.data is List) {
         final List<dynamic> dataList = response.data as List<dynamic>;
-
         final List<ReviewData> loadedReviews = dataList.map((json) => ReviewData.fromJson(json as Map<String, dynamic>)).toList();
         _reviews
           ..clear()
@@ -248,7 +256,6 @@ Future<void> fetchReviewsFromApi() async {
     try {
       final token = await AuthService().getToken();
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
-
       final Map<String, dynamic> reviewData = {
         'rating': _selectedRating,
         'comments': _feedbackController.text.trim(),
@@ -272,52 +279,46 @@ Future<void> fetchReviewsFromApi() async {
     }
   }
 
-  Future<void> todaysfetchEvents() async {
-    try {
-      final token = await AuthService().getToken();
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+  Future<void> todaysfetchEvents(ProfileController profileController) async {
+  try {
+    final token = await AuthService().getToken();
 
-      final response = await _dio.get(
-        '$baseUrl/api/v1/today_event/',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
+    final response = await _dio.get(
+      'api/v1/event/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
 
-      if (response.statusCode == 200 && response.data is List) {
-        final List data = response.data;
-        todaysEvents
-          ..clear()
-          ..addAll(
-            data.map((json) {
-              final formattedDate = formatEventDate(json['date'] ?? '');
-              return EventModel(
-                id: json['id'] ?? 0,
-                title: json['title']?.toString() ?? '',
-                startTime: json['start_time']?.toString() ?? '',
-                endTime: json['end_time']?.toString() ?? '',
-                date: formattedDate,
-                location: json['location']?.toString() ?? '',
-                alarmTime: json['alarm_time']?.toString() ?? '',
-                isCompleted: json['is_completed'] ?? false,
-                createdAt: json['created_at']?.toString() ?? '',
-                user: json['user'] ?? 0,
-                category: json['category']?.toString(),
-                isFavorite: json['is_favorite'] ?? false,
-                userName: json['user_name']?.toString() ?? '',
-                description: json['description']?.toString() ?? '',
-              );
-            }).toList(),
-          );
-        notifyListeners();
+    final data = response.data is String ? jsonDecode(response.data) : response.data;
+
+    if (data is List) {
+      final currentUserId = profileController.currentUser?.id;
+
+      if (currentUserId == null) {
+        debugPrint("❌ Current user is null");
+        return;
       }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching today\'s events: $e');
+
+      todaysEvents
+        ..clear()
+        ..addAll(
+          data.map((e) => EventModel.fromMap(e)).where((event) =>event.user.toString() == currentUserId.toString()) // safe compare.toList(),
+        );
+
+      debugPrint("✅ TODAYS EVENTS LENGTH: ${todaysEvents.length}");
+    } else {
+      debugPrint("❌ API did not return List");
+      todaysEvents.clear();
     }
+
+    notifyListeners();
+  } catch (e) {
+    debugPrint("❌ Error fetching today's events: $e");
   }
+}
 
 Future<bool> _alarmsAlreadyScheduled(int userId) async {
   final prefs = await SharedPreferences.getInstance();
@@ -332,63 +333,194 @@ Future<void> _markAlarmsScheduled(int userId) async {
 }
 
 
-  Future<void> fetchEvents() async {
-    try {
-      final token = await AuthService().getToken();
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+//  Future<void> fetchEvents() async {
+//   try {
+//     debugPrint("🔥 fetchEvents CALLED");
 
-      final response = await _dio.get(
-        '$baseUrl/api/v1/next-quite/',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
+//     final token = await AuthService().getToken();
+//     final currentUserId = UserSession().userId?.toString();
 
-      if (response.statusCode == 200) {
-        final List data = response.data is List ? response.data : [response.data];
-        if (data.isEmpty) return;
+//     debugPrint("👤 Current User ID: $currentUserId");
 
-        data.sort((a, b) {
-          final aTime = DateTime.parse(a['created_at']);
-          final bTime = DateTime.parse(b['created_at']);
-          return aTime.compareTo(bTime);
-        });
+//     final response = await _dio.get(
+//       'api/v1/event/',
+//       options: Options(
+//         headers: {
+//           'Authorization': 'Bearer $token',
+//           'Content-Type': 'application/json',
+//         },
+//       ),
+//     );
 
-        final latest = data.last;
+//     debugPrint("📡 Response Status: ${response.statusCode}");
+//     debugPrint("📦 Raw Response Type: ${response.data.runtimeType}");
+
+//     if (response.statusCode == 200) {
+//       final List data =
+//           response.data is List ? response.data : [response.data];
+
+//       debugPrint("📊 Total Events From API: ${data.length}");
+
+//       /// 🔥 Safe filtering
+//       final userEvents = data
+//           .where((event) {
+//             debugPrint("🔎 Checking Event User: ${event['user']}");
+//             return event['user'].toString() == currentUserId;
+//           })
+//           .toList();
+
+//       debugPrint("🎯 User Events After Filter: ${userEvents.length}");
+
+//       /// ⭐ No events → restore default
+//       if (userEvents.isEmpty) {
+//         debugPrint("⚠️ No user events found. Restoring default quote.");
+//         _inspirationalQuotes
+//           ..clear()
+//           ..addAll(allQuotes);
+//         notifyListeners();
+//         return;
+//       }
+
+//       /// Sort by created date
+//       userEvents.sort((a, b) {
+//         final aTime = DateTime.parse(a['created_at']);
+//         final bTime = DateTime.parse(b['created_at']);
+//         return aTime.compareTo(bTime);
+//       });
+
+//       final latest = userEvents.last;
+
+//       debugPrint("🏆 Latest Event ID: ${latest['id']}");
+//       debugPrint("📝 Description: ${latest['description']}");
+//       debugPrint("📌 Type Description: ${latest['type_event_description']}");
+
+//       /// ⭐ Use description OR fallback
+//       final quoteText =
+//           (latest['description']?.toString().trim().isNotEmpty == true)
+//               ? latest['description'].toString()
+//               : latest['type_event_description']?.toString() ?? '';
+
+//       debugPrint("✨ Final Quote Text: $quoteText");
+
+//       _inspirationalQuotes
+//         ..clear()
+//         ..add(
+//           QuoteData(
+//             id: latest['id'],
+//             quote: quoteText,
+//             reference: latest['title']?.toString() ?? '',
+//           ),
+//         );
+
+//       debugPrint("✅ Inspirational Quotes Length: ${_inspirationalQuotes.length}");
+
+//       notifyListeners();
+//     }
+//   } catch (e) {
+//     debugPrint('⚠️ Error fetching events: $e');
+//   }
+// }
+
+Future<void> fetchEvents() async {
+  try {
+    debugPrint("🔥 fetchEvents CALLED");
+
+    final token = await AuthService().getToken();
+    final currentUserId = UserSession().userId;
+
+    debugPrint("👤 Current User ID: $currentUserId");
+
+    if (currentUserId == null) {
+      debugPrint("❌ User ID is null — restoring default quote.");
+
+      _inspirationalQuotes
+        ..clear()
+        ..addAll(allQuotes);
+
+      notifyListeners();
+      return;
+    }
+
+    final response = await _dio.get(
+      'api/v1/event/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    debugPrint("📡 Response Status: ${response.statusCode}");
+    debugPrint("📦 Raw Response Type: ${response.data.runtimeType}");
+
+    if (response.statusCode == 200) {
+      final List data =
+          response.data is List ? response.data : [response.data];
+
+      debugPrint("📊 Total Events From API: ${data.length}");
+
+      /// 🔥 Safe filtering
+      final userEvents = data
+          .where((event) {
+            debugPrint("🔎 Checking Event User: ${event['user']}");
+            return event['user'].toString() ==
+                currentUserId.toString();
+          })
+          .toList();
+
+      debugPrint("🎯 User Events After Filter: ${userEvents.length}");
+
+      /// ⭐ No events → restore default
+      if (userEvents.isEmpty) {
+        debugPrint("⚠️ No user events found. Restoring default quote.");
 
         _inspirationalQuotes
           ..clear()
-          ..add(
-            QuoteData(
-              id: latest['id'],
-              quote: latest['description']?.toString() ?? '',
-              reference: latest['title']?.toString() ?? '',
-            ),
-          );
+          ..addAll(allQuotes);
+
         notifyListeners();
+        return;
       }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching events: $e');
-    }
-  }
 
-  /// -------------------- Helpers -------------------- ///
-  String formatEventDate(String rawDate) {
-    final startDateTime = DateTime.tryParse(rawDate);
-    if (startDateTime == null) return '';
+      /// Sort by created date
+      userEvents.sort((a, b) {
+        final aTime = DateTime.parse(a['created_at']);
+        final bTime = DateTime.parse(b['created_at']);
+        return aTime.compareTo(bTime);
+      });
 
-    final now = DateTime.now();
-    if (startDateTime.year == now.year &&
-      startDateTime.month == now.month &&
-      startDateTime.day == now.day) {
-      return 'Today';
-    } else {
-      return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);
+      final latest = userEvents.last;
+
+      debugPrint("🏆 Latest Event ID: ${latest['id']}");
+      debugPrint("📝 Description: ${latest['description']}");
+      debugPrint("📌 Type Description: ${latest['type_event_description']}");
+
+      /// ⭐ Use description OR fallback
+      final quoteText =
+          (latest['description']?.toString().trim().isNotEmpty == true)
+              ? latest['description'].toString()
+              : latest['type_event_description']?.toString() ?? '';
+
+      debugPrint("✨ Final Quote Text: $quoteText");
+
+      _inspirationalQuotes
+        ..clear()
+        ..add(
+          QuoteData(
+            id: latest['id'],
+            quote: quoteText,
+            reference: latest['title']?.toString() ?? '',
+          ),
+        );
+
+      debugPrint("✅ Inspirational Quotes Length: ${_inspirationalQuotes.length}");
+      notifyListeners();
     }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching events: $e');
   }
+}
 
   Future<bool> saveQuoteToFavorite({required int eventId}) async {
     try {
@@ -419,3 +551,4 @@ Future<void> _markAlarmsScheduled(int userId) async {
     super.dispose();
   }
 }
+

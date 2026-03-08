@@ -50,19 +50,16 @@ Future<int?> getUserIdFromToken() async {
   if (token == null) return null;
 
   final decoded = JwtDecoder.decode(token);
-  return decoded['user']; // adjust if your token uses another field
-}
 
+  return decoded['user_id'] ?? decoded['user'] ?? decoded['id'];
+}
 
 // ---------------- USER INFO ---------------- //
 
   Future<int?> getUserId() async {
     final token = await getToken();
     if (token == null || token.isEmpty) return null;
-
     final decodedToken = JwtDecoder.decode(token);
-
-    // adjust key if backend uses a different name
     return decodedToken['user_id'] ?? decodedToken['id'];
   }
 
@@ -126,22 +123,26 @@ return {
   }
 }
 
-Future<Map<String, dynamic>> signup(String email, String password, String name, {String? profileImagePath}) async {
+Future<Map<String, dynamic>> signup(String email,String password,String name, {String? profileImagePath,}) async {
+  debugPrint("Image path: $profileImagePath");
   try {
-    final Map<String, dynamic> payload = {
+    FormData formData = FormData.fromMap({
       'email': email,
       'password': password,
       'name': name,
-    };
-
-    // optional profile image
-    if (profileImagePath != null) {
-      payload['profile_image'] = profileImagePath;
-    }
+      if (profileImagePath != null)
+        'profile_picture': await MultipartFile.fromFile(
+          profileImagePath,
+          filename: profileImagePath.split('/').last,
+        ),
+      });
 
     final response = await _dio.post(
       'api/v1/register/',
-      data: jsonEncode(payload),
+      data: formData,
+      options: Options(
+        contentType: 'multipart/form-data',
+      ),
     );
 
     final data = response.data is String ? jsonDecode(response.data) : response.data;
@@ -149,7 +150,6 @@ Future<Map<String, dynamic>> signup(String email, String password, String name, 
     final userData = data['data']?['user'];
     final user = userData != null ? User.fromJson(userData) : null;
 
-    // treat message containing "success" as successful
     final bool success = data['success'] ?? (data['message']?.toLowerCase().contains('success') ?? false);
 
     return {
@@ -168,7 +168,6 @@ Future<Map<String, dynamic>> signup(String email, String password, String name, 
     };
   }
 }
-
 // Future<Map<String, dynamic>> forgotPassword(String email) async {
 //     try {
 //       final response = await _dio.post(

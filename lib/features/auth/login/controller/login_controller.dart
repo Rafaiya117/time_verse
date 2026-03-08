@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginController extends ChangeNotifier{
   TextEditingController emailController = TextEditingController();

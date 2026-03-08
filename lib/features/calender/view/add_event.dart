@@ -15,6 +15,7 @@ import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/calender/widget/custom_chip.dart';
 import 'package:time_verse/features/calender/widget/custom_date_picker.dart';
 import 'package:time_verse/features/calender/widget/time_picker_custom_widget.dart';
+import 'package:time_verse/features/home/controller/home_controller.dart';
 
 class AddEventModal extends StatelessWidget {
   const AddEventModal({super.key});
@@ -250,48 +251,72 @@ class AddEventModal extends StatelessWidget {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (_) =>const Center(child: CircularProgressIndicator()),);
-                    try {
-                    final timeController = Provider.of<TimePickerController>(context,listen: false,);
+                    builder: (_) =>
+                        const Center(child: CircularProgressIndicator()),
+                  );
+
+                  try {
+                    final timeController = Provider.of<TimePickerController>(
+                      context,
+                      listen: false,
+                    );
+
                     // Format times in HH:mm:ss (backend expects only time)
-                    final start = timeController.formatTime(timeController.getTime('start'),);
-                    final end = timeController.formatTime(timeController.getTime('end'),);
-                    final alarm = timeController.formatTime(timeController.getTime('alarm'),);
-      
+                    final start = timeController.formatTime(
+                      timeController.getTime('start'),
+                    );
+                    final end = timeController.formatTime(
+                      timeController.getTime('end'),
+                    );
+                    final alarm = timeController.formatTime(
+                      timeController.getTime('alarm'),
+                    );
+
                     final result = await addEventController.createTask(
                       title: addEventController.titleController.text.trim(),
                       date: addEventController.dateController.text.trim(),
                       startTime: start,
                       endTime: end,
-                      location:addEventController.locationController.text.trim().isEmpty ? null : addEventController.locationController.text.trim(),
+                      location:
+                          addEventController.locationController.text
+                              .trim()
+                              .isEmpty
+                          ? null
+                          : addEventController.locationController.text.trim(),
                       alarmTime: alarm,
-                      categoryName: addEventController.selectedCategory?.isEmpty == true ? null : addEventController.selectedCategory,
+                      categoryName:
+                          addEventController.selectedCategory?.isEmpty == true
+                          ? null
+                          : addEventController.selectedCategory,
                       note: addEventController.noteController.text.trim() ?? "",
                     );
-      
+
                     debugPrint("START TIME SENT => $start");
                     debugPrint("END TIME SENT => $end");
-      
+
                     if (result != null) {
                       final eventModel = EventModel.fromMap(result);
                       await AlarmHelper.scheduleEventAlarm(eventModel);
-      
+
                       DateTime? alarmTime;
                       try {
                         alarmTime = DateTime.parse(result['alarm_time']);
                       } catch (e) {
-                        debugPrint("⚠️ Alarm time format error: ${result['alarm_time']}",);
+                        debugPrint(
+                          "⚠️ Alarm time format error: ${result['alarm_time']}",
+                        );
                       }
-      
+
                       if (alarmTime != null) {
                         await NotificationService.scheduleNotification(
                           id: result['id'],
                           title: result['title'],
                           body: result['description'],
-                          alarmTime: alarmTime, 
+                          alarmTime: alarmTime,
                           payload: result['id'],
                         );
                       }
+
                       await showMessageDialog(
                         context,
                         'Saved successfully',
@@ -299,7 +324,12 @@ class AddEventModal extends StatelessWidget {
                         icon: Icons.check_circle_outline,
                         iconColor: Colors.green,
                       );
-                      context.push('/home');
+
+                      // ✅ REFRESH HOME EVENTS
+                     await context.read<HomeController>().fetchEvents();
+                      if (context.mounted) {
+                         context.go('/all_events');
+                      }
                     }
                   } catch (e) {
                     await showMessageDialog(
@@ -309,7 +339,7 @@ class AddEventModal extends StatelessWidget {
                       icon: Icons.error_outline,
                       iconColor: Colors.red,
                     );
-                  } 
+                  }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

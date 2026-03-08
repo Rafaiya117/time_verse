@@ -98,7 +98,7 @@ class AllEvents extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 20.0),
                           child: EventCard(
                             title: event.title,
-                            sub_title: event.description,
+                            sub_title: event.description??"",
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
                             location: event.location,

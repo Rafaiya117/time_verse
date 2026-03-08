@@ -65,10 +65,16 @@ class ProfileController extends ChangeNotifier {
         passwordController.text = currentUser!.password ?? '';
         dateController.text = currentUser!.birthDate ?? '';
 
+        // UserSession().userId = currentUser!.id.toString();
+        // UserSession().username = currentUser!.name;
+        // UserSession().profileImageUrl = currentUser!.profilePicture;
+
         UserSession().userId = currentUser!.id.toString();
         UserSession().username = currentUser!.name;
-        UserSession().profileImageUrl = currentUser!.profilePicture;
-
+        if (currentUser!.profilePicture != null &&
+          currentUser!.profilePicture!.isNotEmpty) {
+          UserSession().profileImageUrl = currentUser!.profilePicture;
+        }
         debugPrint("✅ User data preloaded: ${UserSession().username}");
         debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
       } else {
@@ -104,13 +110,9 @@ class ProfileController extends ChangeNotifier {
     final updatedUser = User(
       id: currentUser?.id ?? 0,
       name: nameController.text.trim(),
-      birthDate: dateController.text.trim().isNotEmpty
-          ? dateController.text.trim()
-          : null,
+      birthDate: dateController.text.trim().isNotEmpty ? dateController.text.trim(): null,
       profilePicture: null,
-      password: passwordController.text.trim().isNotEmpty
-          ? passwordController.text.trim()
-          : null,
+      password: passwordController.text.trim().isNotEmpty? passwordController.text.trim(): null,
     );
 
     isLoading = true;

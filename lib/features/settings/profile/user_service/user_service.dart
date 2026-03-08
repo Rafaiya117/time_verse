@@ -27,33 +27,57 @@ class UserService {
     ));
   }
 
+  // Future<User?> getUserProfile() async {
+  //   try {
+  //     final response = await _dio.get(
+  //       'api/v1/profile/',
+  //       options: await _authorizedHeader(),
+  //     );
+
+  //     // Parse JSON
+  //     final data = response.data is String ? jsonDecode(response.data) : response.data;
+
+  //     if (response.statusCode == 200 && data != null) {
+  //       _currentUser = User.fromJson(data);
+  //       debugPrint("✅ User loaded: ${_currentUser!.name}");
+  //       return _currentUser;
+  //     } else {
+  //       debugPrint("❌ Failed to load user data: ${data['message'] ?? 'Unknown error'}");
+  //       return null;
+  //     }
+  //   } on DioException catch (e) {
+  //     debugPrint("❌ Dio error while fetching user: ${e.response?.data ?? e.message}");
+  //     return null;
+  //   } catch (e) {
+  //     debugPrint("❌ Exception while fetching user: $e");
+  //     return null;
+  //   }
+  // }
+
   Future<User?> getUserProfile() async {
-    try {
-      final response = await _dio.get(
-        'api/v1/profile/',
-        options: await _authorizedHeader(),
-      );
+  try {
+    final response = await _dio.get(
+      'api/v1/profile/',
+      options: await _authorizedHeader(),
+    );
 
-      // Parse JSON
-      final data = response.data is String ? jsonDecode(response.data) : response.data;
+    final data = response.data is String ? jsonDecode(response.data) : response.data;
 
-      if (response.statusCode == 200 && data != null) {
-        _currentUser = User.fromJson(data);
-        debugPrint("✅ User loaded: ${_currentUser!.name}");
-        return _currentUser;
-      } else {
-        debugPrint("❌ Failed to load user data: ${data['message'] ?? 'Unknown error'}");
-        return null;
-      }
-    } on DioException catch (e) {
-      debugPrint("❌ Dio error while fetching user: ${e.response?.data ?? e.message}");
-      return null;
-    } catch (e) {
-      debugPrint("❌ Exception while fetching user: $e");
-      return null;
+    if (response.statusCode == 200 && data != null) {
+
+      // Support both direct and nested responses
+      final userJson = data['data'] ?? data;
+      _currentUser = User.fromJson(userJson);
+
+      return _currentUser;
     }
-  }
 
+    return null;
+
+  } catch (e) {
+    return null;
+  }
+}
   Future<User?> updateUserProfile(User user, {File? profileImage}) async {
   try {
     dynamic payload;

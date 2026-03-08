@@ -190,7 +190,7 @@ class Signup extends StatelessWidget {
                             color: isDarkMode
                               ? AppColors.third_color
                               : AppColors.heading_color,
-                          ),
+                            ),
                           recognizer: TapGestureRecognizer()..onTap = () {
                             context.push('/login');
                           },

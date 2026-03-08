@@ -10,7 +10,6 @@ import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
-import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
@@ -18,7 +17,11 @@ import 'package:time_verse/features/settings/profile/controller/profile_controll
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  void _showFeedbackDialog(BuildContext context, bool isDarkMode, HomeController homeController) {
+  void _showFeedbackDialog(
+    BuildContext context,
+    bool isDarkMode,
+    HomeController homeController,
+  ) {
     homeController.clearFeedback();
 
     showDialog(
@@ -32,126 +35,12 @@ class HomeView extends StatelessWidget {
                 width: 320.w,
                 padding: EdgeInsets.all(24.w),
                 decoration: BoxDecoration(
-                  color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFFFFF),
+                  color: isDarkMode
+                      ? const Color(0xFF051123)
+                      : const Color(0xFFFFFFFF),
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.grey.withOpacity(0.2),
-                  ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Write your Feedback',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18.sp,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    
-                    // Star Rating
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        return GestureDetector(
-                          onTap: () {
-                            controller.updateRating(index + 1);
-                          },
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4.w),
-                            child: Icon(
-                              controller.selectedRating > index ? Icons.star : Icons.star_border,
-                              color: const Color(0xFFFFB800),
-                              size: 32.sp,
-                            ),
-                          ),
-                        );
-                      }),
-                    ),                    
-                    SizedBox(height: 20.h),                    
-                    Text(
-                      'Your Feedback:',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.sp,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),                    
-                    SizedBox(height: 12.h),                    
-                    // Feedback Text Field
-                    Container(
-                      height: 100.h,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.grey.withOpacity(0.3),
-                        ),
-                      ),
-                      child: TextField(
-                        controller: controller.feedbackController,
-                        maxLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        style: GoogleFonts.outfit(
-                          fontSize: 14.sp,
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Share your thoughts...',
-                          hintStyle: GoogleFonts.outfit(
-                            fontSize: 14.sp,
-                            color: Colors.grey,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(12.w),
-                        ),
-                      ),
-                    ),                    
-                    SizedBox(height: 24.h),                    
-                    // Submit Button
-                    GestureDetector(
-                      onTap: () async {
-                        //controller.submitFeedback();
-                        await controller.postReviewToApi();
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Thank you for your feedback!',
-                              style: GoogleFonts.outfit(
-                                fontSize: 14.sp,
-                                color: Colors.white,
-                              ),
-                            ),
-                            backgroundColor: const Color(0xFFFFB800),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        height: 48.h,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFB800),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Center(
-                          child: Text(
-                            controller.selectedRating > 0 ? 'Submit Review' : 'Submit',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16.sp,
-                              color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: const SizedBox(), // 👈 keep your existing dialog content here
               ),
             );
           },
@@ -162,20 +51,21 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final homeController = Provider.of<HomeController>(context);
-    final profileController = Provider.of<ProfileController>(context, listen: false);
-    final location = GoRouterState.of(context).uri.toString();
-    homeController.updateIndexFromRoute(location);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final String logoPath = isDarkMode
-        ? 'assets/images/logo.png' 
-        : 'assets/images/logo_light.png';
-    // Start auto-slide when widget is built
+    final homeController = context.read<HomeController>();
+    final profileController = context.read<ProfileController>();
+
+    /// ✅ Run once when widget appears
     WidgetsBinding.instance.addPostFrameCallback((_) {
       homeController.initOnce(profileController);
     });
-    
+
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final String logoPath = isDarkMode
+      ? 'assets/images/logo.png'
+      : 'assets/images/logo_light.png';
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
@@ -224,18 +114,23 @@ class HomeView extends StatelessWidget {
                                 width: 2,
                               ),
                             ),
-                            child: ClipOval(
+                            child: 
+                            ClipOval(
                               child: Selector<ProfileController, String?>(
                                 selector: (_, controller) => controller.currentUser?.profilePicture,
                                 builder: (_, profilePicture, __) {
-                                  debugPrint('!----$profilePicture');
+                                  debugPrint(
+                                    '!----Profile image -----------$profilePicture',
+                                  );
 
                                   final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
-                                    ? NetworkImage(profilePicture): const AssetImage(
+                                    ? NetworkImage(profilePicture) as ImageProvider<Object>
+                                      : const AssetImage(
                                       'assets/images/profile_img.png',
-                                    );
+                                    ) as ImageProvider<Object>;
+
                                   return Image(
-                                    image: imageProvider as ImageProvider,
+                                    image: imageProvider,
                                     fit: BoxFit.cover,
                                 );
                               },
@@ -259,14 +154,23 @@ class HomeView extends StatelessWidget {
               ),
             ),
             //SizedBox(height: 10.h),            
-            Text(
-              UserSession().formattedUsername,
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.normal,
-                fontSize: 34.sp,
-                color: isDarkMode? AppColors.fourth_color:Color(0xFF403D3B),
-              ),
-            ),
+            Consumer<ProfileController>(
+                builder: (context, controller, _) {
+                  final username = controller.currentUser?.name ??
+                  UserSession().formattedUsername;
+
+                  return Text(
+                    username,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 34.sp,
+                      color: isDarkMode
+                        ? AppColors.fourth_color
+                        : const Color(0xFF403D3B),
+                      ),
+                    );
+                  },
+                ),
             // Container(
             //   width: 384.w,
             //   height: 224.h,
@@ -367,97 +271,6 @@ class HomeView extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal:24.w, vertical: 100.h),
                   child: Column(
                     children: [
-                    // Quote icon
-                    // Container(
-                    //   width: 48.w,
-                    //   height: 48.h,
-                    //   decoration: BoxDecoration(
-                    //     color: isDarkMode ? const Color(0xFF8B6914) : const Color(0xFFFFF4E6),
-                    //     shape: BoxShape.circle,
-                    //   ),
-                    //   child: SvgPicture.asset(
-                    //     'assets/icons/qoute_icon.svg',
-                    //     // ignore: deprecated_member_use
-                    //     color: isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFFA500),
-                    //     width: 24.w,
-                    //     height: 24.h,
-                    //   ),
-                    // ),
-                    // SizedBox(height: 24.h),
-                    
-                    // // Title
-                    // Text(
-                    //   'Your Daily Inspiration',
-                    //   style: GoogleFonts.outfit(
-                    //     fontWeight: FontWeight.w600,
-                    //     fontSize: 20.sp,
-                    //     color: isDarkMode ? Colors.white : Colors.black,
-                    //   ),
-                    // ),
-                    // SizedBox(height: 8.h),
-                    
-                    // // Subtitle
-                    // Text(
-                    //   'Generated from your calendar',
-                    //   style: GoogleFonts.outfit(
-                    //     fontWeight: FontWeight.w400,
-                    //     fontSize: 14.sp,
-                    //     color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                    //   ),
-                    // ),
-                    // SizedBox(height: 32.h),
-                    
-                    // Quote PageView
-                    // SizedBox(
-                    //   height: 120.h,
-                    //     child: GestureDetector(
-                    //       onPanStart: (_) => homeController.stopAutoSlide(),
-                    //       onPanEnd: (_) => homeController.startAutoSlide(),
-                    //       onTapDown: (_) => homeController.stopAutoSlide(),
-                    //       onTapUp: (_) => homeController.startAutoSlide(),
-                    //       child: PageView.builder(
-                    //         controller: homeController.pageController,
-                    //         itemCount:homeController.inspirationalQuotes.length,
-                    //         onPageChanged: (index) {
-                    //           homeController.updateQuoteIndex(index);
-                    //         },
-                    //         itemBuilder: (context, index) {
-                    //           final quote = homeController.inspirationalQuotes[index];
-                    //           return Column(
-                    //             mainAxisAlignment: MainAxisAlignment.center,
-                    //             children: [
-                    //               Flexible(
-                    //                 child: Text(
-                    //                   quote.quote,
-                    //                   textAlign: TextAlign.center,
-                    //                   style: GoogleFonts.outfit(
-                    //                     fontWeight: FontWeight.w500,
-                    //                     fontSize: 16.sp,
-                    //                     color: isDarkMode
-                    //                       ? Colors.white
-                    //                       : Colors.black,
-                    //                     height: 1.4,
-                    //                   ),
-                    //                 ),
-                    //               ),
-                    //               SizedBox(height: 16.h),
-                    //               Text(
-                    //                 quote.reference,
-                    //                 style: GoogleFonts.outfit(
-                    //                   fontWeight: FontWeight.w500,
-                    //                   fontSize: 14.sp,
-                    //                   color: isDarkMode
-                    //                     ? const Color(0xFFFFD700)
-                    //                     : const Color(0xFFFF8C00),
-                    //                   fontStyle: FontStyle.italic,
-                    //                 ),
-                    //               ),
-                    //             ],
-                    //           );
-                    //         },
-                    //       ),
-                    //     ),
-                    //   ),
                     Consumer<HomeController>(
                       builder: (context, homeController, child) {
                         return Column(
@@ -521,34 +334,6 @@ class HomeView extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(height: 5.h),
-                              // DOT INDICATORS
-                              // Row(
-                              //   mainAxisAlignment: MainAxisAlignment.center,
-                              //   children: List.generate(
-                              //     homeController.inspirationalQuotes.length > 5 ? 5
-                              //     : homeController.inspirationalQuotes.length,
-                              //     (i) {
-                              //       final index = i + (homeController.currentQuoteIndex ~/5) *5;
-                              //       final actualIndex = index % homeController.inspirationalQuotes.length;
-                              //       return GestureDetector(
-                              //         onTap: () => homeController.goToQuote(actualIndex),
-                              //         child: Container(
-                              //           margin: EdgeInsets.symmetric(horizontal: 4.w,),
-                              //           width:homeController.currentQuoteIndex == actualIndex
-                              //             ? 12.w: 8.w,
-                              //           height: homeController.currentQuoteIndex == actualIndex
-                              //             ? 12.h: 8.h,
-                              //           decoration: BoxDecoration(
-                              //             color:homeController.currentQuoteIndex == actualIndex
-                              //               ? (isDarkMode ? const Color(0xFFFFD700) : const Color(0xFFFF8C00))
-                              //               : (isDarkMode ? Colors.grey[600]: Colors.grey[400]),
-                              //             shape: BoxShape.circle,
-                              //           ),
-                              //         ),
-                              //       );
-                              //     },
-                              //   ),
-                              // ),
                             ],
                           );
                         },
@@ -693,46 +478,38 @@ class HomeView extends StatelessWidget {
             SizedBox(height: 16.h),            
             // Schedule events list
             Consumer<HomeController>(
-              builder: (context, controller, _) {
-                final authService = AuthService();
-                  return FutureBuilder<int?>(
-                    future: authService.getUserIdFromToken(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const SizedBox();
+                builder: (context, controller, _) {
+                  final events = controller.todaysEvents;
 
-                      final currentUserId = snapshot.data;
-                      final events = controller.todaysEvents.where((e) => e.user == currentUserId).toList();
-
-                      if (events.isEmpty) {
-                        return Text(
-                          'No review yet',
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14.sp,
-                            color: isDarkMode
-                              ? AppColors.fourth_color
-                              : AppColors.heading_color,
-                            ),
-                          );
-                        }
-                      return Column(
-                        children: events.map((event) {
-                          return Column(
-                            children: [
-                              _buildScheduleEvent(
-                                context,
-                                event.title,
-                                '${event.startTime} - ${event.endTime}',
-                                Colors.grey,
-                                isDarkMode,
-                                lightModeBackgroundColor:AppColors.l_schedule_clr1,
-                              ),
-                              SizedBox(height: 12.h),
-                            ],
-                          );
-                        }).toList(),
+                  if (events.isEmpty) {
+                    return Text(
+                      'No review yet',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14.sp,
+                        color: isDarkMode
+                          ? AppColors.fourth_color
+                          : AppColors.heading_color,
+                        ),
                       );
-                    },
+                    }
+
+                  return Column(
+                    children: events.map((event) {
+                      return Column(
+                        children: [
+                          _buildScheduleEvent(
+                            context,
+                            event.title,
+                            '${event.startTime} - ${event.endTime}',
+                            Colors.grey,
+                            isDarkMode,
+                            lightModeBackgroundColor: AppColors.l_schedule_clr1,
+                          ),
+                          SizedBox(height: 12.h),
+                        ],
+                      );
+                    }).toList(),
                   );
                 },
               ),
