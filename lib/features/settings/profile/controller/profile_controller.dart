@@ -46,47 +46,43 @@ class ProfileController extends ChangeNotifier {
   }
 
   Future<void> loadUserProfile() async {
-    try {
-      isLoading = true;
-      notifyListeners();
+  try {
+    isLoading = true;
+    notifyListeners();
 
-      final user = await _userService.getUserProfile();
+    final user = await _userService.getUserProfile();
 
-      if (user != null) {
-        // 🔥 Merge Google profile from UserSession if available
-        final mergedUser = user.copyWith(
-          name: UserSession().username ?? user.name,
-          profilePicture: UserSession().profileImageUrl ?? user.profilePicture,
-        );
+    if (user != null) {
+      // 🔥 Merge Google profile from UserSession if available
+      final mergedUser = user.copyWith(
+        name: UserSession().username ?? user.name,
+        profilePicture: UserSession().profileImageUrl ?? user.profilePicture,
+      );
 
-        setUser(mergedUser); // ✅ normalize profilePicture
+      setUser(mergedUser);
 
-        nameController.text = currentUser!.name;
-        passwordController.text = currentUser!.password ?? '';
-        dateController.text = currentUser!.birthDate ?? '';
+      nameController.text = currentUser!.name;
+      passwordController.text = currentUser!.password ?? '';
+      dateController.text = currentUser!.birthDate ?? '';
 
-        // UserSession().userId = currentUser!.id.toString();
-        // UserSession().username = currentUser!.name;
-        // UserSession().profileImageUrl = currentUser!.profilePicture;
-
-        UserSession().userId = currentUser!.id.toString();
-        UserSession().username = currentUser!.name;
-        if (currentUser!.profilePicture != null &&
-          currentUser!.profilePicture!.isNotEmpty) {
-          UserSession().profileImageUrl = currentUser!.profilePicture;
-        }
-        debugPrint("✅ User data preloaded: ${UserSession().username}");
-        debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
-      } else {
-        debugPrint("⚠️ No user data found");
+      UserSession().userId = currentUser!.id.toString();
+      UserSession().username = currentUser!.name;
+      if (currentUser!.profilePicture != null && currentUser!.profilePicture!.isNotEmpty) {
+        UserSession().profileImageUrl = currentUser!.profilePicture;
       }
-    } catch (e) {
-      debugPrint("❌ Error loading user data: $e");
-    } finally {
-      isLoading = false;
-      notifyListeners();
+
+      debugPrint("✅ User data preloaded: ${UserSession().username}");
+      debugPrint("✅ User Image: ${UserSession().profileImageUrl}");
+    } else {
+      debugPrint("⚠️ No user data found");
     }
+  } catch (e) {
+    debugPrint("❌ Error loading user data: $e");
+  } finally {
+    isLoading = false;
+    notifyListeners();
   }
+}
 
   Future<void> updateProfile(BuildContext context) async {
     // ✅ BLOCK update for Google login users

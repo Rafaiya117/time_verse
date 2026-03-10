@@ -35,50 +35,49 @@ class LoginController extends ChangeNotifier{
   }
 
 //!------------Log in --------!
-  Future<bool> loginUser() async {
-    try {
-      final response = await _authService.login(
+Future<bool> loginUser() async {
+  try {
+    final response = await _authService.login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
+
+    if (response['success'] == true) {
+      loginError = null;
+
+      // ✅ ADDED: persist login state
+      await AppPrefs.setLoggedIn(true);
+      await AppPrefs.setGoogleLogin(false);
+
+      // ✅ ADDED: save remember-me data
+      await AppPrefs.saveRememberMe(
+        rememberMe,
         emailController.text.trim(),
         passwordController.text.trim(),
       );
 
-      if (response['success'] == true) {
-        loginError = null; 
-        return true;
-      } else {
-        loginError = response['error'] ?? 'Login failed';
-        return false;
-      }
-    } catch (e) {
-      debugPrint("Login error: $e");
-      loginError = 'Something went wrong. Please try again.';
+      return true;
+    } else {
+      loginError = response['error'] ?? 'Login failed';
       return false;
     }
+  } catch (e) {
+    debugPrint("Login error: $e");
+    loginError = 'Something went wrong. Please try again.';
+    return false;
   }
-  //!---Remember me -----!
-  Future<void> loadRememberedUser() async {
+}
+
+//!---Remember me -----!
+Future<void> loadRememberedUser() async {
   final data = await AppPrefs.getRememberedUser();
+
   if (data['remember'] == true) {
     emailController.text = data['email'] ?? '';
     passwordController.text = data['password'] ?? '';
     rememberMe = true;
   }
-    notifyListeners();
-  }
 
-  // Future<void> startGoogleLogin() async {
-  //   final url = Uri.parse("http://10.10.13.74:5000/google_auth/google/login");
-
-  //   try {
-  //     // Open in external browser
-  //     if (!await launchUrl(
-  //       url,
-  //       mode: LaunchMode.externalApplication,
-  //     )) {
-  //       print("Could not launch login url");
-  //     }
-  //   } catch (e) {
-  //     print("Error launching login url: $e");
-  //   }
-  // }
+  notifyListeners();
+}
 }

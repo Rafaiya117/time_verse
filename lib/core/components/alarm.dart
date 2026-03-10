@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:alarm/alarm.dart';
-import 'package:alarm/model/alarm_settings.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
 
 class ExampleAlarmRingScreen extends StatefulWidget {

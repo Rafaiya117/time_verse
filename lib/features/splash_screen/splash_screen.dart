@@ -19,27 +19,37 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateNext() async {
-    await Future.delayed(const Duration(seconds: 3)); 
+    await Future.delayed(const Duration(seconds: 3));
 
     final isFirstLaunch = await AppPrefs.isFirstLaunch();
     final isLoggedIn = await AppPrefs.isLoggedIn();
+    final isGoogleLogin = await AppPrefs.isGoogleLogin();
+    final googleToken = isGoogleLogin ? await AppPrefs.getGoogleToken() : null;
 
     if (!mounted) return;
 
+    final shouldForceLogin = isGoogleLogin && (googleToken == null || googleToken.isEmpty);
+
     if (isFirstLaunch) {
       await AppPrefs.setFirstLaunch(false);
-      context.push('/landing'); 
-    } else if (isLoggedIn) {
-      context.push('/home'); 
+      context.push('/landing');
+    } else if (isLoggedIn && !shouldForceLogin) {
+      context.push('/home'); // user has valid token
     } else {
-      context.push('/login');
+      // Clear invalid Google login state
+      await AppPrefs.setGoogleLogin(false);
+      await AppPrefs.clearGoogleToken();
+      await AppPrefs.setLoggedIn(false);
+
+      context.push('/login'); // send to login
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final String logoAsset = isDarkMode ? 'assets/images/logo.png' : 'assets/images/logo_light.png';
+    final String logoAsset =
+        isDarkMode ? 'assets/images/logo.png' : 'assets/images/logo_light.png';
 
     return Scaffold(
       backgroundColor: Colors.transparent,

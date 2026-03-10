@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -23,18 +21,13 @@ class GoogleServices {
     'https://www.googleapis.com/auth/calendar.events',
   ];
 
-  /// Initialize Google Sign-In
   void init() {
-    _googleSignIn.initialize(
-      serverClientId: serverClientId,
-    );
+    _googleSignIn.initialize(serverClientId: serverClientId);
   }
 
-  /// Sign in with Google
   Future<bool> signIn() async {
     try {
       final user = await _googleSignIn.authenticate();
-
       _currentUser = user;
 
       if (_currentUser != null) {
@@ -67,52 +60,9 @@ class GoogleServices {
     _currentUser = null;
     await AuthService().clearToken();
     await AppPrefs.setLoggedIn(false);
+    await AppPrefs.setGoogleLogin(false);
+    await AppPrefs.clearGoogleToken();
     print("Signed out");
-  }
-
-  /// ✅ FIXED: use authorizationHeaders instead of accessToken
-  Future<void> addEvent({
-    required String summary,
-    required DateTime start,
-    required DateTime end,
-  }) async {
-    if (_currentUser == null) {
-      print("User not signed in");
-      return;
-    }
-
-    // ✅ Google handles access token internally
-    final headers = await _currentUser!.authorizationClient.authorizationHeaders(scopes);
-    final url = Uri.parse(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-    );
-
-    final body = {
-      "summary": summary,
-      "start": {
-        "dateTime": start.toIso8601String(),
-        "timeZone": "UTC",
-      },
-      "end": {
-        "dateTime": end.toIso8601String(),
-        "timeZone": "UTC",
-      },
-    };
-
-    final response = await http.post(
-      url,
-      headers: {
-        ...?headers,
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print("Event added successfully");
-    } else {
-      print("Failed to add event: ${response.body}");
-    }
   }
 
   Future<void> sendTokensToApi(String idToken) async {
@@ -134,6 +84,12 @@ class GoogleServices {
         if (accessToken != null) {
           await AuthService().saveToken(accessToken);
           await AppPrefs.setLoggedIn(true);
+          await AppPrefs.setGoogleLogin(true);
+          await AppPrefs.saveGoogleToken(accessToken);
+
+          // ✅ Save user info in UserSession
+          UserSession().username = data['name'] ?? UserSession().username;
+          UserSession().profileImageUrl = data['picture'] ?? UserSession().profileImageUrl;
         }
 
         debugPrint('✅ Google login successful $response');
