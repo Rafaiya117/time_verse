@@ -11,6 +11,7 @@ import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
+import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/calender/widget/custom_chip.dart';
 import 'package:time_verse/features/calender/widget/custom_date_picker.dart';
@@ -69,11 +70,28 @@ class AddEventModal extends StatelessWidget {
                 child: TextFormField(
                   controller: addEventController.noteController,
                   decoration: InputDecoration(
-                    hintText: 'Type the note here...',
-                    hintStyle: TextStyle(
-                      color:isDarkMode?AppColors.text_color:AppColors.heading_color,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
+                    // ✅ Replace hintText with hint (RichText)
+                    hint: RichText(
+                      text: TextSpan(
+                        text: 'Type the note here',
+                        style: TextStyle(
+                          color: isDarkMode
+                            ? AppColors.text_color
+                            : AppColors.heading_color,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *', // ✅ required star
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -95,19 +113,25 @@ class AddEventModal extends StatelessWidget {
                     ),
                   ),
                   style: TextStyle(
-                    color: isDarkMode?AppColors.text_color:AppColors.heading_color,
+                    color: isDarkMode
+                      ? AppColors.text_color
+                      : AppColors.heading_color,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                   ),
                   cursorColor: Colors.grey.shade300,
                 ),
               ),
-              SizedBox(height:16.h),
-              GestureDetector(
+              SizedBox(height: 16.h),
+             GestureDetector(
                 onTap: () => showDialog(
                   context: context,
                   builder: (_) => DatePickerDialog(
                     controller: addEventController.dateController,
+                    initialDate: Provider.of<CalendarController>(
+                      context,
+                      listen: false,
+                    ).selectedDay,
                   ),
                 ),
                 child: Container(
@@ -251,10 +275,8 @@ class AddEventModal extends StatelessWidget {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (_) =>
-                        const Center(child: CircularProgressIndicator()),
+                    builder: (_) => const Center(child: CircularProgressIndicator()),
                   );
-
                   try {
                     final timeController = Provider.of<TimePickerController>(
                       context,
@@ -277,17 +299,11 @@ class AddEventModal extends StatelessWidget {
                       date: addEventController.dateController.text.trim(),
                       startTime: start,
                       endTime: end,
-                      location:
-                          addEventController.locationController.text
-                              .trim()
-                              .isEmpty
-                          ? null
-                          : addEventController.locationController.text.trim(),
+                      location:addEventController.locationController.text.trim().isEmpty
+                      ? null: addEventController.locationController.text.trim(),
                       alarmTime: alarm,
-                      categoryName:
-                          addEventController.selectedCategory?.isEmpty == true
-                          ? null
-                          : addEventController.selectedCategory,
+                      categoryName:addEventController.selectedCategory?.isEmpty == true
+                      ? null: addEventController.selectedCategory,
                       note: addEventController.noteController.text.trim() ?? "",
                     );
 

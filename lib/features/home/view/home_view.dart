@@ -285,7 +285,9 @@ class HomeView extends StatelessWidget {
                                   child: RepaintBoundary(
                                     key: homeController.quoteShareKey,
                                     child: Container(
-                                      color: const Color(0xFF051123),
+                                      color:isDarkMode
+                                        ? const Color(0xFF051123)
+                                        : Colors.transparent,
                                       padding: EdgeInsets.symmetric(horizontal: 16.w,),
                                       child: DefaultTextStyle(
                                         style: const TextStyle(
@@ -310,7 +312,7 @@ class HomeView extends StatelessWidget {
                                                     style: GoogleFonts.outfit(
                                                       fontWeight:FontWeight.w500,
                                                       fontSize: 16.sp,
-                                                      color: Colors.white, 
+                                                      color: isDarkMode ? AppColors.text_color : AppColors.third_color, 
                                                     ),
                                                   ),
                                                 ),
@@ -354,17 +356,37 @@ class HomeView extends StatelessWidget {
                               ),
                             ),
                             child: GestureDetector(
+                              // onTap: () async {
+                              //   final currentQuote = homeController.inspirationalQuotes[homeController.currentQuoteIndex];
+                              //   debugPrint('Saving quote with ID: ${currentQuote.id}',);
+                              //   final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
+                              //     if (success) {
+                              //       await showMessageDialog(
+                              //         context,
+                              //         "Quote saved successfully!",
+                              //         title: "Success",
+                              //         icon: Icons.check_circle_outline,
+                              //         iconColor: Colors.green,
+                              //       );
+                              //     }
+                              //   },
                               onTap: () async {
-                                final currentQuote = homeController.inspirationalQuotes[homeController.currentQuoteIndex];
-                                debugPrint('Saving quote with ID: ${currentQuote.id}',);
-                                final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
+                                final success = await homeController.saveQuoteImageToGallery();
                                   if (success) {
                                     await showMessageDialog(
                                       context,
-                                      "Quote saved successfully!",
+                                      "Quote saved to gallery successfully!",
                                       title: "Success",
                                       icon: Icons.check_circle_outline,
                                       iconColor: Colors.green,
+                                    );
+                                  } else {
+                                    await showMessageDialog(
+                                      context,
+                                      "Failed to save image.",
+                                      title: "Error",
+                                      icon: Icons.error_outline,
+                                      iconColor: Colors.red,
                                     );
                                   }
                                 },

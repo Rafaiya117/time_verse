@@ -64,16 +64,16 @@ class Profile extends StatelessWidget {
                     hintFontSize: 14.sp,
                   ),
                   SizedBox(height: 20.h),
-                  CustomInputField(
-                    label: 'Email',
-                    hintText: 'example@mail.com',
-                    controller: controller.emailController,
-                    isPassword: false,
-                    fontSize: 16.sp,
-                    height: 44.h,
-                    hintFontSize: 14.sp,
-                  ),
-                  SizedBox(height: 20.h),
+                  // CustomInputField(
+                  //   label: 'Email',
+                  //   hintText: 'example@mail.com',
+                  //   controller: controller.emailController,
+                  //   isPassword: false,
+                  //   fontSize: 16.sp,
+                  //   height: 44.h,
+                  //   hintFontSize: 14.sp,
+                  // ),
+                  // SizedBox(height: 20.h),
                   DateField(
                     label: 'Date of Birth',
                     selectedDate:

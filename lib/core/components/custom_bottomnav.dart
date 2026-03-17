@@ -179,9 +179,7 @@ class CustomBottomNavBar extends StatelessWidget {
                       width: 0.4,
                     ),
                   ),
-                  color: isDark
-                      ? AppColors.containers_bgd
-                      : AppColors.l_bottom_nav,
+                  color: isDark ? AppColors.containers_bgd : AppColors.l_bottom_nav,
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -203,13 +201,17 @@ class CustomBottomNavBar extends StatelessWidget {
                         controller.navigateTo(index, context);
                       },
                       child: isAddIcon
-                          ? SizedBox(
-                              width: 60.w,
-                              height: 100.h,
-                              child: Stack(
-                                clipBehavior: Clip.none,
+                        ? SizedBox(
+                          width: 60.w,
+                          height: 100.h,
+                            child: Stack(
+                              clipBehavior: Clip.none,
                                 alignment: Alignment.center,
                                 children: [
+                                  // ✅ Invisible full-size tap area
+                                  Positioned.fill(
+                                    child: Container(color: Colors.transparent),
+                                  ),
                                   Positioned(
                                     top: -30.h,
                                     child: SvgPicture.asset(
@@ -226,15 +228,15 @@ class CustomBottomNavBar extends StatelessWidget {
                                         fontSize: 10.2.sp,
                                         fontWeight: FontWeight.normal,
                                         color: isSelected
-                                            ? AppColors.fourth_color
-                                            : AppColors.text_color,
+                                          ? AppColors.fourth_color
+                                          : AppColors.text_color,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             )
-                          : Column(
+                            : Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 SvgPicture.asset(

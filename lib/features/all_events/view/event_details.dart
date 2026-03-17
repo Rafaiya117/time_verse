@@ -339,12 +339,23 @@ class EventDetails extends StatelessWidget {
                   children: [
                     CustomButton(
                       text: "Save",
-                      onPressed: () {},
+                      onPressed: () async {
+                        final eventController = Provider.of<EventController>(
+                          context,
+                          listen: false,
+                        );
+                        await eventController.shareQuoteAsImage();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Quote saved as image!')),
+                        );
+                      },
                       borderGradient: AppGradientColors.button_gradient,
                       solidColor: isDarkMode
-                        ? AppColors.containers_bgd
-                        : AppColors.background_color,
-                      textColor: isDarkMode?AppColors.text_color:Color(0xFF373F4B),
+                          ? AppColors.containers_bgd
+                          : AppColors.background_color,
+                      textColor: isDarkMode
+                          ? AppColors.text_color
+                          : const Color(0xFF373F4B),
                       fontFamily: 'outfit',
                       fontSize: 16.sp,
                       fontWeight: FontWeight.normal,
@@ -355,10 +366,12 @@ class EventDetails extends StatelessWidget {
                         width: 18.w,
                         height: 18.h,
                         // ignore: deprecated_member_use
-                        color: isDarkMode?AppColors.text_color:Color(0xFF373F4B),
+                        color: isDarkMode
+                          ? AppColors.text_color
+                          : const Color(0xFF373F4B),
                       ),
                     ),
-                    SizedBox(width:10.w),
+                    SizedBox(width: 10.w),
                     CustomButton(
                       text: "Share",
                       onPressed: () {

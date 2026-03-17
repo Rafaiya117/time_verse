@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:alarm/alarm.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
@@ -223,6 +226,29 @@ class HomeController extends ChangeNotifier {
     }
   }
 
+  Future<bool> saveQuoteImageToGallery() async {
+  try {
+    // Request permission
+    final status = await Permission.photos.request();
+    if (!status.isGranted) return false;
+
+    // Capture widget
+    final boundary = quoteShareKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+
+    // Save to gallery
+    await Gal.putImageBytes(pngBytes);
+
+    return true;
+  } catch (e) {
+    debugPrint("Save error: $e");
+    return false;
+  }
+}
 
 Future<void> fetchReviewsFromApi() async {
   try {
