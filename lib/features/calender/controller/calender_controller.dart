@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -154,4 +155,93 @@ class CalendarController extends ChangeNotifier {
       debugPrint('⚠️ Error fetching events: $e');
     }
   }
+
+  //!------------------ Remove event from API and list ------------------ //
+  Future<bool> deleteEvent(int eventId) async {
+    try {
+      final token = await AuthService().getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.delete(
+        '$baseUrl/api/v1/evenet/delete/$eventId/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      debugPrint('⚠️ Error deleting event: $e');
+      return false;
+    }
+  }
+
+  Future<bool> removeEventFromList(int eventId) async {
+    final success = await deleteEvent(eventId);
+    if (success) {
+      _events.removeWhere((event) => event.id == eventId);
+      debugPrint('✅ Event removed from list: $eventId');
+      notifyListeners();
+      try {
+        await Alarm.stop(eventId);
+      } catch (_) {}
+      return true;
+    }
+    return false;
+  }
+
+  Future<T?> runWithLoaderAndTimer<T>({
+  required BuildContext context,
+  required Future<T> Function() task,
+}) async {
+  final startTime = DateTime.now();
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          Duration elapsed = DateTime.now().difference(startTime);
+
+          // update every second
+          Future.delayed(const Duration(seconds: 1), () {
+            if (context.mounted) setState(() {});
+          });
+
+          return Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Deleting...\n${elapsed.inSeconds}s",
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+
+  try {
+    final result = await task();
+    return result;
+  } finally {
+    if (context.mounted) Navigator.pop(context); // close loader
+  }
+}
 }

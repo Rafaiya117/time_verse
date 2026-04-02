@@ -52,6 +52,31 @@ class AddEventController extends ChangeNotifier {
     }
   }
 
+  //-------------------- Input validation for add event form --------------------//
+  String? validateFields({required String title,required String date,required String startTime,required String endTime,required String note,}) {
+  if (title.trim().isEmpty) {
+    return "Event title is required";
+  }
+
+  if (date.trim().isEmpty) {
+    return "Event date is required";
+  }
+
+  if (startTime.trim().isEmpty) {
+    return "Start time is required";
+  }
+
+  if (endTime.trim().isEmpty) {
+    return "End time is required";
+  }
+
+  if (note.trim().isEmpty) {
+    return "Note/description is required";
+  }
+
+  return null; // ✅ all good
+}
+
   // controller add event
 Future<Map<String, dynamic>?> createTask({
   required String title,
@@ -157,6 +182,22 @@ String _localTimeZoneOffset() {
 void selectCategory(String categoryName) { 
   selectedCategory = categoryName; 
   notifyListeners(); 
+}
+
+
+//!------------------ Clean up controllers ------------------//
+void clearFields() {
+  titleController.clear();
+  dateController.clear();
+  startTimeController.clear();
+  endTimeController.clear();
+  locationController.clear();
+  alarmTimeController.clear();
+  noteController.clear();
+
+  selectedCategory = null;
+
+  notifyListeners(); // ✅ refresh UI if needed
 }
 
 

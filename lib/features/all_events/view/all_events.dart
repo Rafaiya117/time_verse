@@ -85,14 +85,16 @@ class AllEvents extends StatelessWidget {
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         confirmDismiss: (_) async {
-                          final success = await controller.deleteEvent(
-                            event.id,
+                          final success = controller.runWithLoaderAndTimer(
+                            context: context,
+                            task: () =>controller.removeEventFromList(event.id),
                           );
 
-                          if (!success) {
+                          if (success != true) {
                             debugPrint('❌ Failed to delete event');
                           }
-                          return success; // 🔥 triggers smooth pop
+
+                          return success;
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 20.0),
@@ -104,10 +106,11 @@ class AllEvents extends StatelessWidget {
                             location: event.location,
                             isDarkMode: isDarkMode,
                             onDelete: () async {
-                              final success = await controller.deleteEvent(
-                                event.id,
+                              final success = controller.runWithLoaderAndTimer(
+                                context: context,
+                                task: () => controller.removeEventFromList(event.id),
                               );
-                              if (!success) {
+                              if (success != true) {
                                 debugPrint('❌ Failed to delete event');
                               }
                             },

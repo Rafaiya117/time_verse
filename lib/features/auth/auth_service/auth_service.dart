@@ -323,6 +323,30 @@ Future<Map<String, dynamic>> forgotPassword(String email) async {
   }
 }
 
+Future<Map<String, dynamic>> resendOtp(String email) async {
+    try {
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.post(
+        '$baseUrl/api/v1/resend-otp/', // 🔹 replace with your actual endpoint
+        data: {
+          "email": email,
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      return response.data;
+    } catch (e) {
+      debugPrint('❌ Resend OTP error: $e');
+      return {"success": false, "message": "Failed to resend OTP"};
+    }
+  }
+
 
 // ---------------- ERROR HANDLER ---------------- //
   // String _handleError(DioException e) {

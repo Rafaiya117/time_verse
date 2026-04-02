@@ -31,7 +31,7 @@ class AddEventModal extends StatelessWidget {
     return SafeArea(
       bottom: true,
       child: Container(
-        height: 652.h,
+        //height: 652.h,
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isDarkMode?Color(0xFF051123):AppColors.text_color,
@@ -272,28 +272,48 @@ class AddEventModal extends StatelessWidget {
               CustomButton(
                 text: "Save",
                 onPressed: () async {
+                  final timeController = Provider.of<TimePickerController>(
+                    context,
+                    listen: false,
+                  );
+
+                  final start = timeController.formatTime(
+                    timeController.getTime('start'),
+                  );
+                  final end = timeController.formatTime(
+                    timeController.getTime('end'),
+                  );
+                  final alarm = timeController.formatTime(
+                    timeController.getTime('alarm'),
+                  );
+
+                  // ✅ VALIDATION FIRST
+                  final validationError = addEventController.validateFields(
+                    title: addEventController.titleController.text,
+                    date: addEventController.dateController.text,
+                    startTime: start,
+                    endTime: end,
+                    note: addEventController.noteController.text,
+                  );
+
+                  if (validationError != null) {
+                    await showMessageDialog(
+                      context,
+                      validationError,
+                      title: 'Validation Error',
+                      icon: Icons.warning_amber_outlined,
+                      iconColor: Colors.orange,
+                    );
+                    return; 
+                  }
+
+                  // ✅ THEN show loader
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (_) => const Center(child: CircularProgressIndicator()),
+                    builder: (_) =>const Center(child: CircularProgressIndicator()),
                   );
                   try {
-                    final timeController = Provider.of<TimePickerController>(
-                      context,
-                      listen: false,
-                    );
-
-                    // Format times in HH:mm:ss (backend expects only time)
-                    final start = timeController.formatTime(
-                      timeController.getTime('start'),
-                    );
-                    final end = timeController.formatTime(
-                      timeController.getTime('end'),
-                    );
-                    final alarm = timeController.formatTime(
-                      timeController.getTime('alarm'),
-                    );
-
                     final result = await addEventController.createTask(
                       title: addEventController.titleController.text.trim(),
                       date: addEventController.dateController.text.trim(),
@@ -302,18 +322,13 @@ class AddEventModal extends StatelessWidget {
                       location:addEventController.locationController.text.trim().isEmpty
                       ? null: addEventController.locationController.text.trim(),
                       alarmTime: alarm,
-                      categoryName:addEventController.selectedCategory?.isEmpty == true
-                      ? null: addEventController.selectedCategory,
-                      note: addEventController.noteController.text.trim() ?? "",
+                      categoryName:addEventController.selectedCategory?.isEmpty == true? null: addEventController.selectedCategory,
+                      note: addEventController.noteController.text.trim(),
                     );
-
-                    debugPrint("START TIME SENT => $start");
-                    debugPrint("END TIME SENT => $end");
-
+                    Navigator.pop(context); 
                     if (result != null) {
                       final eventModel = EventModel.fromMap(result);
                       await AlarmHelper.scheduleEventAlarm(eventModel);
-
                       DateTime? alarmTime;
                       try {
                         alarmTime = DateTime.parse(result['alarm_time']);
@@ -322,7 +337,6 @@ class AddEventModal extends StatelessWidget {
                           "⚠️ Alarm time format error: ${result['alarm_time']}",
                         );
                       }
-
                       if (alarmTime != null) {
                         await NotificationService.scheduleNotification(
                           id: result['id'],
@@ -332,7 +346,7 @@ class AddEventModal extends StatelessWidget {
                           payload: result['id'],
                         );
                       }
-
+                      addEventController.clearFields();
                       await showMessageDialog(
                         context,
                         'Saved successfully',
@@ -340,14 +354,13 @@ class AddEventModal extends StatelessWidget {
                         icon: Icons.check_circle_outline,
                         iconColor: Colors.green,
                       );
-
-                      // ✅ REFRESH HOME EVENTS
-                     await context.read<HomeController>().fetchEvents();
+                      await context.read<HomeController>().fetchEvents();
                       if (context.mounted) {
-                         context.go('/all_events');
+                        context.go('/all_events');
                       }
                     }
                   } catch (e) {
+                    Navigator.pop(context); 
                     await showMessageDialog(
                       context,
                       'Failed to save event: $e',

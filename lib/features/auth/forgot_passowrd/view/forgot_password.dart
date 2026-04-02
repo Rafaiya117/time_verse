@@ -113,12 +113,10 @@ class ForgotPassword extends StatelessWidget {
                       style: GoogleFonts.roboto(
                         fontWeight: FontWeight.w500,
                         fontSize: 14.sp,
-                        color: isDarkMode
-                          ? AppColors.text_color
-                          : Color(0xFFC2C2C2),
-                        ),
-                        children: [
-                        const TextSpan(text: 'Did not recive OTP code? '),
+                        color: isDarkMode? AppColors.text_color: Color(0xFFC2C2C2),
+                      ),
+                      children: [
+                        const TextSpan(text: 'Did not receive OTP code? '),
                         TextSpan(
                           text: 'Resend',
                           style: GoogleFonts.roboto(
@@ -128,15 +126,45 @@ class ForgotPassword extends StatelessWidget {
                             decoration: TextDecoration.underline,
                             decorationColor: Color(0xFF543558),
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {
-                            //context.push('/signup');
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              final controller = context.read<ForgotPasswordController>();
+                              final email = controller.emailController.text.trim();
+                              if (email.isEmpty) {
+                                await showMessageDialog(
+                                  context,
+                                  'Please enter your email first.',
+                                  title: 'Error',
+                                  icon: Icons.error_outline,
+                                  iconColor: Colors.red,
+                                );
+                                return;
+                              }
+                              final success = await controller.resendOtp(email);
+                              if (success) {
+                                await showMessageDialog(
+                                  context,
+                                  'OTP has been resent successfully.',
+                                  title: 'Success',
+                                  icon: Icons.check_circle_outline,
+                                  iconColor: Colors.green,
+                                );
+                              } else {
+                                await showMessageDialog(
+                                context,
+                                controller.errorMessage ?? 'Failed to resend OTP',
+                                title: 'Error',
+                                icon: Icons.error_outline,
+                                iconColor: Colors.red,
+                              );
+                            }
                           },
                         ),
                       ],
                     ),
                   ),
                 ],
-              ),         
+              ),
             ],
           ),
         ),

@@ -6,6 +6,7 @@ class ForgotPasswordController extends ChangeNotifier{
   final AuthService _authService = AuthService(); 
 
   String? errorMessage;
+  bool otpSent = false;
 
   void disposeControllers() {
     emailController.dispose();
@@ -33,6 +34,7 @@ class ForgotPasswordController extends ChangeNotifier{
       debugPrint("Forgot password response: $response");
 
       if (response['success'] == true) {
+        otpSent = true;
         errorMessage = null;
         return true; 
       } else {
@@ -42,6 +44,25 @@ class ForgotPasswordController extends ChangeNotifier{
     } catch (e) {
       debugPrint("Forgot password exception: $e");
       errorMessage = 'Something went wrong. Please try again.';
+      return false;
+    }
+  }
+
+  //!------------- resend otp -------------!
+  Future<bool> resendOtp(String email) async {
+    try {
+      // Call your AuthService to resend OTP
+      final response = await _authService.resendOtp(email);
+
+      if (response['success'] == true) {
+        return true;
+      } else {
+        errorMessage = response['error'] ?? response['message'];
+        return false;
+      }
+    } catch (e) {
+      errorMessage = 'Failed to resend OTP. Please try again.';
+      debugPrint("Resend OTP error: $e");
       return false;
     }
   }

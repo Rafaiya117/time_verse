@@ -59,13 +59,21 @@ Widget build(BuildContext context) {
                           child: EventCard(
                             id: event.id,
                             title: event.title,
-                            sub_title: '',
+                            sub_title: event.description,
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
                             location: event.location,
                             isDarkMode: isDarkMode,
-                            onDelete: () => controller.removeEvent(index),
-                          ),
+                            onDelete: () async {
+                              final success = controller.runWithLoaderAndTimer(
+                                context: context,
+                                task: () => controller.removeEventFromList(event.id),);
+                                // ignore: unrelated_type_equality_checks
+                                if (success != true) {
+                                  debugPrint('❌ Failed to delete event');
+                                }
+                              },
+                            ),
                         );
                       },
                     ),

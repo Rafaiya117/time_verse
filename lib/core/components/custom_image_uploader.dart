@@ -17,8 +17,8 @@ class ImagePickerBox extends StatelessWidget {
     super.key,
     required this.onTap,
     required this.svgAsset,
-    this.title = 'Upload your photo',
-    this.subtitle = 'JPG, PNG up to 5MB',
+    this.title = 'Upload your photo (optional)',
+    this.subtitle = 'JPG, PNG etc',
     this.width =double.infinity, //327,
     this.height = 62,
   });

@@ -160,9 +160,7 @@ class AllEventsController extends ChangeNotifier {
         );
 
       notifyListeners();
-
       await Alarm.stopAll();
-
       for (final event in _events) {
         if (event.alarmTime.isNotEmpty) {
           await AlarmHelper.scheduleEventAlarm(event);
@@ -195,4 +193,70 @@ class AllEventsController extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> removeEventFromList(int eventId) async {
+    final success = await deleteEvent(eventId);
+    if (success) {
+      _events.removeWhere((event) => event.id == eventId);
+      debugPrint('✅ Event removed from list: $eventId');
+      notifyListeners();
+      try {
+        await Alarm.stop(eventId);
+      } catch (_) {}
+      return true;
+    }
+    return false;
+  }
+
+  Future<T?> runWithLoaderAndTimer<T>({
+  required BuildContext context,
+  required Future<T> Function() task,
+}) async {
+  final startTime = DateTime.now();
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          Duration elapsed = DateTime.now().difference(startTime);
+
+          // update every second
+          Future.delayed(const Duration(seconds: 1), () {
+            if (context.mounted) setState(() {});
+          });
+
+          return Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Deleting...\n${elapsed.inSeconds}s",
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+
+  try {
+    final result = await task();
+    return result;
+  } finally {
+    if (context.mounted) Navigator.pop(context); // close loader
+  }
+}
 }

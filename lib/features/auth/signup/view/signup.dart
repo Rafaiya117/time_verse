@@ -31,6 +31,9 @@ class Signup extends StatelessWidget {
     final Color secondaryTextColor = isDarkMode 
       ? AppColors.fourth_color 
       : AppColors.heading_color;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      googleServices.init();
+    });
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(
@@ -207,6 +210,7 @@ class Signup extends StatelessWidget {
                     final success  = await googleServices.signIn();
                     if (success) {
                       await AppPrefs.setLoggedIn(true);
+                      await AppPrefs.setGoogleLogin(false);
                       await AppPrefs.setFirstLaunch(false);
                       if (context.mounted) context.push('/home');
                     } else {

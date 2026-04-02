@@ -89,6 +89,7 @@ class SignupController extends ChangeNotifier {
     emailController.dispose();
     nameController.dispose();
     passwordController.dispose();
+    confirm_passwordController.dispose();
   }
 
   bool areFieldsFilled(List<TextEditingController> controllers) {
@@ -101,7 +102,7 @@ class SignupController extends ChangeNotifier {
   }
 
   bool validateSignupFields() {
-    return areFieldsFilled([emailController, nameController, passwordController]);
+    return areFieldsFilled([emailController, nameController, passwordController, confirm_passwordController]);
   }
 
   String? pickedImagePath;

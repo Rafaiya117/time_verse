@@ -20,6 +20,10 @@ class OtpView extends StatelessWidget {
     final Color secondaryTextColor = isDarkMode 
       ? AppColors.fourth_color 
       : AppColors.heading_color;
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      otpController.startTimer();
+    });
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(
@@ -93,13 +97,17 @@ class OtpView extends StatelessWidget {
                     thickness: 1,
                   ),
                 ),
-                Text(
-                  '02.49',
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14.sp,
-                    color: const Color(0xFFF29F0D),
-                  ),
+                Consumer<OtpController>(
+                  builder: (context, controller, _) {
+                    return Text(
+                      controller.formattedTime,
+                      style: GoogleFonts.roboto(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14.sp,
+                        color: const Color(0xFFF29F0D),
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(
                   width: 128,
@@ -184,7 +192,7 @@ class OtpView extends StatelessWidget {
                           decorationColor: AppColors.fourth_color,
                         ),
                         recognizer: TapGestureRecognizer()..onTap = () {
-                          //context.push('/signup');
+                          context.push('/forgot_pass');
                         },
                       ),
                     ],
