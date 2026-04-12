@@ -173,9 +173,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: isDark
-                          ? AppColors.text_color
-                          : AppColors.heading_color,
+                      color: isDark ? AppColors.text_color: AppColors.heading_color,
                       width: 0.4,
                     ),
                   ),
@@ -201,68 +199,64 @@ class CustomBottomNavBar extends StatelessWidget {
                         controller.navigateTo(index, context);
                       },
                       child: isAddIcon
-                        ? SizedBox(
-                          width: 60.w,
-                          height: 100.h,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                                alignment: Alignment.center,
-                                children: [
-                                  // ✅ Invisible full-size tap area
-                                  Positioned.fill(
-                                    child: Container(color: Colors.transparent),
-                                  ),
-                                  Positioned(
-                                    top: -30.h,
-                                    child: SvgPicture.asset(
-                                      item.iconPath,
-                                      width: 50.w,
-                                      height: 70.h,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 8,
-                                    child: Text(
-                                      item.label,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 10.2.sp,
-                                        fontWeight: FontWeight.normal,
-                                        color: isSelected
-                                          ? AppColors.fourth_color
-                                          : AppColors.text_color,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                            : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.asset(
-                                  item.iconPath,
-                                  width: 24.w,
-                                  height: 24.h,
-                                  colorFilter: ColorFilter.mode(
-                                    isSelected
-                                        ? AppColors.fourth_color
-                                        : AppColors.text_color,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  item.label,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10.2.sp,
-                                    fontWeight: FontWeight.normal,
-                                    color: isSelected
-                                        ? AppColors.fourth_color
-                                        : AppColors.text_color,
-                                  ),
-                                ),
-                              ],
+                      ? SizedBox(
+                        width: 60.w,
+                        height: 100.h,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
+                        children: [
+                          // ✅ Invisible full-size tap area
+                          Positioned.fill(
+                            child: Container(color: Colors.transparent),
+                          ),
+                          Positioned(
+                            top: -30.h,
+                            child: SvgPicture.asset(
+                              item.iconPath,
+                              width: 50.w,
+                              height: 70.h,
                             ),
+                          ),
+                          Positioned(
+                            bottom: 8,
+                            child: Text(
+                              item.label,
+                              style: GoogleFonts.inter(
+                                fontSize: 10.2.sp,
+                                fontWeight: FontWeight.normal,
+                                color: isSelected
+                                ? AppColors.fourth_color
+                                : AppColors.text_color,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            item.iconPath,
+                            width: 24.w,
+                            height: 24.h,
+                            colorFilter: ColorFilter.mode(
+                              isSelected? AppColors.fourth_color : AppColors.text_color,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            item.label,
+                            style: GoogleFonts.inter(
+                              fontSize: 10.2.sp,
+                              fontWeight: FontWeight.normal,
+                              color: isSelected? AppColors.fourth_color: AppColors.text_color,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }),
                 ),

@@ -25,48 +25,51 @@ class EventDetails extends StatelessWidget {
       controller.fetchEventDetailsById(eventId);
     });
     return Scaffold(
-      body: Padding(
+  body: Consumer<EventController>(
+    builder: (context, eventController, _) {
+      // ✅ FIX: Show a loader while eventDetail is null to prevent errors
+      if (eventController.eventDetail == null) {
+        return const Center(child: CircularProgressIndicator(color: Color(0xFFFFB800)));
+      }
+
+      return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 32.0.h),
-        child:Column(
+        child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
-                  onPressed: (){
-                    context.pop();
-                  }, 
+                  onPressed: () => context.pop(),
                   icon: SvgPicture.asset(
                     'assets/icons/arrow_back.svg',
                     width: 17.5.w,
                     height: 15.01.h,
-                    // ignore: deprecated_member_use
-                    color: isDarkMode?AppColors.text_color:AppColors.heading_color,
+                    color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
                   ),
                 ),
-                SizedBox(width: 90.w,),
+                SizedBox(width: 90.w),
                 Text(
                   'Share Quote',
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 20.sp,
-                    color: isDarkMode? AppColors.text_color: AppColors.heading_color,
+                    color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
                   ),
                 ),
-                SizedBox(width: 45.w,),
+                const Spacer(), // Replaced fixed SizedBox for better alignment
                 IconButton(
-                  onPressed: (){
-                    themeProvider.toggleTheme();
-                  }, 
+                  onPressed: () => themeProvider.toggleTheme(),
                   icon: SvgPicture.asset(
-                    isDarkMode?'assets/icons/theme_dark.svg':'assets/icons/light_theme.svg',
+                    isDarkMode ? 'assets/icons/theme_dark.svg' : 'assets/icons/light_theme.svg',
                     width: 15.w,
                     height: 15.h,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 20.h,),
+            SizedBox(height: 20.h),
+
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -412,7 +415,8 @@ class EventDetails extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
+    }
+  ));
   }
 }

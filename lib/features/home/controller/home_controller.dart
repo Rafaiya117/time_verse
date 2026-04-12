@@ -222,7 +222,7 @@ class HomeController extends ChangeNotifier {
       final file = await File('${tempDir.path}/quote.png').create();
       await file.writeAsBytes(pngBytes);
 
-      await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration');
+      await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration by Infiniqoute');
     }
   }
 

@@ -18,36 +18,123 @@ class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   void _showFeedbackDialog(
-    BuildContext context,
-    bool isDarkMode,
-    HomeController homeController,
-  ) {
-    homeController.clearFeedback();
+  BuildContext context,
+  bool isDarkMode,
+  HomeController homeController,
+) {
+  homeController.clearFeedback();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Consumer<HomeController>(
-          builder: (context, controller, child) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                width: 320.w,
-                padding: EdgeInsets.all(24.w),
-                decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? const Color(0xFF051123)
-                      : const Color(0xFFFFFFFF),
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: const SizedBox(), // 👈 keep your existing dialog content here
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Consumer<HomeController>(
+        builder: (context, controller, child) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Container(
+              width: 340.w,
+              padding: EdgeInsets.all(24.w),
+              decoration: BoxDecoration(
+                color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFF3D9),
+                borderRadius: BorderRadius.circular(16.r),
               ),
-            );
-          },
-        );
-      },
-    );
-  }
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Write your Feedback',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : const Color(0xFF4A4A4A),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                    // Fixed Rating Row: Star outline becomes filled star
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        int ratingValue = index + 1;
+                        bool isSelected = ratingValue <= controller.selectedRating;
+
+                        return GestureDetector(
+                          onTap: () => controller.updateRating(ratingValue),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w),
+                            child: Icon(
+                              // If selected, show solid star; otherwise, show the star outline
+                              isSelected ? Icons.star : Icons.star_border,
+                              color: const Color(0xFFFFB800),
+                              size: 32.sp,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  SizedBox(height: 24.h),
+                  Text(
+                    'Your Feedback:',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF4A4A4A),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  TextField(
+                    controller: controller.feedbackController,
+                    maxLines: 4,
+                    style: GoogleFonts.outfit(color: isDarkMode ? Colors.white : Colors.black),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: isDarkMode ? const Color(0xFF051123) : Colors.white,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xFFFFB800).withOpacity(isDarkMode ? 0.5 : 1.0),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: const BorderSide(color: Color(0xFFFFB800), width: 1.5),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        controller.submitFeedback();
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDarkMode ? const Color(0xFFC69C3D) : const Color(0xFFF39C12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        isDarkMode ? 'Submit' : 'Submit Review',
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +363,7 @@ class HomeView extends StatelessWidget {
                         return Column(
                           children: [
                             SizedBox(
-                              height: 120.h,
+                              height: 130.h,
                                 child: GestureDetector(
                                   onPanStart: (_) => homeController.stopAutoSlide(),
                                   onPanEnd: (_) => homeController.startAutoSlide(),
@@ -286,8 +373,7 @@ class HomeView extends StatelessWidget {
                                     key: homeController.quoteShareKey,
                                     child: Container(
                                       color:isDarkMode
-                                        ? const Color(0xFF051123)
-                                        : Colors.transparent,
+                                      ? const Color(0xFF051123): Colors.transparent,
                                       padding: EdgeInsets.symmetric(horizontal: 16.w,),
                                       child: DefaultTextStyle(
                                         style: const TextStyle(
@@ -396,9 +482,7 @@ class HomeView extends StatelessWidget {
                                     SvgPicture.asset(
                                       'assets/icons/download.svg',
                                       // ignore: deprecated_member_use
-                                      color: isDarkMode
-                                        ? Colors.white
-                                        : const Color(0xFF4A90E2),
+                                      color: isDarkMode? Colors.white : const Color(0xFF4A90E2),
                                       width: 20.sp,
                                       height: 20.sp,
                                     ),
@@ -408,9 +492,7 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16.sp,
-                                        color: isDarkMode
-                                          ? Colors.white
-                                          : const Color(0xFF4A90E2),
+                                        color: isDarkMode? Colors.white : const Color(0xFF4A90E2),
                                       ),
                                     ),
                                   ],
@@ -556,7 +638,7 @@ class HomeView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'What Our Users Are Saying?',
+                  'What Other Users Are Saying?',
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w600,
                     fontSize: 18.sp,
