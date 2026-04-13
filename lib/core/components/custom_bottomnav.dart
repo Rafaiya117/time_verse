@@ -200,8 +200,8 @@ class CustomBottomNavBar extends StatelessWidget {
                       },
                       child: isAddIcon
                       ? SizedBox(
-                        width: 60.w,
-                        height: 100.h,
+                      width: 60.w,
+                      height: 100.h,
                       child: Stack(
                         clipBehavior: Clip.none,
                         alignment: Alignment.center,

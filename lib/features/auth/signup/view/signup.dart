@@ -9,6 +9,7 @@ import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
+import 'package:time_verse/core/components/custom_drop_down.dart';
 import 'package:time_verse/core/components/custom_image_uploader.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
@@ -62,14 +63,30 @@ class Signup extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h,),
-              CustomInputField(
-                label: 'Full Name *',
-                hintText: 'Enter your fullname',
-                controller: signupController.nameController,
-                isPassword: false,
-                fontSize: 12,
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomInputField(
+                      label: 'First Name *',
+                      hintText: 'e.g. John',
+                      controller: signupController.firstNameController, // Updated controller
+                      isPassword: false,
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(width: 15.w), // Adjust width as per your design
+                  Expanded(
+                    child: CustomInputField(
+                      label: 'Surname *',
+                      hintText: 'e.g. Doe',
+                      controller: signupController.surnameController, // Updated controller
+                      isPassword: false,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 20.h,),
+              SizedBox(height: 20.h),
               CustomInputField(
                 label: 'Email Address *',
                 hintText: 'Enter your email...',
@@ -78,6 +95,44 @@ class Signup extends StatelessWidget {
                 fontSize: 12,
               ),
               SizedBox(height: 20.h,),
+              Row(
+                children: [
+                  // --- Gender Dropdown ---
+                  Expanded(
+                    child: CustomDropdownField<String>(
+                      label: "Select Gender*",
+                      hintText: "Choose one",
+                      value: signupController.selectedgender,
+                      items: ["Male", "Female", "Other"].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) => signupController.updateGender(newValue),
+                    ),
+                  ),
+                  SizedBox(width: 15.w), // Space between the two dropdowns
+                  // --- Nationality Dropdown ---
+                  Expanded(
+                    child: CustomDropdownField<String>(
+                      label: "Nationality*",
+                      hintText: "Select",
+                      value: signupController.selectedNationality,
+                      items: ["American", "British", "Canadian", "Other"].map((
+                        String value,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) => signupController.updateNationality(newValue),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.h),
               Row(
                 children: [
                   Expanded(

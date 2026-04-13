@@ -55,7 +55,7 @@ class HomeController extends ChangeNotifier {
   final List<QuoteData> _inspirationalQuotes = [
     QuoteData(
       id: 0,
-      quote:"This is the day that the Lord has made; let us rejoice and be glad in it",
+      quote:"Welcome to InfiniQuote.Your calendar has always kept you busy.Now let it inspire you.",
       reference: "Psalm 118:24",
     ),    
   ];

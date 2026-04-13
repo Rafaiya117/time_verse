@@ -77,17 +77,21 @@ import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 // }
 
 class SignupController extends ChangeNotifier {
-  TextEditingController nameController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController surnameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirm_passwordController = TextEditingController();
 
   final AuthService _authService = AuthService(); 
   String? signupError; 
+  String? selectedgender;
+  String? selectedNationality;
 
   void disposeControllers() {
     emailController.dispose();
-    nameController.dispose();
+    firstNameController.dispose();
+    surnameController.dispose();
     passwordController.dispose();
     confirm_passwordController.dispose();
   }
@@ -102,7 +106,7 @@ class SignupController extends ChangeNotifier {
   }
 
   bool validateSignupFields() {
-    return areFieldsFilled([emailController, nameController, passwordController, confirm_passwordController]);
+    return areFieldsFilled([emailController, firstNameController, passwordController, confirm_passwordController]);
   }
 
   String? pickedImagePath;
@@ -115,12 +119,22 @@ class SignupController extends ChangeNotifier {
     }
   }
 
+  void updateGender(String? value) {
+    selectedgender = value;
+    notifyListeners(); // This tells the UI to rebuild
+  }
+
+  void updateNationality(String? value) {
+    selectedNationality = value;
+    notifyListeners();
+  }
+
   Future<bool> signupUser() async {
     try {
       final response = await _authService.signup(
         emailController.text.trim(),
         passwordController.text.trim(),
-        nameController.text.trim(),
+        firstNameController.text.trim(),
         profileImagePath: pickedImagePath, // optional profile image
       );
 
