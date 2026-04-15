@@ -44,6 +44,7 @@ class HomeController extends ChangeNotifier {
 
   final List<EventModel> todaysEvents = [];
   bool _isInitialized = false;
+  DateTime selectedDate = DateTime.now();
 
   final Dio _dio =  Dio(BaseOptions(
     baseUrl: dotenv.env['BASE_URL'] ?? '',
@@ -305,12 +306,19 @@ Future<void> fetchReviewsFromApi() async {
     }
   }
 
-  Future<void> todaysfetchEvents(ProfileController profileController) async {
+  Future<void> todaysfetchEvents(ProfileController profileController, {DateTime? selectedDate,}) async {
   try {
     final token = await AuthService().getToken();
+    /// ✅ default = today
+    final dateToFetch = selectedDate ?? DateTime.now();
+
+    final formattedDate = "${dateToFetch.year.toString().padLeft(4, '0')}-" "${dateToFetch.month.toString().padLeft(2, '0')}-""${dateToFetch.day.toString().padLeft(2, '0')}";
 
     final response = await _dio.get(
       'api/v1/event/',
+      queryParameters: {
+        'date': formattedDate, 
+      },
       options: Options(
         headers: {
           'Authorization': 'Bearer $token',
@@ -318,7 +326,8 @@ Future<void> fetchReviewsFromApi() async {
       ),
     );
 
-    final data = response.data is String ? jsonDecode(response.data) : response.data;
+    final data = response.data is String
+    ? jsonDecode(response.data) : response.data;
 
     if (data is List) {
       final currentUserId = profileController.currentUser?.id;
@@ -331,9 +340,8 @@ Future<void> fetchReviewsFromApi() async {
       todaysEvents
         ..clear()
         ..addAll(
-          data.map((e) => EventModel.fromMap(e)).where((event) =>event.user.toString() == currentUserId.toString()) // safe compare.toList(),
+          data.map((e) => EventModel.fromMap(e)).where((event) => event.user.toString() == currentUserId.toString(),).toList(),
         );
-
       debugPrint("✅ TODAYS EVENTS LENGTH: ${todaysEvents.length}");
     } else {
       debugPrint("❌ API did not return List");
@@ -342,7 +350,7 @@ Future<void> fetchReviewsFromApi() async {
 
     notifyListeners();
   } catch (e) {
-    debugPrint("❌ Error fetching today's events: $e");
+    debugPrint("❌ Error fetching events: $e");
   }
 }
 
@@ -481,19 +489,14 @@ Future<void> fetchEvents() async {
     debugPrint("📦 Raw Response Type: ${response.data.runtimeType}");
 
     if (response.statusCode == 200) {
-      final List data =
-          response.data is List ? response.data : [response.data];
+      final List data = response.data is List ? response.data : [response.data];
 
       debugPrint("📊 Total Events From API: ${data.length}");
 
       /// 🔥 Safe filtering
-      final userEvents = data
-          .where((event) {
-            debugPrint("🔎 Checking Event User: ${event['user']}");
-            return event['user'].toString() ==
-                currentUserId.toString();
-          })
-          .toList();
+      final userEvents = data.where((event) {
+      debugPrint("🔎 Checking Event User: ${event['user']}");
+      return event['user'].toString() == currentUserId.toString();}).toList();
 
       debugPrint("🎯 User Events After Filter: ${userEvents.length}");
 
@@ -523,10 +526,8 @@ Future<void> fetchEvents() async {
       debugPrint("📌 Type Description: ${latest['type_event_description']}");
 
       /// ⭐ Use description OR fallback
-      final quoteText =
-          (latest['description']?.toString().trim().isNotEmpty == true)
-              ? latest['description'].toString()
-              : latest['type_event_description']?.toString() ?? '';
+      final quoteText = (latest['description']?.toString().trim().isNotEmpty == true)
+      ? latest['description'].toString() : latest['type_event_description']?.toString() ?? '';
 
       debugPrint("✨ Final Quote Text: $quoteText");
 
@@ -567,6 +568,12 @@ Future<void> fetchEvents() async {
       debugPrint('⚠️ Error saving quote: $e');
       return false;
     }
+  }
+
+  void selectDate(DateTime date, ProfileController profileController) {
+    selectedDate = date;
+    todaysfetchEvents(profileController, selectedDate: date);
+    notifyListeners();
   }
 
   @override

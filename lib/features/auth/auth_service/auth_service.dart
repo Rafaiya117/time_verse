@@ -123,19 +123,31 @@ return {
   }
 }
 
-Future<Map<String, dynamic>> signup(String email,String password,String name, {String? profileImagePath,}) async {
+Future<Map<String, dynamic>> signup(
+  String email,
+  String password,
+  String firstName,
+  String lastName,
+  String gender,
+  String nationality, {
+  String? profileImagePath,
+}) async {
   debugPrint("Image path: $profileImagePath");
+
   try {
     FormData formData = FormData.fromMap({
       'email': email,
       'password': password,
-      'name': name,
+      'first_name': firstName,
+      'last_name': lastName,
+      'gender': gender,
+      'nationality': nationality,
       if (profileImagePath != null)
         'profile_picture': await MultipartFile.fromFile(
           profileImagePath,
           filename: profileImagePath.split('/').last,
         ),
-      });
+    });
 
     final response = await _dio.post(
       'api/v1/register/',
@@ -145,20 +157,18 @@ Future<Map<String, dynamic>> signup(String email,String password,String name, {S
       ),
     );
 
-    final data = response.data is String ? jsonDecode(response.data) : response.data;
+    final data =
+        response.data is String ? jsonDecode(response.data) : response.data;
 
-    final userData = data['data']?['user'];
+    // 🔥 Updated response parsing
+    final userData = data['user'];
     final user = userData != null ? User.fromJson(userData) : null;
 
-    final bool success = data['success'] ?? (data['message']?.toLowerCase().contains('success') ?? false);
-
     return {
-      'success': success,
+      'success': true,
       'message': data['message'] ?? 'Signup successful',
       'data': {
         'user': user,
-        'access': data['data']?['access'],
-        'refresh': data['data']?['refresh'],
       },
     };
   } on DioException catch (e) {
@@ -168,6 +178,54 @@ Future<Map<String, dynamic>> signup(String email,String password,String name, {S
     };
   }
 }
+
+//--------------- Previous ---------------------
+
+// Future<Map<String, dynamic>> signup(String email,String password,String name, {String? profileImagePath,}) async {
+//   debugPrint("Image path: $profileImagePath");
+//   try {
+//     FormData formData = FormData.fromMap({
+//       'email': email,
+//       'password': password,
+//       'name': name,
+//       if (profileImagePath != null)
+//         'profile_picture': await MultipartFile.fromFile(
+//           profileImagePath,
+//           filename: profileImagePath.split('/').last,
+//         ),
+//       });
+
+//     final response = await _dio.post(
+//       'api/v1/register/',
+//       data: formData,
+//       options: Options(
+//         contentType: 'multipart/form-data',
+//       ),
+//     );
+
+//     final data = response.data is String ? jsonDecode(response.data) : response.data;
+
+//     final userData = data['data']?['user'];
+//     final user = userData != null ? User.fromJson(userData) : null;
+
+//     final bool success = data['success'] ?? (data['message']?.toLowerCase().contains('success') ?? false);
+
+//     return {
+//       'success': success,
+//       'message': data['message'] ?? 'Signup successful',
+//       'data': {
+//         'user': user,
+//         'access': data['data']?['access'],
+//         'refresh': data['data']?['refresh'],
+//       },
+//     };
+//   } on DioException catch (e) {
+//     return {
+//       'success': false,
+//       'error': _handleError(e),
+//     };
+//   }
+// }
 // Future<Map<String, dynamic>> forgotPassword(String email) async {
 //     try {
 //       final response = await _dio.post(

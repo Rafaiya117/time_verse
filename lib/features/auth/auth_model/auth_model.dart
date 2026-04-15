@@ -14,14 +14,14 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as int,
-      birthDate: json['birth_date'] != null ? json['birth_date'] as String : null,
-      profilePicture: json['profile_picture'] != null ? json['profile_picture'] as String : null,
-      name: json['name'] as String,
-      password: json['password'] != null ? json['password'] as String : null,
-    );
-  }
+  return User(
+    id: json['id'] as int,
+    name: "${json['first_name'] ?? ''} ${json['last_name'] ?? ''}".trim(),
+    profilePicture: json['profile_picture'] as String?,
+    birthDate: null, // not provided anymore
+    password: null,
+  );
+}
 
   Map<String, dynamic> toJson() {
     final data = {

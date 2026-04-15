@@ -135,7 +135,10 @@ class SignupController extends ChangeNotifier {
         emailController.text.trim(),
         passwordController.text.trim(),
         firstNameController.text.trim(),
-        profileImagePath: pickedImagePath, // optional profile image
+        surnameController.text.trim(),
+        selectedgender ?? '',
+        selectedNationality ?? '',
+        profileImagePath: pickedImagePath,
       );
 
       debugPrint("Signup response: $response");

@@ -292,42 +292,68 @@ class HomeView extends StatelessWidget {
             ),
             SizedBox(height: 15.h),            
             SizedBox(
-              height: 80.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 7,
-                itemBuilder: (context, index) {
-                  final now = DateTime.now();
-                  final date = now.add(Duration(days: index - 3)); 
-                  final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
-                  
-                  return Container(
-                    width: 60.w,
-                    margin: EdgeInsets.only(right: 12.w),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _getDayName(date.weekday),
-                          style: GoogleFonts.outfit(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                            color: isToday 
-                              ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color)
-                              : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                height: 80.h,
+                child: Consumer<HomeController>(
+                  // ✅ ADD THIS
+                  builder: (context, controller, _) {
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 7,
+                      itemBuilder: (context, index) {
+                        final now = DateTime.now();
+                        final date = now.add(Duration(days: index - 3));
+
+                        final isToday =
+                            date.day == now.day &&
+                            date.month == now.month &&
+                            date.year == now.year;
+
+                        /// ✅ ADD THIS (selected state)
+                        final isSelected = date.day == controller.selectedDate.day &&
+                        date.month == controller.selectedDate.month && date.year == controller.selectedDate.year;
+
+                        return GestureDetector(
+                          // ✅ ADD THIS
+                          onTap: () {
+                            controller.selectDate(
+                              date,
+                              profileController,
+                            ); // 🔥 trigger API
+                          },
+                          child: Container(
+                            width: 60.w,
+                            margin: EdgeInsets.only(right: 12.w),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _getDayName(date.weekday),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color:isSelected // ✅ USE selected instead
+                                    ? AppColors.fourth_color: isToday
+                                    ? (isDarkMode? AppColors.fourth_color: AppColors.heading_color)
+                                    : (isDarkMode? AppColors.text_color: AppColors.heading_color),
+                                  ),
+                                ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                date.day.toString(),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color:isSelected // ✅ USE selected instead
+                                  ? AppColors.fourth_color
+                                  : isToday ? (isDarkMode? AppColors.fourth_color: AppColors.heading_color)
+                                  : (isDarkMode ? AppColors.text_color: AppColors.heading_color),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            date.day.toString(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isToday ? (isDarkMode ? AppColors.fourth_color : AppColors.heading_color) : (isDarkMode ? AppColors.text_color : AppColors.heading_color),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -553,9 +579,7 @@ class HomeView extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w600,
                       fontSize: 18.sp,
-                      color: isDarkMode
-                          ? AppColors.fourth_color
-                          : AppColors.heading_color,
+                      color: isDarkMode? AppColors.fourth_color: AppColors.heading_color,
                     ),
                   ),
 
@@ -564,15 +588,12 @@ class HomeView extends StatelessWidget {
                       final events = controller.todaysEvents;
 
                       return Text(
-                        events.isEmpty
-                            ? 'No event yet'
-                            : '${events.length} events',
+                        events.isEmpty? 'No event yet': '${events.length} events',
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.w400,
                           fontSize: 14.sp,
                           color: isDarkMode
-                              ? AppColors.fourth_color
-                              : AppColors.heading_color,
+                          ? AppColors.fourth_color: AppColors.heading_color,
                         ),
                       );
                     },
@@ -582,8 +603,8 @@ class HomeView extends StatelessWidget {
             SizedBox(height: 16.h),            
             // Schedule events list
             Consumer<HomeController>(
-                builder: (context, controller, _) {
-                  final events = controller.todaysEvents;
+              builder: (context, controller, _) {
+                final events = controller.todaysEvents;
 
                   if (events.isEmpty) {
                     return Text(
