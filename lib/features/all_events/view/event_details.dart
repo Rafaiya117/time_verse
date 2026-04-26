@@ -221,7 +221,7 @@ class EventDetails extends StatelessWidget {
                                         // Name at the bottom
                                         Consumer<EventController>(
                                           builder:(context,eventController,_,) => Text(
-                                            'Name ${eventController.eventDetail?.userName ?? 'xyz'}',
+                                            eventController.eventDetail?.userName ?? 'xyz',
                                             style: GoogleFonts.outfit(
                                               fontSize: 12.6.sp,
                                               fontWeight: FontWeight.w500,

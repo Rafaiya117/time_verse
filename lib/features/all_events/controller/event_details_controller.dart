@@ -58,7 +58,7 @@ class EventController extends ChangeNotifier {
       debugPrint('✅ Event details fetched: ${data['title']}');
       eventDetail = EventModel(
           id: data['id'] ?? 0,
-          userName: data['user_name']?.toString() ?? '',
+          userName: "${data['user_first_name'] ?? ''} ${data['user_last_name'] ?? ''}".trim(),
           title: data['title']?.toString() ?? '',
           description: data['description']?.toString() ?? '',
           date: data['date']?.toString() ?? '',

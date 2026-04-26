@@ -625,6 +625,7 @@ class HomeView extends StatelessWidget {
                         children: [
                           _buildScheduleEvent(
                             context,
+                            event.id,
                             event.title,
                             '${event.startTime} - ${event.endTime}',
                             Colors.grey,
@@ -850,6 +851,7 @@ class HomeView extends StatelessWidget {
 
   Widget _buildScheduleEvent(
     BuildContext context,
+    int id,
     String title,
     String time,
     Color indicatorColor,
@@ -858,7 +860,7 @@ class HomeView extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: (){
-        //context.push('/event_details');
+        context.push('/event_details', extra: id);
       },
       child:Container(
       width: double.infinity,

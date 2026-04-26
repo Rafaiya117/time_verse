@@ -15,7 +15,6 @@ class FancyCalendarView extends StatelessWidget {
     final textColor = isDarkMode ? Colors.orange : const Color(0xFF373F4B);
 
     return Container(
-      //padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16.r),
@@ -27,12 +26,20 @@ class FancyCalendarView extends StatelessWidget {
         selectedDayPredicate: (day) => isSameDay(controller.selectedDay, day),
         onDaySelected: controller.onDaySelected,
 
+        // --- This shows dots on days that have events ---
+        eventLoader: (day) {
+          return controller.events.where((event) {
+            final eventDate = DateTime.tryParse(event.createdAt); 
+            return eventDate != null && isSameDay(eventDate, day);
+          }).toList();
+        },
+
         // --- HEADER STYLE ---
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
-          leftChevronIcon:Icon(Icons.chevron_left, color: textColor, size: 24.sp),
-          rightChevronIcon:Icon(Icons.chevron_right, color: textColor, size: 24.sp),
+          leftChevronIcon: Icon(Icons.chevron_left, color: textColor, size: 24.sp),
+          rightChevronIcon: Icon(Icons.chevron_right, color: textColor, size: 24.sp),
           titleTextStyle: GoogleFonts.outfit(
             color: textColor,
             fontSize: 18.sp,
@@ -49,13 +56,11 @@ class FancyCalendarView extends StatelessWidget {
         // --- DAYS OF WEEK STYLE ---
         daysOfWeekStyle: DaysOfWeekStyle(
           weekdayStyle: GoogleFonts.outfit(
-            // ignore: deprecated_member_use
             color: textColor.withOpacity(0.7),
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
           weekendStyle: GoogleFonts.outfit(
-            // ignore: deprecated_member_use
             color: textColor.withOpacity(0.7),
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
@@ -65,6 +70,10 @@ class FancyCalendarView extends StatelessWidget {
         // --- CALENDAR STYLE ---
         calendarStyle: CalendarStyle(
           isTodayHighlighted: true,
+          markerDecoration: BoxDecoration(
+            color: isDarkMode ? Colors.orange : const Color(0xFF373F4B),
+            shape: BoxShape.circle,
+          ),
           todayDecoration: BoxDecoration(
             color: isDarkMode ? Colors.orange.shade600 : const Color(0xFF373F4B),
             shape: BoxShape.circle,
@@ -98,7 +107,6 @@ class FancyCalendarView extends StatelessWidget {
           markersAlignment: Alignment.bottomCenter,
           cellMargin: EdgeInsets.all(6.w),
         ),
-
         calendarFormat: CalendarFormat.month,
       ),
     );

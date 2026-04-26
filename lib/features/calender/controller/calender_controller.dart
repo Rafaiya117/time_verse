@@ -20,6 +20,8 @@ class CalendarController extends ChangeNotifier {
     model
       ..selectedDay = selectedDay
       ..focusedDay = focusedDay;
+
+      fetchUpcomingEvents(date: selectedDay);
     notifyListeners();
   }
   final List<EventModel> _events = [
@@ -94,67 +96,121 @@ class CalendarController extends ChangeNotifier {
   }
 
   // ------------------ Fetch events from API ------------------ //
-   Future<void> fetchUpcomingEvents() async {
-    try {
-      final authService = AuthService();
-      final token = await authService.getToken();
-      debugPrint('🚀 Token fetched: $token');
+  //  Future<void> fetchUpcomingEvents() async {
+  //   try {
+  //     final authService = AuthService();
+  //     final token = await authService.getToken();
+  //     debugPrint('🚀 Token fetched: $token');
 
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
-      debugPrint('Base URL: $baseUrl');
+  //     final baseUrl = dotenv.env['BASE_URL'] ?? '';
+  //     debugPrint('Base URL: $baseUrl');
 
-      final response = await _dio.get(
-        '${baseUrl}api/v1/up-comming/events/',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
+  //     final response = await _dio.get(
+  //       '${baseUrl}api/v1/up-comming/events/',
+  //       options: Options(
+  //         headers: {
+  //           'Authorization': 'Bearer $token',
+  //           'Content-Type': 'application/json',
+  //         },
+  //       ),
+  //     );
 
-      debugPrint('📦 API Response Status: ${response.statusCode}');
-      debugPrint('📄 Response data: ${response.data}');
+  //     debugPrint('📦 API Response Status: ${response.statusCode}');
+  //     debugPrint('📄 Response data: ${response.data}');
 
-      if (response.statusCode == 200) {
-        final List data = response.data;
-        debugPrint('✅ Number of events fetched: ${data.length}');
+  //     if (response.statusCode == 200) {
+  //       final List data = response.data;
+  //       debugPrint('✅ Number of events fetched: ${data.length}');
 
-        _events
-          ..clear()
-          ..addAll(
-            data.map((json) {
-              final formattedDate = formatEventDate(json['date'] ?? '');
-              debugPrint('💬 Event parsed: ${json['title']} - $formattedDate');
+  //       _events
+  //         ..clear()
+  //         ..addAll(
+  //           data.map((json) {
+  //             final formattedDate = formatEventDate(json['date'] ?? '');
+  //             debugPrint('💬 Event parsed: ${json['title']} - $formattedDate');
 
-              return EventModel(
-                id: json['id'] ?? 0,
-                userName: json['user_name']?.toString() ?? '',
-                title: json['title']?.toString() ?? '',
-                description: json['description']?.toString() ?? '',
-                date: formattedDate,
-                startTime: json['start_time']?.toString() ?? '',
-                endTime: json['end_time']?.toString() ?? '',
-                location: json['location']?.toString() ?? '',
-                alarmTime: json['alarm_time']?.toString() ?? '',
-                isCompleted: json['is_completed'] ?? false,
-                createdAt: json['created_at']?.toString() ?? '',
-                user: json['user'] ?? 0,
-                category: json['category']?.toString(),
-                isFavorite: json['is_favorite'] ?? false,
-              );
-            }).toList(),
-          );
-        notifyListeners();
-        debugPrint('🎉 Events added to controller: ${_events.length}');
-      }
-      else {
-        debugPrint('❌ Failed to load events: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching events: $e');
+  //             return EventModel(
+  //               id: json['id'] ?? 0,
+  //               userName: json['user_name']?.toString() ?? '',
+  //               title: json['title']?.toString() ?? '',
+  //               description: json['description']?.toString() ?? '',
+  //               date: formattedDate,
+  //               startTime: json['start_time']?.toString() ?? '',
+  //               endTime: json['end_time']?.toString() ?? '',
+  //               location: json['location']?.toString() ?? '',
+  //               alarmTime: json['alarm_time']?.toString() ?? '',
+  //               isCompleted: json['is_completed'] ?? false,
+  //               createdAt: json['created_at']?.toString() ?? '',
+  //               user: json['user'] ?? 0,
+  //               category: json['category']?.toString(),
+  //               isFavorite: json['is_favorite'] ?? false,
+  //             );
+  //           }).toList(),
+  //         );
+  //       notifyListeners();
+  //       debugPrint('🎉 Events added to controller: ${_events.length}');
+  //     }
+  //     else {
+  //       debugPrint('❌ Failed to load events: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     debugPrint('⚠️ Error fetching events: $e');
+  //   }
+  // }
+
+  Future<void> fetchUpcomingEvents({DateTime? date}) async {
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    // 1. Format the date for the API (e.g., "2026-04-26")
+    // Use the passed date, or the currently selected day, or today as fallback.
+    final targetDate = date ?? selectedDay ?? DateTime.now();
+    final String formattedQueryDate = DateFormat('yyyy-MM-dd').format(targetDate);
+
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+    final response = await _dio.get(
+      '${baseUrl}api/v1/up-comming/events/',
+      // 2. Add the query parameter here
+      queryParameters: {'date': formattedQueryDate}, 
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final List data = response.data;
+      _events.clear();
+      _events.addAll(data.map((json) {
+        final formattedDate = formatEventDate(json['date'] ?? '');
+        return EventModel(
+          id: json['id'] ?? 0,
+          userName: json['user_name']?.toString() ?? '',
+          title: json['title']?.toString() ?? '',
+          description: json['description']?.toString() ?? '',
+          date: formattedDate,
+          startTime: json['start_time']?.toString() ?? '',
+          endTime: json['end_time']?.toString() ?? '',
+          location: json['location']?.toString() ?? '',
+          alarmTime: json['alarm_time']?.toString() ?? '',
+          isCompleted: json['is_completed'] ?? false,
+          createdAt: json['created_at']?.toString() ?? '',
+          user: json['user'] ?? 0,
+          category: json['category']?.toString(),
+          isFavorite: json['is_favorite'] ?? false,
+        );
+      }).toList());
+      
+      notifyListeners();
     }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching events: $e');
   }
+}
 
   //!------------------ Remove event from API and list ------------------ //
   Future<bool> deleteEvent(int eventId) async {
