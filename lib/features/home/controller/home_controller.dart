@@ -57,7 +57,7 @@ class HomeController extends ChangeNotifier {
     QuoteData(
       id: 0,
       quote:"Welcome to InfiniQuote.Your calendar has always kept you busy.Now let it inspire you.",
-      reference: "Psalm 118:24",
+      reference: "",
     ),    
   ];
 

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
@@ -168,13 +169,8 @@ Future<Map<String, dynamic>?> createTask({
       "type_event_description": note ?? "",
     };
 
-    if (location != null && location.trim().isNotEmpty) {
-      body["location"] = location.trim();
-    }
-
-    if (categoryName != null && categoryName.trim().isNotEmpty) {
-      body["category_name"] = categoryName.trim();
-    }
+    if (location != null && location.trim().isNotEmpty) body["location"] = location.trim();
+    if (categoryName != null && categoryName.trim().isNotEmpty) body["category_name"] = categoryName.trim();
 
     final response = await _dio.post(
       url.toString(),
@@ -189,25 +185,31 @@ Future<Map<String, dynamic>?> createTask({
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
+      debugPrint("✅ Backend Event Created");
 
-      debugPrint("✅ Event created successfully: ${response.data}");
-
-      // ✅ ADDED: Send event to Google Calendar
-      final googleService = GoogleServices();
-      if (googleService.accessToken == null) {
-          await googleService.signIn(); // ensure login
-          debugPrint('!----ok ${googleService.accessToken}');
+      // ✅ Push to Google ONLY if user logged in via Google
+      final isGoogleUser = await AppPrefs.isGoogleLogin();
+      
+      if (isGoogleUser) {
+        final googleService = GoogleServices(); // Singleton instance
+        
+        // Only trigger sign-in flow if token is null
+        if (googleService.accessToken == null) {
+          await googleService.signIn(); 
         }
 
-      await googleService.createGoogleCalendarEvent(
-        accessToken: googleService.accessToken!,
-        title: title,
-        date: date,
-        startTime: startTime,
-        endTime: endTime,
-        description: note,
-        location: location,
-      );
+        if (googleService.accessToken != null) {
+          await googleService.createGoogleCalendarEvent(
+            accessToken: googleService.accessToken!,
+            title: title,
+            date: date,
+            startTime: startTime,
+            endTime: endTime,
+            description: note,
+            location: location,
+          );
+        }
+      }
 
       return response.data;
     }

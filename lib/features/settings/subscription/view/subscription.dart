@@ -181,17 +181,17 @@ class Subscription extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h),
-              Text(
-                'Subscription will automatically renew. Cancel\n anytime.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 10.2.sp,
-                  fontWeight: FontWeight.normal,
-                  color: isDarkMode
-                    ? AppColors.text_color
-                    : const Color(0xFF373F4B),
-                ),
-              ),
+              // Text(
+              //   'Subscription will automatically renew. Cancel\n anytime.',
+              //   textAlign: TextAlign.center,
+              //   style: GoogleFonts.inter(
+              //     fontSize: 10.2.sp,
+              //     fontWeight: FontWeight.normal,
+              //     color: isDarkMode
+              //       ? AppColors.text_color
+              //       : const Color(0xFF373F4B),
+              //   ),
+              // ),
               SizedBox(height: 20.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
