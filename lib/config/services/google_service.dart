@@ -12,6 +12,8 @@ class GoogleServices {
 
   GoogleSignInAccount? _currentUser;//266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com
   final String serverClientId = '468767271373-igakn4plmbu2io7ocqph0miemm38lumq.apps.googleusercontent.com';
+  String? _accessToken;
+  String? get accessToken => _accessToken;
 
   final List<String> scopes = [
     'email',
@@ -39,6 +41,7 @@ class GoogleServices {
 
       final auth = await user.authorizationClient.authorizationForScopes(scopes);
       final accessToken = auth?.accessToken;
+      _accessToken = accessToken;
       print("ACCESS TOKEN: $accessToken");
 
       final idToken = (user.authentication).idToken;
@@ -58,12 +61,15 @@ class GoogleServices {
   Future<void> signOut() async {
     await _googleSignIn.disconnect();
     _currentUser = null;
+    _accessToken = null; // ✅ clear token
+
     await AuthService().clearToken();
     await AppPrefs.setLoggedIn(false);
     await AppPrefs.setGoogleLogin(false);
     await AppPrefs.clearGoogleToken();
     print("Signed out");
   }
+
 
   Future<void> sendTokensToApi(String idToken) async {
     try {
@@ -98,6 +104,50 @@ class GoogleServices {
       }
     } on DioException catch (e) {
       debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
+    }
+  }
+
+  Future<void> createGoogleCalendarEvent({
+    required String accessToken,
+    required String title,
+    required String date,
+    required String startTime,
+    required String endTime,
+    String? description,
+    String? location,
+  }) async {
+    final dio = Dio();
+
+    final startDateTime = "${date}T$startTime:00";
+    final endDateTime = "${date}T$endTime:00";
+
+    final body = {
+      "summary": title,
+      "description": description ?? "",
+      "location": location ?? "",
+      "start": {"dateTime": startDateTime, "timeZone": "Asia/Dhaka"},
+      "end": {"dateTime": endDateTime, "timeZone": "Asia/Dhaka"},
+    };
+
+    try {
+      final response = await dio.post(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        data: body,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("✅ Event added to Google Calendar");
+      } else {
+        debugPrint("⚠️ Google Calendar error: ${response.data}");
+      }
+    } catch (e) {
+      debugPrint("❌ Google Calendar Exception: $e");
     }
   }
 }

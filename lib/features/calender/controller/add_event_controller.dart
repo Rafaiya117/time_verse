@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -78,6 +79,66 @@ class AddEventController extends ChangeNotifier {
 }
 
   // controller add event
+// Future<Map<String, dynamic>?> createTask({
+//   required String title,
+//   required String date,
+//   required String startTime,
+//   required String endTime,
+//   String? location,
+//   required String alarmTime,
+//   String? categoryName,
+//   bool isCompleted = false,
+//   String? note,
+// }) async {
+//   final baseUrl = dotenv.env['BASE_URL'] ?? '';
+//   final authService = AuthService();
+//   final accessToken = await authService.getToken();
+
+//   try {
+//     final url = Uri.parse("$baseUrl/api/v1/event/create/");
+//     final formattedAlarmTime = _formatAlarmTime(date, alarmTime);
+
+//     final Map<String, dynamic> body = {
+//       "title": title,
+//       "date": date,
+//       "start_time": startTime,
+//       "end_time": endTime,
+//       "alarm_time": formattedAlarmTime,
+//       "is_completed": isCompleted,
+//       "type_event_description": note ?? "",
+//     };
+
+//     if (location != null && location.trim().isNotEmpty) {
+//       body["location"] = location.trim();
+//     }
+
+//     if (categoryName != null && categoryName.trim().isNotEmpty) {
+//       body["category_name"] = categoryName.trim();
+//     }
+
+//     final response = await _dio.post(
+//       url.toString(),
+//       data: body,
+//       options: Options(
+//         headers: {
+//           "Content-Type": "application/json",
+//           "Accept": "application/json",
+//           "Authorization": "Bearer $accessToken",
+//         },
+//       ),
+//     );
+
+//     if (response.statusCode == 200 || response.statusCode == 201) {
+      
+//       debugPrint("✅ Event created successfully: ${response.data}");
+//       return response.data;
+//     }
+//   } catch (e) {
+//     debugPrint("❌ Exception: $e");
+//   }
+//   return null;
+// }
+
 Future<Map<String, dynamic>?> createTask({
   required String title,
   required String date,
@@ -128,8 +189,22 @@ Future<Map<String, dynamic>?> createTask({
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      
+
       debugPrint("✅ Event created successfully: ${response.data}");
+
+      // ✅ ADDED: Send event to Google Calendar
+      final googleService = GoogleServices();
+
+      await googleService.createGoogleCalendarEvent(
+        accessToken: googleService.accessToken!,
+        title: title,
+        date: date,
+        startTime: startTime,
+        endTime: endTime,
+        description: note,
+        location: location,
+      );
+
       return response.data;
     }
   } catch (e) {
