@@ -194,6 +194,10 @@ Future<Map<String, dynamic>?> createTask({
 
       // ✅ ADDED: Send event to Google Calendar
       final googleService = GoogleServices();
+      if (googleService.accessToken == null) {
+          await googleService.signIn(); // ensure login
+          debugPrint('!----ok ${googleService.accessToken}');
+        }
 
       await googleService.createGoogleCalendarEvent(
         accessToken: googleService.accessToken!,

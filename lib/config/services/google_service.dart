@@ -7,6 +7,10 @@ import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
 class GoogleServices {
+  static final GoogleServices _instance = GoogleServices._internal();
+  factory GoogleServices() => _instance;
+  GoogleServices._internal();
+
   // Use instance for 7.x plugin
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
@@ -27,36 +31,45 @@ class GoogleServices {
     _googleSignIn.initialize(serverClientId: serverClientId);
   }
 
-  Future<bool> signIn() async {
-    try {
-      final user = await _googleSignIn.authenticate();
-      _currentUser = user;
 
-      if (_currentUser != null) {
-        UserSession().username = _currentUser!.displayName;
-        UserSession().profileImageUrl = _currentUser!.photoUrl;
-        debugPrint("✅ Google Name: ${_currentUser!.displayName}");
-        debugPrint("✅ Google Photo: ${_currentUser!.photoUrl}");
-      }
+ Future<bool> signIn() async {
+  try {
+    if (_accessToken != null) {
+      debugPrint("🔵 Reusing existing Access Token: $_accessToken");
+      return true;
+    }
 
-      final auth = await user.authorizationClient.authorizationForScopes(scopes);
-      final accessToken = auth?.accessToken;
-      _accessToken = accessToken;
-      print("ACCESS TOKEN: $accessToken");
+    final user = await _googleSignIn.authenticate();
+    _currentUser = user;
 
-      final idToken = (user.authentication).idToken;
-      print("ID TOKEN: $idToken");
+    if (_currentUser != null) {
+      // 1. Get the ID Token (for your backend API)
+      final idToken = (await _currentUser!.authentication).idToken;
+      debugPrint("🆔 ID TOKEN: $idToken");
 
+      // 2. Get the Access Token (for Google Calendar)
+      final auth = await _currentUser!.authorizationClient.authorizationForScopes(scopes);
+      _accessToken = auth?.accessToken;
+      debugPrint("🔑 ACCESS TOKEN: $_accessToken");
+
+      // Update Session
+      UserSession().username = _currentUser!.displayName;
+      UserSession().profileImageUrl = _currentUser!.photoUrl;
+      
+      // If you need to send the ID Token to your server immediately
       if (idToken != null) {
         await sendTokensToApi(idToken);
       }
 
+      debugPrint("✅ Google Sign-In Success for: ${_currentUser!.displayName}");
       return true;
-    } catch (e) {
-      print("Google Sign-In error: $e");
-      return false;
     }
+    return false;
+  } catch (e) {
+    debugPrint("❌ Google Sign-In error: $e");
+    return false;
   }
+}
 
   Future<void> signOut() async {
     await _googleSignIn.disconnect();
@@ -118,8 +131,8 @@ class GoogleServices {
   }) async {
     final dio = Dio();
 
-    final startDateTime = "${date}T$startTime:00";
-    final endDateTime = "${date}T$endTime:00";
+    final startDateTime = "${date}T$startTime";
+    final endDateTime = "${date}T$endTime";
 
     final body = {
       "summary": title,
