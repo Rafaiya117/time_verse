@@ -15,7 +15,7 @@ class CustomInputField extends StatefulWidget {
   final Color? labelColor;
   final double? height;
   final double? hintFontSize;
-  final String? prefixSvgPath; // ✅ added
+  final String? prefixSvgPath;
   final Color? prefixIconColor;
   final Color? suffixIconColor;
 
@@ -31,7 +31,7 @@ class CustomInputField extends StatefulWidget {
     this.labelColor,
     this.height,
     this.hintFontSize,
-    this.prefixSvgPath, // ✅ added
+    this.prefixSvgPath,
     this.prefixIconColor,
     this.suffixIconColor,
   });
@@ -58,8 +58,9 @@ class _CustomInputFieldState extends State<CustomInputField> {
                 style: GoogleFonts.outfit(
                   fontWeight: FontWeight.w500,
                   fontSize: widget.fontSize.sp,
-                  color: widget.textColor ??
-                    (isDarkMode ? AppColors.text_color : AppColors.heading_color),
+                  color: widget.textColor ??(isDarkMode
+                    ? AppColors.text_color
+                    : AppColors.heading_color),
                 ),
               ),
               if (widget.label.contains('*'))
@@ -69,72 +70,108 @@ class _CustomInputFieldState extends State<CustomInputField> {
                     fontWeight: FontWeight.w500,
                     fontSize: widget.fontSize.sp,
                     color: Colors.red,
-                  ),
                 ),
+              ),
             ],
           ),
         ),
         SizedBox(height: 5.h),
         SizedBox(
           height: widget.height ?? 45.h,
-          child: TextFormField(
-            controller: widget.controller,
-            obscureText: widget.isPassword ? _obscureText : false,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(vertical: 9.h, horizontal: 8.w),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: widget.borderColor ?? AppColors.third_color,
-                  width: 1.0,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: const Color(0xFFDF951F),
+                width: 1.w,
+              ),
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF020617), // top
+                  Color(0xFF111827), // middle
+                  Color(0xFF0F172A), // bottom
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color:const Color(0xFFDF951F).withValues(alpha: 0.12),
+                  blurRadius: 6,
+                  spreadRadius: 0.5,
                 ),
+              ],
+            ),
+            child: TextFormField(
+              controller: widget.controller,
+              obscureText:
+                  widget.isPassword ? _obscureText : false,
+              textAlignVertical: TextAlignVertical.center,
+
+              style: GoogleFonts.outfit(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: widget.borderColor ?? AppColors.third_color,
-                  width: 1.0,
+
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.transparent,
+
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 14.w,
+                  vertical: 12.h,
                 ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: widget.borderColor ?? AppColors.third_color,
-                  width: 1.0.w,
+
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+
+                hintText: widget.hintText,
+
+                hintStyle: GoogleFonts.outfit(
+                  fontSize:
+                      widget.hintFontSize ?? 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF9CA3AF),
                 ),
-              ),
-              labelText: widget.hintText,
-              labelStyle: GoogleFonts.outfit(
-                fontSize: widget.hintFontSize ?? 10.sp,
-                fontWeight: FontWeight.normal,
-                color: widget.labelColor ??(isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
-              ),
-              prefixIcon: widget.prefixSvgPath != null
-                ? Padding(
-                  padding: EdgeInsets.all(16.0),
-                    child: SvgPicture.asset(
-                      widget.prefixSvgPath!,
-                      width: 14.w,
-                      height: 16.h,
-                      colorFilter: ColorFilter.mode(
-                        widget.prefixIconColor ?? AppColors.text_color,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                )
-                : null,
+
+                prefixIcon: widget.prefixSvgPath != null
+                    ? Padding(
+                        padding: EdgeInsets.all(14.w),
+                        child: SvgPicture.asset(
+                          widget.prefixSvgPath!,
+                          width: 16.w,
+                          height: 16.h,
+                          colorFilter: ColorFilter.mode(
+                            widget.prefixIconColor ??
+                                const Color(0xFF9CA3AF),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      )
+                    : null,
+
                 suffixIcon: widget.isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        _obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: widget.suffixIconColor ?? AppColors.text_color,
-                        size: 11.sp,
-                    ),
-                    onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                )
-              : null,
+                    ? IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: widget.suffixIconColor ??
+                              const Color(0xFF9CA3AF),
+                          size: 20.sp,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      )
+                    : null,
+              ),
             ),
           ),
         ),

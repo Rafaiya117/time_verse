@@ -9,7 +9,7 @@ class ThemedBackgroundWrapper extends StatelessWidget {
     //!-------- Check current brightness -------------!
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final String backgroundAsset = isDarkMode
-        ? 'assets/images/bg_dark4.png' 
+        ? 'assets/images/bg_dark5.png' 
         : 'assets/images/bg_light.png';
     return Stack(
       children: <Widget>[

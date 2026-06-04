@@ -52,10 +52,10 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 20.h,),
               Center(
                 child: Text(
-                  'Welcome to InfiniQuote',
-                  style: GoogleFonts.outfit(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w500,
+                  'Welcome Back',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 36.sp,
+                    fontWeight: FontWeight.w700,
                     color: secondaryTextColor    ,
                   ),
                 ),
@@ -65,76 +65,98 @@ class LoginPage extends StatelessWidget {
                 child: Text(
                   'Sign in to continue organizing amazing activities',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15.3.sp,
+                    fontWeight: FontWeight.normal,
                     color: isDarkMode?AppColors.text_color: AppColors.heading_color    ,
                   ),
                 ),
               ),
               SizedBox(height: 20.h,),
-              CustomInputField(
-                label: 'Email Address *',
-                hintText: 'Enter your email...',
-                controller: loginController.emailController,
-                isPassword: false,
-                fontSize: 12,
-              ),
-              SizedBox(height: 30.h,),
-              CustomInputField(
-                label: 'Password *',
-                hintText: 'Enter your password...',
-                controller: loginController.passwordController,
-                isPassword: true,
-                fontSize: 12,
-              ),
-              SizedBox(height: 20.h,),
-              Consumer<LoginController>(
-                builder: (context, controller, _) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Color(0xFF051123): AppColors.background_color,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: AppColors.fourth_color, width: 0.6.w),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Checkbox(
-                          value: controller.rememberMe,
-                          onChanged: controller.toggleRememberMe,
-                          activeColor: AppColors.third_color,
-                          materialTapTargetSize:MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        Text(
-                          'Remember me',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color:Theme.of(context).brightness == Brightness.dark
-                              ? AppColors.text_color
-                              :AppColors.heading_color,
+                    CustomInputField(
+                      label: 'Email Address', // Removed the '*' to match image
+                      hintText: 'Enter your email address..',
+                      controller: loginController.emailController,
+                      isPassword: false,
+                      fontSize: 12,
+                    ),
+                    SizedBox(height: 30.h),
+                    CustomInputField(
+                      label: 'Password', // Removed the '*' to match image
+                      hintText: 'Enter your password',
+                      controller: loginController.passwordController,
+                      isPassword: true,
+                      fontSize: 12,
+                    ),
+                    SizedBox(height: 20.h),
+                    Consumer<LoginController>(
+                      builder: (context, controller, _) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Left Group: Switch + Label text
+                          Row(
+                            children: [
+                              SizedBox(
+                                height: 24.h,
+                                child: Switch(
+                                  value: controller.rememberMe,
+                                  onChanged: controller.toggleRememberMe,
+                                  activeColor: Colors.white,
+                                  activeTrackColor: Colors.orange, // Use AppColors.third_color if it's the orange tone
+                                  inactiveThumbColor: Colors.white,
+                                  inactiveTrackColor: Colors.grey.shade700,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Remember Me',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  color:Theme.of(context).brightness == Brightness.dark
+                                    ? AppColors.text_color
+                                    : AppColors.heading_color,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Right Group: Forgot Password button
+                          TextButton(
+                            onPressed: () {
+                              context.push('/forgot_pass');
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'Forgot Password?',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12.sp,
+                                color: Colors.orange, // Use your orange color variable here
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.orange,
                               ),
                             ),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.28,),
-                            // SizedBox(width: 95.w,),
-                            //Spacer(),
-                            TextButton(
-                              onPressed: (){
-                                context.push('/forgot_pass');
-                              },
-                              child: Text(
-                                'Forgot Password',
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10.sp,
-                                  color: AppColors.third_color,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.third_color 
-                              ),
-                            ), 
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              SizedBox(height: 20.h,),
+              ),
+              SizedBox(height: 20.h),
               Center(
                 child: CustomButton(
                   text: "Continue",
@@ -174,47 +196,100 @@ class LoginPage extends StatelessWidget {
                     }
                   },
                   gradient: AppGradientColors.button_gradient,
-                  textColor: AppColors.text_color,
-                  fontFamily: 'outfit',
+                  textColor: Colors.black,
+                  fontFamily: 'SF Pro',
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.w700,
                   height: 51.h,
                   width: double.infinity,
                 ),
               ),
               SizedBox(height: 20.h,),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 10.sp,
-                        color: isDarkMode
-                          ? AppColors.text_color
-                          : AppColors.heading_color,
+                  // Left divider line
+                  Expanded(
+                    child: Container(
+                      height: 1.5, // Total line thickness
+                      margin: EdgeInsets.only(right: 12.w), // Space before text
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(
+                              0.0,
+                            ), // Fades out completely at outer edge
+                            Colors.white.withOpacity(
+                              0.65,
+                            ), // Solid/visible near the text
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        children: [
-                        const TextSpan(text: 'Already have an account? '),
-                        TextSpan(
-                          text: 'Sign Up',
-                          style: GoogleFonts.outfit(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.normal,
-                            color: isDarkMode
-                              ? AppColors.third_color
-                              : AppColors.heading_color,
-                            ),
-                          recognizer: TapGestureRecognizer()..onTap = () {
-                            context.push('/signup');
-                          },
+                      ),
+                    ),
+                  ),
+                  // Center Text
+                  Text(
+                    'Or continue with',
+                    style: GoogleFonts.inter(
+                      color: const Color(
+                        0xFF9E9E9E,
+                      ), // Muted grey color matching the image text
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  // Right divider line
+                  Expanded(
+                    child: Container(
+                      height: 1.5,
+                      margin: EdgeInsets.only(left: 12.w), // Space after text
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.55,), // Solid/visible near the text
+                            Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
               ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     RichText(
+              //       text: TextSpan(
+              //         style: GoogleFonts.outfit(
+              //           fontWeight: FontWeight.normal,
+              //           fontSize: 10.sp,
+              //           color: isDarkMode
+              //             ? AppColors.text_color
+              //             : AppColors.heading_color,
+              //           ),
+              //           children: [
+              //           const TextSpan(text: 'Already have an account? '),
+              //           TextSpan(
+              //             text: 'Sign Up',
+              //             style: GoogleFonts.outfit(
+              //               fontSize: 10.sp,
+              //               fontWeight: FontWeight.normal,
+              //               color: isDarkMode
+              //                 ? AppColors.third_color
+              //                 : AppColors.heading_color,
+              //               ),
+              //             recognizer: TapGestureRecognizer()..onTap = () {
+              //               context.push('/signup');
+              //             },
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ],
+              // ),
               SizedBox(height: 30.h,),
               Center(
                 child: GestureDetector(
