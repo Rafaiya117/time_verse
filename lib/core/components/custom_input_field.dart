@@ -55,7 +55,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
             children: [
               TextSpan(
                 text: widget.label.replaceAll('*', ''),
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.playfairDisplay(
                   fontWeight: FontWeight.w500,
                   fontSize: widget.fontSize.sp,
                   color: widget.textColor ??(isDarkMode

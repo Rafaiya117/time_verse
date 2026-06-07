@@ -31,92 +31,114 @@ class ResetPassword extends StatelessWidget {
           children: [
             Center(
               child: Image.asset(
-                'assets/images/reset_passowrd.png',
+                'assets/images/forgot_password.png',
                 width:233.w,
                 height: 184.h,
               ),
             ),
+            SizedBox(height: 5.h,),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Main Title Header
+                Text(
+                  'CREATE NEW PASSWORD',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 26.sp, 
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.fourth_color, 
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                SizedBox(height: 14.h,), // Clean vertical spacing between header elements
+                // Subtitle Description Lines
+                Text(
+                  'Create a new password to secure your\naccount and continue safely.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF9EACBA,), 
+                    height:1.4, 
+                  ),
+                ),
+              ],
+            ),
             SizedBox(height: 20.h,),
-            Center(
-              child: Text(
-                'Create New Passowrd',
-                style: GoogleFonts.outfit(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w500,
-                  color: secondaryTextColor    ,
+            Container(
+              padding: EdgeInsets.all(24.sp),
+              decoration: BoxDecoration(
+                color: isDarkMode?AppColors.containers_bgd: AppColors.container,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDarkMode?AppColors.fourth_color.withOpacity(0.5): AppColors.new_clr,
+                  width: 0.5,
                 ),
               ),
-            ),
-            SizedBox(height: 20.h,),
-            Center(
-              child: Text(
-                'We have send otp code abc abc',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: isDarkMode?AppColors.text_color: AppColors.heading_color    ,
-                ),
-              ),
-            ),
-            SizedBox(height: 20.h,),
-            CustomInputField(
-              label: 'New Password*',
-              hintText: 'Enter your passowrd...',
-              controller: resetpasswordController.passwordController,
-              isPassword: true,
-              fontSize: 12,
-            ),
-            SizedBox(height: 20.h,),
-            CustomInputField(
-              label: 'Confirm Password*',
-              hintText: 'Enter your password...',
-              controller: resetpasswordController.confirm_passwordController,
-              isPassword: true,
-              fontSize: 12,
-            ),
-            SizedBox(height: 20.h,),
-            Center(
-              child: CustomButton(
-                text: "Continue",
-                onPressed: () async{
-                  if (resetpasswordController.validateLoginFields()) {
-                    final success = await resetpasswordController.resetPassword(email,otp,);
-                    if (success) {
-                      debugPrint("✅ Password reset success confirmed. Navigating to login...",);
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Password reset successful"),
-                        ),
-                      );
-                      await Future.delayed(const Duration(milliseconds: 800));
-                      if (context.mounted) {
-                        context.go('/login');
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              resetpasswordController.errorMessage ?? 'Reset failed',
-                            ),
-                          ),
-                        );
-                      }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Please fill all fields")),
-                      );
-                    }
-                  //context.push('/login');
-                },
-                gradient: AppGradientColors.button_gradient,
-                textColor: AppColors.text_color,
-                fontFamily: 'outfit',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.normal,
-                height: 51.h,
-                width: double.infinity,
+              child: Column(
+                children: [
+                  CustomInputField(
+                    label: 'New Password*',
+                    hintText: 'Enter your passowrd...',
+                    controller: resetpasswordController.passwordController,
+                    isPassword: true,
+                    fontSize: 13.sp,
+                  ),
+                  SizedBox(height: 20.h,),
+                  CustomInputField(
+                    label: 'Confirm Password*',
+                    hintText: 'Enter your password...',
+                    controller: resetpasswordController.confirm_passwordController,
+                    isPassword: true,
+                    fontSize: 13.sp,
+                  ),
+                  SizedBox(height: 20.h,),
+                  Center(
+                    child: CustomButton(
+                      text: "Continue",
+                      onPressed: () async{
+                        if (resetpasswordController.validateLoginFields()) {
+                          final success = await resetpasswordController.resetPassword(email,otp,);
+                          if (success) {
+                            debugPrint("✅ Password reset success confirmed. Navigating to login...",);
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Password reset successful"),
+                              ),
+                            );
+                            await Future.delayed(const Duration(milliseconds: 800));
+                            if (context.mounted) {
+                              context.go('/login');
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    resetpasswordController.errorMessage ?? 'Reset failed',
+                                  ),
+                                ),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Please fill all fields")),
+                            );
+                          }
+                        //context.push('/login');
+                      },
+                      gradient: AppGradientColors.button_gradient,
+                      textColor: Colors.black,
+                      fontFamily: 'outfit',
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      height: 51.h,
+                      width: double.infinity,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

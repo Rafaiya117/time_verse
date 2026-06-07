@@ -10,7 +10,9 @@ import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
+import 'package:time_verse/core/components/mood_tracker/mood_tracker_popup.dart';
 import 'package:time_verse/core/components/prograss_bar.dart';
+import 'package:time_verse/core/components/social_action_button.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/login/controller/login_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
@@ -144,9 +146,9 @@ class LoginPage extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12.sp,
-                                color: Colors.orange, // Use your orange color variable here
+                                color: Colors.red, // Use your orange color variable here
                                 decoration: TextDecoration.underline,
-                                decorationColor: Colors.orange,
+                                decorationColor: Colors.red,
                               ),
                             ),
                           ),
@@ -176,8 +178,22 @@ class LoginPage extends StatelessWidget {
                         }
                         await AppPrefs.setLoggedIn(true);
                         await AppPrefs.setFirstLaunch(false);
-                         await context.read<ProfileController>().loadUserProfile(); 
-                        if (context.mounted) context.push('/home');
+                        await context.read<ProfileController>().loadUserProfile();
+                        if (context.mounted) {
+                          if (loginController.rememberMe) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              // ignore: deprecated_member_use
+                              barrierColor: Colors.black.withOpacity(0.5),
+                              builder: (dialogContext) => const MoodTrackerPopup(),
+                            ).then((_) {
+                              if (context.mounted) context.push('/home');
+                            });
+                          } else {
+                            context.push('/home');
+                          }
+                        }
                       } else {
                         if (context.mounted) {
                           await showMessageDialog(
@@ -258,43 +274,16 @@ class LoginPage extends StatelessWidget {
                   ),
                 ],
               ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [
-              //     RichText(
-              //       text: TextSpan(
-              //         style: GoogleFonts.outfit(
-              //           fontWeight: FontWeight.normal,
-              //           fontSize: 10.sp,
-              //           color: isDarkMode
-              //             ? AppColors.text_color
-              //             : AppColors.heading_color,
-              //           ),
-              //           children: [
-              //           const TextSpan(text: 'Already have an account? '),
-              //           TextSpan(
-              //             text: 'Sign Up',
-              //             style: GoogleFonts.outfit(
-              //               fontSize: 10.sp,
-              //               fontWeight: FontWeight.normal,
-              //               color: isDarkMode
-              //                 ? AppColors.third_color
-              //                 : AppColors.heading_color,
-              //               ),
-              //             recognizer: TapGestureRecognizer()..onTap = () {
-              //               context.push('/signup');
-              //             },
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ],
-              // ),
               SizedBox(height: 30.h,),
               Center(
-                child: GestureDetector(
-                  onTap: ()async {
-                    final success  = await googleServices.signIn();
+                child: SocialAuthButton(
+                  text: 'Sign in with Google',
+                  icon: SvgPicture.asset(
+                    'assets/icons/gmail.svg', // Ensure this points to your standard colorful Google asset icon
+                    fit: BoxFit.contain,
+                  ),
+                  onTap: () async {
+                    final success = await googleServices.signIn();
                     if (success) {
                       await AppPrefs.setLoggedIn(true);
                       await AppPrefs.setFirstLaunch(false);
@@ -307,39 +296,42 @@ class LoginPage extends StatelessWidget {
                         );
                       }
                     }
-                    //loginController.startGoogleLogin(); 
                   },
-                  child: SvgPicture.asset(
-                    'assets/icons/gmail.svg',
-                    width: 35.w,
-                    height: 35.h,
-                  ),
                 ),
               ),
-              SizedBox(height: 20.h,),
-               Center(
-                child: Text(
-                  'Tap to sign in with Google',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: isDarkMode?AppColors.text_color: AppColors.heading_color    ,
+              SizedBox(height: 40.h,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 13.sp,
+                        color: isDarkMode
+                          ? AppColors.text_color
+                          : AppColors.heading_color,
+                        ),
+                        children: [
+                        const TextSpan(text: 'Don\'t have an account? '),
+                        TextSpan(
+                          text: 'Sign Up',
+                          style: GoogleFonts.outfit(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.normal,
+                            color: isDarkMode
+                              ? AppColors.third_color
+                              : AppColors.heading_color,
+                            ),
+                          recognizer: TapGestureRecognizer()..onTap = () {
+                            context.push('/signup');
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
-              SizedBox(height: 120.h,),
-              Center(
-                child: SizedBox(
-                  width: 142.w,
-                  child: ProgressIndicatorWidget(
-                    barHeight: 4,
-                    percentage: 100,
-                    progressColor: AppColors.third_color,
-                  ),
-                ),
-              ),
-              SizedBox(height: 10.h,),
             ],
           ),
         ),

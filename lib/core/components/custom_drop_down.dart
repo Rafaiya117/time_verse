@@ -42,7 +42,7 @@ class CustomDropdownField<T> extends StatelessWidget {
             children: [
               TextSpan(
                 text: label.replaceAll('*', ''),
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.playfairDisplay(
                   fontWeight: FontWeight.w500,
                   fontSize: fontSize.sp,
                   color: textColor ?? (isDarkMode ? Colors.white70 : Colors.black87),

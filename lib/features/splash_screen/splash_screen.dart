@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
-import 'package:time_verse/config/app_route/app_prefernce.dart'; 
+import 'package:time_verse/config/app_route/app_prefernce.dart';
+import 'package:time_verse/core/components/mood_tracker/mood_tracker_popup.dart'; 
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,14 +35,28 @@ class _SplashScreenState extends State<SplashScreen> {
       await AppPrefs.setFirstLaunch(false);
       context.push('/landing');
     } else if (isLoggedIn && !shouldForceLogin) {
-      context.push('/home'); // user has valid token
+      final isRememberMe = await AppPrefs.isRememberMeEnabled();
+
+      if (!mounted) return;
+
+      if (isRememberMe) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          barrierColor: Colors.black.withOpacity(0.5),
+          builder: (dialogContext) => const MoodTrackerPopup(),
+        ).then((_) {
+          if (context.mounted) context.push('/home');
+        });
+      } else {
+        context.push('/home'); 
+      }
     } else {
-      // Clear invalid Google login state
       await AppPrefs.setGoogleLogin(false);
       await AppPrefs.clearGoogleToken();
       await AppPrefs.setLoggedIn(false);
 
-      context.push('/login'); // send to login
+      context.push('/login');
     }
   }
 

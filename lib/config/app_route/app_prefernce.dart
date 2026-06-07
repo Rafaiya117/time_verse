@@ -165,4 +165,9 @@ static Future<void> clearGoogleToken() async {
       'password': prefs.getString(_savedPasswordKey),
     };
   }
+
+  static Future<bool> isRememberMeEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_rememberMeKey) ?? false;
+  }
 }

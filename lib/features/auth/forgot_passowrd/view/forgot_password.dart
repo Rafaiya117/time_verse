@@ -18,8 +18,8 @@ class ForgotPassword extends StatelessWidget {
     final forgotpasswordController = Provider.of<ForgotPasswordController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color secondaryTextColor = isDarkMode 
-        ? AppColors.fourth_color 
-        : AppColors.heading_color;
+      ? AppColors.fourth_color 
+      : AppColors.heading_color;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(
@@ -36,72 +36,97 @@ class ForgotPassword extends StatelessWidget {
                   height: 184.h,
                 ),
               ),
-              SizedBox(height: 20.h,),
+              SizedBox(height: 5.h,),
               Center(
-                child: Text(
-                  'Forgot Passowrd',
-                  style: GoogleFonts.outfit(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w500,
-                    color: secondaryTextColor    ,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Main Title Header
+                    Text(
+                      'FORGOT PASSWORD',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 26.sp, // Sized prominently to match layout proportions
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.fourth_color, 
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    SizedBox(height: 10.h,), // Tight dynamic spacing layout matched to image
+                    // Subtitle Description Line
+                    Text(
+                      'We have send OTP code abc abc',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(
+                          0xFF9EACBA,
+                        ), // Soft slate/grey accent color
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 20.h,),
-              Center(
-                child: Text(
-                  'We have send otp code abc abc',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: isDarkMode?AppColors.text_color: AppColors.heading_color    ,
+              SizedBox(height: 20.h),
+              Container(
+                padding: EdgeInsets.all(24.sp),
+                decoration: BoxDecoration(
+                  color: isDarkMode?AppColors.containers_bgd: AppColors.container,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDarkMode?AppColors.fourth_color: AppColors.new_clr,
+                    width:0.5,
                   ),
                 ),
-              ),
-              SizedBox(height: 20.h,),
-              CustomInputField(
-                label: 'Email Address *',
-                hintText: 'Enter your email...',
-                controller: forgotpasswordController.emailController,
-                isPassword: false,
-                fontSize: 12,
-              ),
-              SizedBox(height: 20.h,),
-              Center(
-                child: CustomButton(
-                  text: "Recover Account",
-                  onPressed: () async {
-                    if (forgotpasswordController.validateLoginFields()) {
-                      final success = await forgotpasswordController.sendForgotPasswordEmail();
-                      if (success) {
-                        if (context.mounted) {
-                          final email = forgotpasswordController.emailController
-                            .text.trim();
-                          final encodedEmail = Uri.encodeComponent(email);
-                          context.push('/otp?email=$encodedEmail');
-                        }
-                      } else {
-                        if (context.mounted) {
-                          await showMessageDialog(
-                            context,
-                            forgotpasswordController.errorMessage ?? 'Request failed',
-                          );
-                        }
-                      }
-                    } else {
-                      if (context.mounted) {
-                        await showMessageDialog(context, 'Please enter your email');
-                      }
-                    }
-                  },
-                  gradient: AppGradientColors.button_gradient,
-                  textColor: AppColors.text_color,
-                  fontFamily: 'outfit',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.normal,
-                  height: 51.h,
-                  width: double.infinity,
+                child: Column(
+                  children: [
+                    CustomInputField(
+                      label: 'Email Address *',
+                      hintText: 'Enter your email address ...',
+                      controller: forgotpasswordController.emailController,
+                      isPassword: false,
+                      fontSize: 13.sp,
+                    ),
+                    SizedBox(height: 20.h,),
+                    Center(
+                      child: CustomButton(
+                        text: "Send",
+                        onPressed: () async {
+                          if (forgotpasswordController.validateLoginFields()) {
+                            final success = await forgotpasswordController.sendForgotPasswordEmail();
+                            if (success) {
+                              if (context.mounted) {
+                                final email = forgotpasswordController.emailController
+                                  .text.trim();
+                                final encodedEmail = Uri.encodeComponent(email);
+                                context.push('/otp?email=$encodedEmail');
+                              }
+                            } else {
+                              if (context.mounted) {
+                                await showMessageDialog(
+                                  context,
+                                  forgotpasswordController.errorMessage ?? 'Request failed',
+                                );
+                              }
+                            }
+                          } else {
+                            if (context.mounted) {
+                              await showMessageDialog(context, 'Please enter your email');
+                            }
+                          }
+                        },
+                        gradient: AppGradientColors.button_gradient,
+                        textColor: Colors.black,
+                        fontFamily: 'outfit',
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        height: 51.h,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 250.h,),
@@ -110,54 +135,26 @@ class ForgotPassword extends StatelessWidget {
                 children: [
                   RichText(
                     text: TextSpan(
-                      style: GoogleFonts.roboto(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.sp,
-                        color: isDarkMode? AppColors.text_color: Color(0xFFC2C2C2),
-                      ),
-                      children: [
-                        const TextSpan(text: 'Did not receive OTP code? '),
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 13.sp,
+                        color: isDarkMode
+                          ? AppColors.text_color
+                          : AppColors.heading_color,
+                        ),
+                        children: [
+                        const TextSpan(text: 'Don\'t have an account? '),
                         TextSpan(
-                          text: 'Resend',
-                          style: GoogleFonts.roboto(
-                            fontSize: 14.sp,
+                          text: 'Sign Up',
+                          style: GoogleFonts.outfit(
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.normal,
-                            color: Color(0xFF543558),
-                            decoration: TextDecoration.underline,
-                            decorationColor: Color(0xFF543558),
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () async {
-                              final controller = context.read<ForgotPasswordController>();
-                              final email = controller.emailController.text.trim();
-                              if (email.isEmpty) {
-                                await showMessageDialog(
-                                  context,
-                                  'Please enter your email first.',
-                                  title: 'Error',
-                                  icon: Icons.error_outline,
-                                  iconColor: Colors.red,
-                                );
-                                return;
-                              }
-                              final success = await controller.resendOtp(email);
-                              if (success) {
-                                await showMessageDialog(
-                                  context,
-                                  'OTP has been resent successfully.',
-                                  title: 'Success',
-                                  icon: Icons.check_circle_outline,
-                                  iconColor: Colors.green,
-                                );
-                              } else {
-                                await showMessageDialog(
-                                context,
-                                controller.errorMessage ?? 'Failed to resend OTP',
-                                title: 'Error',
-                                icon: Icons.error_outline,
-                                iconColor: Colors.red,
-                              );
-                            }
+                            color: isDarkMode
+                              ? AppColors.third_color
+                              : AppColors.heading_color,
+                            ),
+                          recognizer: TapGestureRecognizer()..onTap = () {
+                            context.push('/signup');
                           },
                         ),
                       ],
