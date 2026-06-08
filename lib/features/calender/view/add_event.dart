@@ -2,9 +2,11 @@ import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
+import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
@@ -18,375 +20,635 @@ import 'package:time_verse/features/calender/widget/custom_date_picker.dart';
 import 'package:time_verse/features/calender/widget/time_picker_custom_widget.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 
-class AddEventModal extends StatelessWidget {
-  const AddEventModal({super.key});
+class AddEventPage extends StatelessWidget {
+  const AddEventPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final addEventController = Provider.of<AddEventController>(context, listen: false);
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       addEventController.fetchCategories();
     });
-    return SafeArea(
-      bottom: true,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          //height: 652.h,
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDarkMode?Color(0xFF051123):AppColors.text_color,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(50)),
-            border: const Border(top: BorderSide(color: Colors.grey, width: 1.5)),
-          ),
-        
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Add Event',
-                    style: GoogleFonts.outfit(
-                      color: isDarkMode?AppColors.third_color:AppColors.heading_color,
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                CustomInputField(
-                  label: '',
-                  hintText: 'Enter Name *',
-                  controller: addEventController.titleController,
-                  isPassword: false,
-                  fontSize: 12.sp,
-                  height: 44.h,
-                  hintFontSize: 12.sp,
-                ),
-                SizedBox(height: 16.h),
-                SizedBox(
-                  height: 88.h,
-                  child: TextFormField(
-                    controller: addEventController.noteController,
-                    decoration: InputDecoration(
-                      // ✅ Replace hintText with hint (RichText)
-                      hint: RichText(
-                        text: TextSpan(
-                          text: 'Type the note here',
-                          style: TextStyle(
-                            color: isDarkMode
-                              ? AppColors.text_color
-                              : AppColors.heading_color,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: ' *', 
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: AppColors.third_color,
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: AppColors.third_color,
-                          width: 1.2,
-                        ),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 28.h,
-                        horizontal: 16.w,
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: isDarkMode
-                        ? AppColors.text_color
-                        : AppColors.heading_color,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    cursorColor: Colors.grey.shade300,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-               GestureDetector(
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (_) => DatePickerDialog(
-                      controller: addEventController.dateController,
-                      initialDate: Provider.of<CalendarController>(
-                        context,
-                        listen: false,
-                      ).selectedDay,
-                    ),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.fourth_color),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ValueListenableBuilder<TextEditingValue>(
-                          valueListenable: addEventController.dateController,
-                          builder: (context, value, child) {
-                            return Text(
-                              value.text.isEmpty ? "Date" : value.text,
-                              style: GoogleFonts.outfit(
-                                color: isDarkMode
-                                ? AppColors.text_color
-                                : AppColors.heading_color,
-                              ),
-                            );
-                          },
-                        ),
-                        Icon(
-                          Icons.calendar_today,
-                          color: isDarkMode
-                          ? AppColors.text_color
-                          : AppColors.heading_color,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+    const goldColor = Color(0xFFFFA500); 
+    const inputBgColor = Color(0xFF0A192F); // Dark input card backgrounds
+
+    return Scaffold(
+      //backgroundColor: isDarkMode ? const Color(0xFF051123) : AppColors.text_color,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        centerTitle: true,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Add Event',
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              'Create a moment that matters ✨',
+              style: GoogleFonts.outfit(
+                color: Colors.grey.shade400,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isDarkMode ? Icons.wb_sunny : Icons.nightlight_round,
+              color: goldColor,
+            ),
+            onPressed: () {},
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- SECTION: BASICS ---
+              _buildSectionHeader('Basics'),
+              SizedBox(height: 8.h),
+             _buildFormContainer(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Consumer<TimePickerController>(
-                      builder: (context, controller, _) => TimePickerField(
-                        fieldKey: 'start',
-                        label: 'Start Time',
-                        icon: Icons.access_time,
+                    // Gold Star Icon aligned with the input layout
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                      child: Icon(
+                        Icons
+                            .star_purple500_sharp, // Sharp geometric star icon match
+                        color: const Color(
+                          0xFFFFA500,
+                        ), // Match the prominent orange/gold color
+                        size: 22.sp,
                       ),
                     ),
-                    Consumer<TimePickerController>(
-                    builder: (context, controller, _) => TimePickerField(
-                      fieldKey: 'end',
-                      label: 'End Time',
-                      icon: Icons.access_time,
+                    // Expanded Input Text Field
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Event Name',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          TextFormField(
+                            controller: addEventController.titleController,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'e.g. morning Meditation',
+                              hintStyle: GoogleFonts.inter(
+                                color: Colors.grey.shade500,
+                                fontSize: 13.sp,
+                              ),
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 16.h,),
-                CustomInputField(
-                  label: '',
-                  hintText: 'you can add address or can leave it empty',
-                  controller: addEventController.locationController,
-                  isPassword: false,
-                  fontSize: 12.sp,
-                  height: 44.h,
-                  hintFontSize: 12.sp,
-                ),
-                SizedBox(height: 16.h,),
-                Consumer<TimePickerController>(
-                  builder: (context, controller, _) => TimePickerField(
-                    fieldKey: 'alarm',
-                    label: 'Alarm',
-                    icon: 'assets/icons/alarm.svg', 
-                  ),
-                ),
-                SizedBox(height: 16.h,),
-                 Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Select Category',
-                    style: GoogleFonts.outfit(
-                      color: isDarkMode?AppColors.third_color:AppColors.heading_color,
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w400,
+              ),
+              SizedBox(height: 16.h),
+              _buildFormContainer(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Notebook with Pencil Emoji/Icon
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                      child: Text('📝', style: TextStyle(fontSize: 20.sp)),
                     ),
-                  ),
-                ),
-                SizedBox(height: 16.h,),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: 
-                  Consumer<AddEventController>(
-                    builder: (context, controller, _) {
-                      final categories = controller.categories;
-                      if (categories.isEmpty) {
-                        return Row(
-                          children: List.generate(3, (index) {
-                            return Row(
-                              children: [
-                                BulletButton(
-                                  label: 'Loading...',
-                                  color: AppColors.fourth_color,
-                                  iconPath: 'assets/icons/bullet_point.svg',
-                                ),
-                                SizedBox(width: 16.w),
-                              ],
-                            );
-                          }),
-                        );
-                      }
-                      return Row(
-                        children: List.generate(categories.length, (index) {
-                          final category = categories[index];
-                          final baseColor = index % 2 == 0 ? AppColors.fourth_color: AppColors.fifth_color;
-                          final color = controller.selectedCategory == category.name ? AppColors.heading_color : baseColor;
-                          return Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  debugPrint('Selected Category: ${category.name}');
-                                  controller.selectCategory(category.name);
-                                },
-                                child: BulletButton(
-                                  label: category.name,
-                                  color: color,
-                                  iconPath: 'assets/icons/bullet_point.svg',
-                                ),
+                    // Input Fields layout
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Add A Note',
+                            style: GoogleFonts.inter(
+                              color: Colors
+                                  .white, // Pure white matching the image layout
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          TextFormField(
+                            controller: addEventController.noteController,
+                            maxLines: 2,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                            cursorColor: const Color(0xFFFFA500),
+                            decoration: InputDecoration(
+                              hintText:
+                                  'What would you like to Remember For This Special Moment?',
+                              hintStyle: GoogleFonts.inter(
+                                color: Colors
+                                    .grey
+                                    .shade500, // Matching the soft layout gray text
+                                fontSize: 13.sp,
                               ),
-                              SizedBox(width: 16.w),
-                            ],
-                          );
-                        }),
-                      );
-                    },
-                  ),
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 16.h),
-                CustomButton(
-                  text: "Save",
-                  onPressed: () async {
-                    final timeController = Provider.of<TimePickerController>(
-                      context,
-                      listen: false,
-                    );
-        
-                    final start = timeController.formatTime(
-                      timeController.getTime('start'),
-                    );
-                    final end = timeController.formatTime(
-                      timeController.getTime('end'),
-                    );
-                    final alarm = timeController.formatTime(
-                      timeController.getTime('alarm'),
-                    );
-        
-                    // ✅ VALIDATION FIRST
-                    final validationError = addEventController.validateFields(
-                      title: addEventController.titleController.text,
-                      date: addEventController.dateController.text,
-                      startTime: start,
-                      endTime: end,
-                      note: addEventController.noteController.text,
-                    );
-        
-                    if (validationError != null) {
-                      await showMessageDialog(
-                        context,
-                        validationError,
-                        title: 'Validation Error',
-                        icon: Icons.warning_amber_outlined,
-                        iconColor: Colors.orange,
-                      );
-                      return; 
-                    }
-        
-                    // ✅ THEN show loader
-                    showDialog(
+              ),
+              SizedBox(height: 20.h),
+              // --- SECTION: SCHEDULE ---
+              _buildSectionHeader('Schedule'),
+              SizedBox(height: 8.h),
+              _buildFormContainer(
+                child: GestureDetector(
+                  onTap: () async {
+                    final DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      barrierDismissible: false,
-                      builder: (_) =>const Center(child: CircularProgressIndicator()),
+                      initialDate:
+                          Provider.of<CalendarController>(
+                            context,
+                            listen: false,
+                          ).selectedDay ??
+                          DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
                     );
-                    try {
-                      final result = await addEventController.createTask(
-                        title: addEventController.titleController.text.trim(),
-                        date: addEventController.dateController.text.trim(),
-                        startTime: start,
-                        endTime: end,
-                        location:addEventController.locationController.text.trim().isEmpty
-                        ? null: addEventController.locationController.text.trim(),
-                        alarmTime: alarm,
-                        categoryName:addEventController.selectedCategory?.isEmpty == true? null: addEventController.selectedCategory,
-                        note: addEventController.noteController.text.trim(),
-                      );
-                      Navigator.pop(context); 
-                      if (result != null) {
-                        final eventModel = EventModel.fromMap(result);
-                        await AlarmHelper.scheduleEventAlarm(eventModel);
-                        DateTime? alarmTime;
-                        try {
-                          alarmTime = DateTime.parse(result['alarm_time']);
-                        } catch (e) {
-                          debugPrint(
-                            "⚠️ Alarm time format error: ${result['alarm_time']}",
-                          );
-                        }
-                        if (alarmTime != null) {
-                          await NotificationService.scheduleNotification(
-                            id: result['id'],
-                            title: result['title'],
-                            body: result['description'],
-                            alarmTime: alarmTime,
-                            payload: result['id'],
-                          );
-                        }
-                        addEventController.clearFields();
-                        await showMessageDialog(
-                          context,
-                          'Saved successfully',
-                          title: 'Success',
-                          icon: Icons.check_circle_outline,
-                          iconColor: Colors.green,
-                        );
-                        await context.read<HomeController>().fetchEvents();
-                        if (context.mounted) {
-                          final int id = result['id']; 
-                          context.push('/event_details', extra: id);
-                        }
-                      }
-                    } catch (e) {
-                      Navigator.pop(context); 
-                      await showMessageDialog(
-                        context,
-                        'Failed to save event: $e',
-                        title: 'Error',
-                        icon: Icons.error_outline,
-                        iconColor: Colors.red,
-                      );
+
+                    if (pickedDate != null) {
+                      // Formats the date precisely to "MMMM d, yyyy" (e.g., May 4, 2026)
+                      String formattedDate = DateFormat(
+                        'MMMM d, yyyy',
+                      ).format(pickedDate);
+                      addEventController.dateController.text = formattedDate;
                     }
                   },
-                  gradient: AppGradientColors.button_gradient,
-                  textColor: AppColors.text_color,
-                  fontFamily: 'outfit',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.normal,
-                  height: 51.h,
-                  width: double.infinity,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Left Calendar Icon
+                      Padding(
+                        padding: EdgeInsets.only(right: 12.w),
+                        child: Text('📅', style: TextStyle(fontSize: 20.sp)),
+                      ),
+                      // Central labels block
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Date',
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            ValueListenableBuilder<TextEditingValue>(
+                              valueListenable:
+                                  addEventController.dateController,
+                              builder: (context, value, child) {
+                                return Text(
+                                  value.text.isEmpty
+                                      ? "Select Date"
+                                      : value.text,
+                                  style: GoogleFonts.inter(
+                                    color: Colors
+                                        .grey
+                                        .shade500, // Matches the soft color layer in the image
+                                    fontSize: 13.sp,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Orange-tinted dropdown indicator arrow
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: const Color(0xFFFFA500),
+                        size: 22.sp,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildFormContainer(
+                      child: Consumer<TimePickerController>(
+                        builder: (context, controller, _) => TimePickerField(
+                          fieldKey: 'start',
+                          label: 'Start Time',
+                          textController: addEventController
+                              .startTimeController, // optional
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: _buildFormContainer(
+                      child: Consumer<TimePickerController>(
+                        builder: (context, controller, _) => TimePickerField(
+                          fieldKey: 'end',
+                          label: 'End Time',
+                          textController:
+                              addEventController.endTimeController, // optional
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 20.h),
+
+              // --- SECTION: DETAILS ---
+              _buildSectionHeader('Details'),
+              SizedBox(height: 8.h),
+              _buildFormContainer(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Red Location Pin Icon/Emoji
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                      child: Text('📍', style: TextStyle(fontSize: 18.sp)),
+                    ),
+                    // Input text block layout
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Where is this happening? (optional)',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          TextFormField(
+                            controller: addEventController.locationController,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Add address or location',
+                              hintStyle: GoogleFonts.inter(
+                                color: Colors.grey.shade500,
+                                fontSize: 13.sp,
+                              ),
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 12.h),
+              _buildFormContainer(
+                child: Consumer<TimePickerController>(
+                  builder: (context, controller, _) {
+                    // Get dynamic saved alarm text value or fallback to default placeholder hint string
+                    final alarmTime = controller.getTime('alarm');
+                    final formattedAlarm = alarmTime != null
+                        ? controller.formatTime(alarmTime)
+                        : null;
+
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque, 
+                      onTap: () => controller.selectTime(context, 'alarm'),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                            child: Text(
+                              '🔔',
+                              style: TextStyle(fontSize: 18.sp),
+                            ),
+                          ),
+                          // Text block layout
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Remind me',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  formattedAlarm ?? '10 minutes before',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 13.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 20.h),
+              // --- SECTION: SELECT CATEGORY ---
+              _buildSectionHeader('Select Category'),
+              SizedBox(height: 12.h),
+              
+              Consumer<AddEventController>(
+                builder: (context, controller, _) {
+                  final categories = controller.categories;
+                  if (categories.isEmpty) {
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 2.1,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (context, index) => _buildCategoryCardSkeleton(),
+                    );
+                  }
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.1,
+                    ),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      final isSelected = controller.selectedCategory == category.name;
+
+                      return GestureDetector(
+                        onTap: () => controller.selectCategory(category.name),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? goldColor.withOpacity(0.15) : inputBgColor,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: isSelected ? goldColor : Colors.grey.shade800,
+                              width: isSelected ? 1.5 : 1.0,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(_getCategoryIcon(category.name), color: goldColor, size: 24.sp),
+                              SizedBox(height: 6.h),
+                              Text(
+                                category.name,
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+
+              SizedBox(height: 28.h),
+
+              // --- SAVE BUTTON ---
+              CustomButton(
+                text: "Save",
+                onPressed: () async {
+                  final timeController = Provider.of<TimePickerController>(context, listen: false);
+
+                  final start = timeController.formatTime(timeController.getTime('start'));
+                  final end = timeController.formatTime(timeController.getTime('end'));
+                  final alarm = timeController.formatTime(timeController.getTime('alarm'));
+
+                  final validationError = addEventController.validateFields(
+                    title: addEventController.titleController.text,
+                    date: addEventController.dateController.text,
+                    startTime: start,
+                    endTime: end,
+                    note: addEventController.noteController.text,
+                  );
+
+                  if (validationError != null) {
+                    await showMessageDialog(
+                      context,
+                      validationError,
+                      title: 'Validation Error',
+                      icon: Icons.warning_amber_outlined,
+                      iconColor: Colors.orange,
+                    );
+                    return;
+                  }
+
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => const Center(child: CircularProgressIndicator()),
+                  );
+
+                  try {
+                    final result = await addEventController.createTask(
+                      title: addEventController.titleController.text.trim(),
+                      date: addEventController.dateController.text.trim(),
+                      startTime: start,
+                      endTime: end,
+                      location: addEventController.locationController.text.trim().isEmpty 
+                          ? null : addEventController.locationController.text.trim(),
+                      alarmTime: alarm,
+                      categoryName: addEventController.selectedCategory?.isEmpty == true 
+                          ? null : addEventController.selectedCategory,
+                      note: addEventController.noteController.text.trim(),
+                    );
+                    
+                    Navigator.pop(context); // Pop Loader
+
+                    if (result != null) {
+                      final eventModel = EventModel.fromMap(result);
+                      await AlarmHelper.scheduleEventAlarm(eventModel);
+                      
+                      DateTime? alarmTime;
+                      try {
+                        alarmTime = DateTime.parse(result['alarm_time']);
+                      } catch (e) {
+                        debugPrint("⚠️ Alarm time format error: ${result['alarm_time']}");
+                      }
+
+                      if (alarmTime != null) {
+                        await NotificationService.scheduleNotification(
+                          id: result['id'],
+                          title: result['title'],
+                          body: result['description'],
+                          alarmTime: alarmTime,
+                          payload: result['id'],
+                        );
+                      }
+
+                      addEventController.clearFields();
+                      await showMessageDialog(
+                        context,
+                        'Saved successfully',
+                        title: 'Success',
+                        icon: Icons.check_circle_outline,
+                        iconColor: Colors.green,
+                      );
+                      await context.read<HomeController>().fetchEvents();
+                      if (context.mounted) {
+                        final int id = result['id'];
+                        context.push('/event_details', extra: id);
+                      }
+                    }
+                  } catch (e) {
+                    Navigator.pop(context); // Pop Loader
+                    await showMessageDialog(
+                      context,
+                      'Failed to save event: $e',
+                      title: 'Error',
+                      icon: Icons.error_outline,
+                      iconColor: Colors.red,
+                    );
+                  }
+                },
+                gradient: AppGradientColors.button_gradient,
+                textColor: AppColors.text_color,
+                fontFamily: 'outfit',
+                fontSize: 16.sp,
+                fontWeight: FontWeight.normal,
+                height: 51.h,
+                width: double.infinity,
+              ),
+              SizedBox(height: 20.h),
+            ],
           ),
         ),
       ),
+      bottomNavigationBar: const CustomBottomNavBar(),
     );
+  }
+
+  // Visual framing encapsulation helpers matching iPhone layout standards
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        color: const Color(0xFFFFA500),
+        fontSize: 15.sp,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+
+  Widget _buildFormContainer({required Widget child}) {
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+    decoration: BoxDecoration(
+      color: const Color(0xFF041023), // Deep dark background matching the image
+      borderRadius: BorderRadius.circular(12.r),
+      border: Border.all(
+        color: const Color(0xFFD4AF37).withOpacity(0.3), // Subtle gold border hue
+        width: 1,
+      ),
+    ),
+    child: child,
+  );
+}
+
+  Widget _buildCategoryCardSkeleton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey.shade900),
+      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+    );
+  }
+
+  IconData _getCategoryIcon(String? name) {
+    switch (name?.toLowerCase()) {
+      case 'success stories': return Icons.emoji_events_outlined;
+      case 'daily motivation': return Icons.wb_sunny_outlined;
+      case 'personal growth': return Icons.trending_up;
+      case 'workout': return Icons.fitness_center;
+      default: return Icons.category_outlined;
+    }
   }
 }
 

@@ -518,8 +518,8 @@ class HomeView extends StatelessWidget {
                               key: homeController.quoteShareKey,
                               child: Container(
                                 color: isDarkMode
-                                    ? const Color(0xFF051123).withOpacity(0.2)
-                                    : Colors.transparent,
+                                ? const Color(0xFF051123).withOpacity(0.2)
+                                : Colors.transparent,
                                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                                 child: DefaultTextStyle(
                                   style: const TextStyle(
@@ -528,63 +528,51 @@ class HomeView extends StatelessWidget {
                                   ),
                                   child: PageView.builder(
                                     controller: homeController.pageController,
-                                    itemCount: homeController
-                                        .inspirationalQuotes
-                                        .length,
+                                    itemCount: homeController.inspirationalQuotes.length,
                                     onPageChanged: (index) {
                                       homeController.updateQuoteIndex(index);
                                     },
                                     itemBuilder: (context, index) {
-                                      final quote = homeController
-                                          .inspirationalQuotes[index];
+                                      final quote = homeController.inspirationalQuotes[index];
                                       return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                        mainAxisAlignment:MainAxisAlignment.center,
                                         children: [
                                           Flexible(
                                             child: Text(
                                               quote.quote,
                                               textAlign: TextAlign.center,
-                                              style:
-                                                  GoogleFonts.playfairDisplay(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 22.sp,
-                                                    color: Colors.white,
-                                                    height: 1.3,
-                                                  ),
+                                              style:GoogleFonts.playfairDisplay(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 22.sp,
+                                                color: Colors.white,
+                                                height: 1.3,
+                                              ),
                                             ),
                                           ),
                                           SizedBox(height: 16.h),
                                           // Diamond Flare Design Divider Line
                                           Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                            mainAxisAlignment:MainAxisAlignment.center,
                                             children: [
                                               Container(
                                                 width: 30.w,
                                                 height: 1,
-                                                color: const Color(
-                                                  0xFFFFA500,
-                                                ).withOpacity(0.5),
+                                                // ignore: deprecated_member_use
+                                                color: const Color(0xFFFFA500,).withOpacity(0.5),
                                               ),
                                               Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 8.w,
-                                                ),
+                                                padding: EdgeInsets.symmetric(horizontal: 8.w,),
                                                 child: Icon(
                                                   Icons.star,
-                                                  color: const Color(
-                                                    0xFFFFA500,
-                                                  ),
+                                                  color: const Color(0xFFFFA500,),
                                                   size: 12.sp,
                                                 ),
                                               ),
                                               Container(
                                                 width: 30.w,
                                                 height: 1,
-                                                color: const Color(
-                                                  0xFFFFA500,
-                                                ).withOpacity(0.5),
+                                                // ignore: deprecated_member_use
+                                                color: const Color(0xFFFFA500,).withOpacity(0.5),
                                               ),
                                             ],
                                           ),
@@ -636,9 +624,7 @@ class HomeView extends StatelessWidget {
                                   onTap: () async {
                                     if (homeController.inspirationalQuotes.isNotEmpty) {
                                       final currentQuote = homeController.inspirationalQuotes[homeController.currentQuoteIndex];
-                                      debugPrint(
-                                        'Saving quote with ID: ${currentQuote.id}',
-                                      );
+                                      debugPrint('Saving quote with ID: ${currentQuote.id}',);
                                       final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
                                       if (success) {
                                         await showMessageDialog(
@@ -677,8 +663,6 @@ class HomeView extends StatelessWidget {
                                 width: 1,
                                 color: Colors.white.withOpacity(0.12),
                               ),
-
-                              // Option B: Download/Save to Local Storage Gallery
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
@@ -725,6 +709,7 @@ class HomeView extends StatelessWidget {
                               Container(
                                 height: 24.h,
                                 width: 1,
+                                // ignore: deprecated_member_use
                                 color: Colors.white.withOpacity(0.12),
                               ),
                               Expanded(
@@ -779,7 +764,8 @@ class HomeView extends StatelessWidget {
                     ),
                     child: InkWell(
                       onTap: () {
-                        context.push('/add_event');
+                        //context.push('/add_event');
+                        context.push('/all_events');
                       },
                       borderRadius: BorderRadius.circular(30.r),
                       child: Padding(
@@ -816,7 +802,6 @@ class HomeView extends StatelessWidget {
             Consumer<HomeController>(
               builder: (context, controller, _) {
                 final events = controller.todaysEvents;
-
                   if (events.isEmpty) {
                     return Text(
                       'No review yet',
@@ -824,60 +809,147 @@ class HomeView extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                         fontSize: 14.sp,
                         color: isDarkMode
-                          ? AppColors.fourth_color
-                          : AppColors.heading_color,
+                        ? AppColors.fourth_color
+                        : AppColors.heading_color,
+                      ),
+                    );
+                  }
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                      ? const Color(0xFF051123)
+                      : AppColors.l_schedule_clr1,
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: const Color(0xFFC5A880).withOpacity(0.35),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Column(
+                          children: List.generate(events.length, (index) {
+                            final event = events[index];
+                            final isLastItem = index == events.length - 1;
+                            String calculatedPeriod = "Morning";
+                            try {
+                              final startHourStr =(event.startTime).split(':').first.trim();
+                              final int hourValue = int.parse(startHourStr);
+                              if (hourValue >= 12) {
+                                calculatedPeriod = "Afternoon";
+                              }
+                            } catch (_) {
+                              calculatedPeriod = "Morning";
+                            }
+                            bool showHeaderLabel = false;
+                            if (index == 0) {
+                              showHeaderLabel = true;
+                            } else {
+                              final priorEvent = events[index - 1];
+                              String priorPeriod = "Morning";
+                              try {
+                                final priorHourStr =(priorEvent.startTime).split(':').first.trim();
+                                if (int.parse(priorHourStr) >= 12)
+                                  priorPeriod = "Afternoon";
+                              } catch (_) {}
+                              if (calculatedPeriod != priorPeriod) {
+                                showHeaderLabel = true;
+                              }
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (showHeaderLabel) ...[
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 16.h,top: index > 0 ? 16.h : 0,),
+                                    child: Text(
+                                      calculatedPeriod,
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18.sp,
+                                        color: const Color(0xFFFFA500),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                _buildScheduleEvent(
+                                  context,
+                                  event.id,
+                                  event.title,
+                                  '${event.startTime} - ${event.endTime}',
+                                  event.category ?? '',
+                                  event.location,
+                                  event.description,
+                                  Colors.grey,
+                                  isDarkMode,
+                                  lightModeBackgroundColor:AppColors.l_schedule_clr1,
+                                  isLastItem: isLastItem,
+                                ),
+                              ],
+                            );
+                          }),
                         ),
-                      );
-                    }
-
-                  return Column(
-                    children: events.map((event) {
-                      return Column(
-                        children: [
-                          _buildScheduleEvent(
-                            context,
-                            event.id,
-                            event.title,
-                            '${event.startTime} - ${event.endTime}',
-                            event.category ?? "", // 👈 Pass your dynamic category string from the backend here
-                            event.subtitle ?? "", // 👈 Pass your dynamic subtitle string from the backend here
-                            Colors.grey,
-                            isDarkMode,
-                            lightModeBackgroundColor: AppColors.l_schedule_clr1,
-                          ),
-                          SizedBox(height: 12.h),
-                        ],
-                      );
-                    }).toList(),
+                      ],
+                    ),
                   );
                 },
               ),
-            SizedBox(height: 16.h),
-            Center(
-              child: TextButton(
-                onPressed: (){
-                  context.push('/all_events');
-                }, 
-                child: Text(
-                  'View all events',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14.sp,
-                    color: const Color(0xFFFFB800),
-                  ),
+            SizedBox(height: 30.h,),
+            Container(
+              padding: EdgeInsets.all(24.w),
+              decoration: BoxDecoration(
+                // ignore: deprecated_member_use
+                color: isDarkMode? const Color(0xFFF6AD14).withOpacity(0.2): const Color(0xFFFFFFFF),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: isDarkMode
+                    // ignore: deprecated_member_use
+                    ? const Color(0xFFFFB800).withOpacity(0.3)
+                    : Colors.transparent,
                 ),
-              )
-            ),            
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AI Reflections',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20.sp,
+                        color: isDarkMode
+                        ? AppColors.fourth_color
+                        : AppColors.heading_color,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Today feels centered around connection, gratitude and emotionally meaningful movement.',
+                      textAlign: TextAlign.start, 
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14.sp,
+                        color: isDarkMode
+                        ? AppColors.l_schedule_clr3
+                        : AppColors.new_clr,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             SizedBox(height: 30.h),            
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'What Other Users Are Saying?',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.playfairDisplay(
                     fontWeight: FontWeight.w600,
-                    fontSize: 18.sp,
-                    color: const Color(0xFFFFB800),
+                    fontSize: 20.sp,
+                    color: AppColors.l_schedule_clr3,
                   ),
                 ),
                 GestureDetector(
@@ -886,12 +958,18 @@ class HomeView extends StatelessWidget {
                     width: 32.w,
                     height: 32.h,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFB800),
+                      // ignore: deprecated_member_use
+                      color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        // ignore: deprecated_member_use
+                        color: AppColors.fourth_color.withOpacity(0.2),
+                        width: 0.5,
+                      ),
                     ),
                     child: Icon(
                       Icons.add,
-                      color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
+                      color:Colors.white,
                       size: 20.sp,
                     ),
                   ),
@@ -996,54 +1074,58 @@ class HomeView extends StatelessWidget {
                   );
                 },
               ),
-              SizedBox(height: 30.h),            
+            SizedBox(height: 30.h),            
             // Unlock More Blessings section
             Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20.w),
-              decoration: BoxDecoration(
-                color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  // ignore: deprecated_member_use
-                  color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.transparent,
+                width: double.infinity,
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? const Color(0xFF051123)
+                      : const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? const Color(0xFFC5A880).withOpacity(0.35)
+                        : Colors.transparent,
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Unlock More Blessings',
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18.sp,
-                      color: const Color(0xFFFFB800),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Unlock More Blessings',
+                      style: GoogleFonts.playfairDisplay(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22.sp,
+                        color: const Color(0xFFFFA500,), 
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 12.h),
-                  Icon(
-                    Icons.star,
-                    color: const Color(0xFFFFB800),
-                    size: 32.sp,
-                  ),
-                  SizedBox(height: 16.h),
-                  Container(
-                    width: double.infinity,
-                    height: 48.h,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB8860B),
-                      borderRadius: BorderRadius.circular(12.r),
+                    SizedBox(height: 16.h),
+                    SvgPicture.asset(
+                      'assets/icons/premium_icon.svg',
+                      width: 72.w,
+                      height: 72.h,
                     ),
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: (){
-                          context.push('/subscription');
-                        },
-                        child: Text(
-                        'Go Premium',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16.sp,
-                          color: Colors.white,
+                    SizedBox(height: 20.h),
+                    GestureDetector(
+                      onTap: () {
+                        context.push('/subscription');
+                      },
+                      child: Container(
+                        width: 160.w, 
+                        height: 48.h,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5B301,), 
+                          borderRadius: BorderRadius.circular(14.r,), 
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Go Premium',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -1135,156 +1217,186 @@ class HomeView extends StatelessWidget {
   int id,
   String title,
   String time,
-  String category,      // Dynamically fed from backend payload data
-  String subtitle,      // Dynamically fed from backend payload data
+  String category, 
+  String location,     
+  String subtitle,      
   Color indicatorColor,
   bool isDarkMode, {
   Color? lightModeBackgroundColor,
+  bool isLastItem = false,
 }) {
-  // 🕐 Dynamically evaluate if the event is in the Morning or Afternoon
-  String periodLabel = "Morning";
-  try {
-    final lowercaseTime = time.toLowerCase();
-    if (lowercaseTime.contains("pm") || lowercaseTime.contains("afternoon")) {
-      periodLabel = "Afternoon";
-    } else if (lowercaseTime.contains("am")) {
-      periodLabel = "Morning";
-    } else {
-      final firstHourToken = time.split(':').first.trim();
-      final hour = int.parse(firstHourToken);
-      if (hour >= 12) periodLabel = "Afternoon";
-    }
-  } catch (_) {
-    periodLabel = "Afternoon"; // Graceful fallback
-  }
-
-  return GestureDetector(
-    onTap: () {
-      context.push('/event_details', extra: id);
-    },
-    child: Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: isDarkMode 
-            ? const Color(0xFF051123) 
-            : (lightModeBackgroundColor ?? Colors.white),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: const Color(0xFFC5A880).withOpacity(0.35),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 🌤️ Period Header Title Text Label (Morning / Afternoon)
-          Text(
-            periodLabel,
-            style: GoogleFonts.playfairDisplay(
-              fontWeight: FontWeight.bold,
-              fontSize: 18.sp,
-              color: const Color(0xFFFFA500),
-            ),
-          ),
-          SizedBox(height: 12.h),
-
-          // 🖼️ INNER CONTAINER INNER CONTENT WRAPPER FRAME
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF09121F) : Colors.grey.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: const Color(0xFFC5A880).withOpacity(0.2),
-              ),
-              // 👇 PLACE YOUR INNER CONTAINER TEXTURED BACKGROUND ASSET RIGHT HERE 👇
-              image: const DecorationImage(
-                image: AssetImage('assets/images/your_inner_texture.png'), // Swap with your file asset path string
-                fit: BoxFit.cover,
-              ),
-              // 👆 PLACE YOUR INNER CONTAINER TEXTURED BACKGROUND ASSET RIGHT HERE 👆
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Meta Badge Category Line & Time Placement Strip Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Dynamic Tag Label Category Chip Frame
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.15),
-                        ),
-                      ),
-                      child: Text(
-                        category, 
-                        style: GoogleFonts.outfit(
-                          color: const Color(0xFF7A8B9E),
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    // Dynamic Time Stamp Tracking String
-                    Text(
-                      time,
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13.sp,
-                        color: const Color(0xFFFFA500),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-
-                // Core Main Dynamic Event Title Text Header
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.sp,
-                    color: isDarkMode ? Colors.white : Colors.black,
+  return IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Left custom tracker track spine framework matching design target visuals
+        SizedBox(
+          width: 24.w,
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              // Continuous vertical alignment connecting background path pillar line segment
+              if (!isLastItem)
+                Positioned(
+                  top: 6.h,
+                  bottom: 0,
+                  child: Container(
+                    width: 1.5.w,
+                    color: const Color(0xFFC5A880).withOpacity(0.35),
                   ),
                 ),
-                SizedBox(height: 6.h),
-
-                // Secondary Subtitle Segment Location Frame Row Block
-                Row(
+              // Horizontal cross-connecting node offset row segment
+              Positioned(
+                top: 6.h,
+                left: 6.w,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.location_on_rounded, 
-                      color: const Color(0xFFFF4D4D), // Reddish accent custom map point marker pin shade
-                      size: 14.sp,
-                    ),
-                    SizedBox(width: 4.w),
-                    Expanded(
-                      child: Text(
-                        subtitle, 
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14.sp,
-                          color: isDarkMode ? Colors.white70 : Colors.black,
-                        ),
+                    // Outer structural glowing circular core badge node accent
+                    Container(
+                      width: 12.w,
+                      height: 12.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFA500),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFA500).withOpacity(0.4),
+                            blurRadius: 6.r,
+                            spreadRadius: 1.r,
+                          ),
+                        ],
                       ),
+                    ),
+                    // Linking line projecting outward into matching edge of target cell block frame container
+                    Container(
+                      width: 6.w,
+                      height: 1.5.h,
+                      color: const Color(0xFFC5A880).withOpacity(0.35),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        // Right Content Dynamic Textured Panel Card Container Frame
+        Expanded(
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  context.push('/event_details', extra: id);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? const Color(0xFF09121F) : Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: const Color(0xFFC5A880).withOpacity(0.2),
+                    ),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/container_bgm.jpg'), 
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.25),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.15),
+                              ),
+                            ),
+                            child: Text(
+                              category.isEmpty ? 'General' : category,
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xFF7A8B9E),
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            time,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13.sp,
+                              color: const Color(0xFFFFA500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        title,
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.sp,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      if (location.isNotEmpty) ...[
+                        SizedBox(height: 8.h),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_rounded, color: const Color(0xFFFF4D4D), size: 14.sp),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                location,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14.sp,
+                                  color: isDarkMode ? Colors.white70 : Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (subtitle.isNotEmpty) ...[
+                        SizedBox(height: 4.h),
+                        Row(
+                          children: [
+                            Icon(Icons.description_outlined, color: const Color(0xFF7A8B9E), size: 14.sp),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14.sp,
+                                  color: isDarkMode ? Colors.white60 : Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: isLastItem ? 0 : 16.h),
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }

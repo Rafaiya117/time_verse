@@ -45,7 +45,7 @@ void navigateTo(int index, BuildContext context) {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const AddEventModal(),
+      builder: (_) => const AddEventPage(),
     );
   } else {
     showBottomCard = false;

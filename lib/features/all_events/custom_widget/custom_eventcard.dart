@@ -54,17 +54,26 @@ class EventCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment:CrossAxisAlignment.start, 
                         children: [
-                          Text(
-                            title,
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16.sp,
-                              color: isDarkMode
-                                ? AppColors.text_color
-                                : const Color(0xFF353535),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                          Row(
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/tittle_icon.svg',
+                                height: 23.sp,
+                                width: 23.sp,
+                              ),
+                              Text(
+                                title,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16.sp,
+                                  color: isDarkMode
+                                    ? AppColors.text_color
+                                    : const Color(0xFF353535),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
                           ),
                           SizedBox(height: 10.h),
                           Text(

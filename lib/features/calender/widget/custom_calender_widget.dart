@@ -12,7 +12,12 @@ class FancyCalendarView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<CalendarController>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDarkMode ? Colors.orange : const Color(0xFF373F4B);
+    
+    const goldColor = Color(0xFFFFA500); //
+    const whiteColor = Colors.white; //
+
+    // Get today's weekday integer (1 = Monday, ..., 7 = Sunday)
+    final int todayWeekday = DateTime.now().weekday;
 
     return Container(
       decoration: BoxDecoration(
@@ -26,7 +31,6 @@ class FancyCalendarView extends StatelessWidget {
         selectedDayPredicate: (day) => isSameDay(controller.selectedDay, day),
         onDaySelected: controller.onDaySelected,
 
-        // --- This shows dots on days that have events ---
         eventLoader: (day) {
           return controller.events.where((event) {
             final eventDate = DateTime.tryParse(event.createdAt); 
@@ -38,74 +42,99 @@ class FancyCalendarView extends StatelessWidget {
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
-          leftChevronIcon: Icon(Icons.chevron_left, color: textColor, size: 24.sp),
-          rightChevronIcon: Icon(Icons.chevron_right, color: textColor, size: 24.sp),
-          titleTextStyle: GoogleFonts.outfit(
-            color: textColor,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-          ),
-          headerPadding: EdgeInsets.symmetric(vertical: 8.h),
-          titleTextFormatter: (date, locale) {
-            final month = _monthName(date.month);
-            final year = '${date.year}';
-            return '$month\n$year';
+          leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFFF5B301), size: 28.sp), //
+          rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFFF5B301), size: 28.sp), //
+          headerPadding: EdgeInsets.symmetric(vertical: 12.h),
+          titleTextStyle: const TextStyle(height: 0), 
+          titleTextFormatter: (date, locale) => '', 
+        ),
+
+        // --- CUSTOM BUILDERS (HEADER & WEEKDAYS) ---
+        calendarBuilders: CalendarBuilders(
+          headerTitleBuilder: (context, date) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _monthName(date.month),
+                  style: GoogleFonts.outfit(
+                    color: Color(0xFFF5B301), //
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w500, //
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  '${date.year}',
+                  style: GoogleFonts.outfit(
+                    color: Color(0xFFF5B301), //
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            );
+          },
+          
+          // 💡 Fix: Dynamically styles today's weekday name as golden, others as white
+          dowBuilder: (context, day) {
+            final text = _weekdayName(day.weekday);
+            final isTodayWeekday = day.weekday == todayWeekday;
+
+            return Center(
+              child: Text(
+                text,
+                style: GoogleFonts.outfit(
+                  color: isTodayWeekday ? goldColor : whiteColor, // Golden for today, white for others
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
           },
         ),
 
-        // --- DAYS OF WEEK STYLE ---
-        daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle: GoogleFonts.outfit(
-            color: textColor.withOpacity(0.7),
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w500,
-          ),
-          weekendStyle: GoogleFonts.outfit(
-            color: textColor.withOpacity(0.7),
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        // --- CALENDAR STYLE ---
+        // --- CALENDAR GRID NUMBERS STYLE ---
         calendarStyle: CalendarStyle(
           isTodayHighlighted: true,
-          markerDecoration: BoxDecoration(
-            color: isDarkMode ? Colors.orange : const Color(0xFF373F4B),
-            shape: BoxShape.circle,
-          ),
-          todayDecoration: BoxDecoration(
-            color: isDarkMode ? Colors.orange.shade600 : const Color(0xFF373F4B),
+          markerDecoration: const BoxDecoration(
+            color: goldColor,
             shape: BoxShape.circle,
           ),
           selectedDecoration: BoxDecoration(
-            color: isDarkMode ? Colors.orange : const Color(0xFF373F4B),
-            shape: BoxShape.circle,
+            color: goldColor, //
+            borderRadius: BorderRadius.circular(12.r), //
           ),
           selectedTextStyle: GoogleFonts.outfit(
-            color: isDarkMode ? Colors.black : Colors.white,
+            color: Colors.black, //
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
+          todayDecoration: BoxDecoration(
+            color: goldColor.withOpacity(0.3), 
+            borderRadius: BorderRadius.circular(12.r),
+          ),
           todayTextStyle: GoogleFonts.outfit(
-            color: Colors.white,
+            color: whiteColor,
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
           defaultTextStyle: GoogleFonts.outfit(
-            color: textColor,
+            color: whiteColor, //
             fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
           ),
           weekendTextStyle: GoogleFonts.outfit(
-            color: textColor,
+            color: whiteColor,
             fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
           ),
           outsideTextStyle: GoogleFonts.outfit(
-            color: textColor.withOpacity(0.2),
+            color: whiteColor.withOpacity(0.25), //
             fontSize: 14.sp,
           ),
           markersAlignment: Alignment.bottomCenter,
-          cellMargin: EdgeInsets.all(6.w),
+          cellMargin: EdgeInsets.all(5.w),
         ),
         calendarFormat: CalendarFormat.month,
       ),
@@ -116,18 +145,14 @@ class FancyCalendarView extends StatelessWidget {
 /// ✅ Helper to return month name
 String _monthName(int month) {
   const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
   return months[month - 1];
+}
+
+/// ✅ Helper to return short weekday name
+String _weekdayName(int weekday) {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; //
+  return days[weekday - 1];
 }

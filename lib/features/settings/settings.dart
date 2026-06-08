@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/components/custom_settings_section.dart';
+import 'package:time_verse/core/components/notification_card.dart';
+import 'package:time_verse/core/components/user_profile_card.dart';
 import 'package:time_verse/features/settings/log_out_modal.dart';
 import 'package:time_verse/features/settings/settings_controller.dart';
 
@@ -13,65 +16,108 @@ class Settings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userSession = UserSession();
+
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
-        child: Column(
-          children: [
-            CustomHeaderBar(
-              title: 'Settings',
-              leftSpacing: 100.w,
-              rightSpacing: 79.w,
-            ),
-            SizedBox(height: 20.h),
-            SettingsSection(
-              title: 'Account',
-              items: [
-                SettingsItem(
-                  label: 'Profile',
-                  onTap: () => context.push('/profile'),
+      //backgroundColor: isDarkMode ? const Color(0xFF060E1E) : const Color(0xFFF9FAFB),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomHeaderBar(
+                  title: 'Settings',
+                  leftSpacing: 100.w,
+                  rightSpacing: 79.w,
                 ),
-                SettingsItem(
-                  label: 'Change Password',
-                  onTap: () => context.push('/change_password'),
+                SizedBox(height: 24.h),
+
+                UserProfileCard(
+                  imageUrl: userSession.profileImageUrl ?? '',
+                  userName: userSession.username ?? '',
+                  isPremium: false,
+                  subtitle: 'Manage your account and preferences',
+                  onTap: () {
+                    context.push('/profile');
+                  },
+                ),
+                SizedBox(height: 24.h),
+                // 2. Alert Notification Action Card Component
+                TappableNotificationCard(
+                  title: 'Notifications',
+                  subtitle: 'Manage alerts and reminders',
+                  badgeCount: 1, // Dynamically input your real backend unread count here
+                  onTap: () => context.push('/notifications_settings'),
+                ),
+                SizedBox(height: 24.h),
+                // Section 1: Security (Profile & Change Password)
+                SettingsSection(
+                  title: 'Security',
+                  items: [
+                    SettingsItem(
+                      label: 'Change Password',
+                      subtitle:'Update your security password', 
+                      iconPath: 'assets/icons/lock.svg',
+                      onTap: () => context.push('/change_password'),
+                    ),
+                  ],
+                ),
+                // Section 2: Subscription
+                SettingsSection(
+                  title: 'Subscription',
+                  items: [
+                    SettingsItem(
+                      label: 'Premium Plan',
+                      subtitle: 'Unlimited AI quotes • Priority support',
+                      statusText: 'Active until June 20, 2026',
+                      iconPath: 'assets/icons/subscription.svg',
+                      onTap: () => context.push('/subscription'),
+                    ),
+                  ],
+                ),
+                // Section 3: Support & Legal
+                SettingsSection(
+                  title: 'Support & legal',
+                  items: [
+                    SettingsItem(
+                      label: 'Privacy Policy',
+                      iconPath: 'assets/icons/shield_1.svg',
+                      onTap: () => context.push('/privacy_policy'),
+                    ),
+                    SettingsItem(
+                      label: 'Terms & Conditions',
+                      iconPath: 'assets/icons/shield_1.svg',
+                      onTap: () => context.push('/terms_and_condition'),
+                    ),
+                  ],
+                ),
+
+                // Section 4: Danger Zone
+                SettingsSection(
+                  title: 'Danger Zone',
+                  items: [
+                    SettingsItem(
+                      label: 'Delete Account',
+                      iconPath: 'assets/icons/trash.svg',
+                      onTap: () => context.push('/delete_account'),
+                    ),
+                    SettingsItem(
+                      label: 'Logout',
+                      iconPath: 'assets/icons/logout.svg',
+                      onTap: () => showLogoutDialog(context),
+                    ),
+                  ],
                 ),
               ],
             ),
-            SettingsSection(
-              title: 'Support & Legal',
-              items: [
-                SettingsItem(
-                  label: 'Privacy Policy',
-                  onTap: () => context.push('/privacy_policy'),
-                ),
-                SettingsItem(
-                  label: 'Terms & Conditions',
-                  onTap: () => context.push('/terms_and_condition'),
-                ),
-              ],
-            ),
-            SettingsSection(
-              title: 'Account Actions',
-              items: [
-                SettingsItem(
-                  label: 'Subscription',
-                  onTap: () => context.push('/subscription'),
-                ),
-                SettingsItem(
-                  label: 'Delete Account',
-                  onTap: () => context.push('/delete_account'),
-                ),
-                SettingsItem(
-                  label: 'Logout',
-                  onTap: () => showLogoutDialog(context),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
       bottomNavigationBar: Consumer<SettingsController>(
-        builder: (context, controller, _) => CustomBottomNavBar(),
+        builder: (context, controller, _) => const CustomBottomNavBar(),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
@@ -158,22 +159,33 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return SafeArea(
-      top: false, // ✅ only protect bottom area
-      child: Consumer<BottomNavController>(
-        builder: (context, controller, _) {
-          final selectedIndex = controller.selectedIndex;
+    // Separate the standard 4 background items from the floating button layer
+    final List<NavItem> standardItems = [
+      navItems[0], // Home
+      navItems[1], // Calendar
+      navItems[3], // Saved
+      navItems[4], // Settings
+    ];
 
-          return Stack(
-            clipBehavior: Clip.none,
+    final addItem = navItems.firstWhere((item) => item.label == 'Add');
+
+    return Consumer<BottomNavController>(
+      builder: (context, controller, _) {
+        final selectedIndex = controller.selectedIndex;
+
+        return SizedBox(
+          height: 100.h, 
+          child: Stack(
+            clipBehavior: Clip.none, 
+            alignment: Alignment.bottomCenter,
             children: [
               Container(
-                height: 71.h,
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                height: 64.h,
+                padding: EdgeInsets.symmetric(vertical: 8.h),
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: isDark ? AppColors.text_color: AppColors.heading_color,
+                      color: isDark ? AppColors.text_color : AppColors.heading_color,
                       width: 0.4,
                     ),
                   ),
@@ -187,85 +199,101 @@ class CustomBottomNavBar extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(navItems.length, (index) {
-                    final item = navItems[index];
-                    final isSelected = index == selectedIndex;
-                    final isAddIcon = item.label == 'Add';
+                  children: List.generate(standardItems.length, (index) {
+                    final item = standardItems[index];
+                    final originalIndex = navItems.indexOf(item);
+                    final isSelected = originalIndex == selectedIndex;
 
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        debugPrint('Tapped index: $index (${item.label})');
-                        controller.navigateTo(index, context);
-                      },
-                      child: isAddIcon
-                      ? SizedBox(
-                      width: 60.w,
-                      height: 100.h,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        alignment: Alignment.center,
-                        children: [
-                          // ✅ Invisible full-size tap area
-                          Positioned.fill(
-                            child: Container(color: Colors.transparent),
-                          ),
-                          Positioned(
-                            top: -30.h,
-                            child: SvgPicture.asset(
+                    return Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          debugPrint('Tapped index: $originalIndex (${item.label})');
+                          controller.navigateTo(originalIndex, context);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset(
                               item.iconPath,
-                              width: 50.w,
-                              height: 70.h,
+                              width: 24.w,
+                              height: 24.h,
+                              colorFilter: ColorFilter.mode(
+                                isSelected ? AppColors.fourth_color : AppColors.text_color,
+                                BlendMode.srcIn,
+                              ),
                             ),
-                          ),
-                          Positioned(
-                            bottom: 8,
-                            child: Text(
+                            SizedBox(height: 4.h),
+                            Text(
                               item.label,
                               style: GoogleFonts.inter(
                                 fontSize: 10.2.sp,
                                 fontWeight: FontWeight.normal,
-                                color: isSelected
-                                ? AppColors.fourth_color
-                                : AppColors.text_color,
-                                ),
+                                color: isSelected ? AppColors.fourth_color : AppColors.text_color,
                               ),
                             ),
                           ],
                         ),
-                      )
-                      : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            item.iconPath,
-                            width: 24.w,
-                            height: 24.h,
-                            colorFilter: ColorFilter.mode(
-                              isSelected? AppColors.fourth_color : AppColors.text_color,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            item.label,
-                            style: GoogleFonts.inter(
-                              fontSize: 10.2.sp,
-                              fontWeight: FontWeight.normal,
-                              color: isSelected? AppColors.fourth_color: AppColors.text_color,
-                            ),
-                          ),
-                        ],
                       ),
                     );
                   }),
                 ),
               ),
+              Positioned(
+                bottom: 65.h, 
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    final int addIndex = navItems.indexOf(addItem);
+                    debugPrint('SUCCESS: Tapped floating action index: $addIndex (Add Page)');
+                    
+                    // Update index selection state inside your controller layout manager
+                    controller.navigateTo(addIndex, context);
+                    
+                    // Use go to clear underlying route stacks and prevent backward overlay transparency issues
+                    context.go(addItem.route);
+                  },
+                  child: Container(
+                    width: 58.w,
+                    height: 58.h,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFA500), 
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4), 
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 32.w,
+                        height: 32.h,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white, 
+                            width: 2.w,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
-

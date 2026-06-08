@@ -42,8 +42,8 @@ class CustomHeaderBar extends StatelessWidget {
         SizedBox(width: leftSpacing),
         Text(
           title,
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.w500,
+          style: GoogleFonts.playfairDisplay(
+            fontWeight: FontWeight.bold,
             fontSize: 20.sp,
             color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
           ),
