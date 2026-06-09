@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048" width="2048" height="2048">
+  <defs>
+    <linearGradient id="gold" x1="25%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FFF2A6"/>
+      <stop offset="28%" stop-color="#F6C343"/>
+      <stop offset="62%" stop-color="#D69A13"/>
+      <stop offset="100%" stop-color="#8A5B00"/>
+    </linearGradient>
+    <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE484"/>
+      <stop offset="100%" stop-color="#B97900"/>
+    </linearGradient>
+    <style>
+      .letter { fill: url(#gold); stroke:#f7c948; stroke-width:8; stroke-linejoin:round; }
+      .vine { fill:none; stroke:url(#goldStroke); stroke-width:12; stroke-linecap:round; stroke-linejoin:round; }
+      .thin { stroke-width:7; }
+      .leaf { fill:url(#gold); stroke:#f7c948; stroke-width:5; }
+    </style>
+  </defs>
+  <path id="letter-N" class="letter" d="M 484.00 1543.51 L 484.00 1472.10 L 619.49 1472.10 L 619.49 609.13 L 484.00 609.13 L 484.00 536.86 L 742.03 536.86 L 1345.45 1331.22 L 1345.45 609.13 L 1210.62 609.13 L 1210.62 536.86 L 1564.00 536.86 L 1564.00 609.13 L 1428.51 609.13 L 1428.51 1563.14 L 1346.96 1563.14 L 702.33 714.85 L 702.33 1472.10 L 837.82 1472.10 L 837.82 1543.51 L 484.00 1543.51 Z"/>
+  <g id="vine-N">
+<path class="vine" d="M 480 1530 C 430 1340, 510 1150, 650 1030"/>
+<path class="vine thin" d="M 500 1410 C 570 1340, 645 1330, 685 1245"/>
+<path class="vine" d="M 460 1490 C 380 1450, 380 1370, 450 1360 C 515 1350, 505 1425, 455 1410"/>
+<ellipse class="leaf" cx="540" cy="1240" rx="42" ry="18" transform="rotate(-30 540 1240)"/>
+<ellipse class="leaf" cx="630" cy="1105" rx="42" ry="18" transform="rotate(25 630 1105)"/>
+<ellipse class="leaf" cx="500" cy="1390" rx="42" ry="18" transform="rotate(35 500 1390)"/>
+</g>
+</svg>

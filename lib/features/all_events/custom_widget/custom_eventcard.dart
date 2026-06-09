@@ -37,7 +37,7 @@ class EventCard extends StatelessWidget {
         width: double.infinity,
         height: 200.h,
         decoration: BoxDecoration(
-          color: isDarkMode ? AppColors.containers_bgd : Color(0xFFF4F6F5),
+          color: isDarkMode ? AppColors.containers_bgd : Colors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: AppColors.third_color),
         ),
@@ -82,8 +82,8 @@ class EventCard extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                               fontSize: 12.sp,
                               color: isDarkMode
-                                ? AppColors.text_color
-                                : const Color(0xFF353535),
+                              ? AppColors.text_color
+                              : const Color(0xFF353535),
                             ),
                             overflow: TextOverflow.ellipsis, 
                             maxLines: 1,

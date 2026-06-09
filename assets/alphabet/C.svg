@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048" width="2048" height="2048">
+  <defs>
+    <linearGradient id="gold" x1="25%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FFF2A6"/>
+      <stop offset="28%" stop-color="#F6C343"/>
+      <stop offset="62%" stop-color="#D69A13"/>
+      <stop offset="100%" stop-color="#8A5B00"/>
+    </linearGradient>
+    <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE484"/>
+      <stop offset="100%" stop-color="#B97900"/>
+    </linearGradient>
+    <style>
+      .letter { fill: url(#gold); stroke:#f7c948; stroke-width:8; stroke-linejoin:round; }
+      .vine { fill:none; stroke:url(#goldStroke); stroke-width:12; stroke-linecap:round; stroke-linejoin:round; }
+      .thin { stroke-width:7; }
+      .leaf { fill:url(#gold); stroke:#f7c948; stroke-width:5; }
+    </style>
+  </defs>
+  <path id="letter-C" class="letter" d="M 1487.37 1294.40 Q 1441.19 1440.08 1332.76 1515.04 Q 1224.34 1590.00 1058.58 1590.00 Q 956.63 1590.00 869.40 1555.20 Q 782.39 1520.17 714.79 1452.57 Q 636.71 1374.49 598.56 1275.21 Q 560.63 1175.71 560.63 1050.33 Q 560.63 807.61 700.74 658.80 Q 841.06 510.00 1070.40 510.00 Q 1155.40 510.00 1251.56 532.31 Q 1347.93 554.62 1458.59 599.91 L 1458.59 839.73 L 1379.84 839.73 Q 1354.18 708.78 1276.32 646.76 Q 1198.68 584.51 1058.58 584.51 Q 891.93 584.51 806.04 702.75 Q 720.37 820.99 720.37 1050.33 Q 720.37 1279.01 806.04 1397.25 Q 891.93 1515.26 1058.58 1515.26 Q 1175.03 1515.26 1250.22 1459.94 Q 1325.62 1404.39 1359.09 1294.40 L 1487.37 1294.40 Z"/>
+  <g id="vine-C">
+<path class="vine" d="M 450 1550 C 360 1390, 500 1150, 660 1050"/>
+<path class="vine thin" d="M 515 1430 C 570 1360, 655 1340, 690 1255"/>
+<path class="vine" d="M 460 1480 C 380 1440, 380 1360, 450 1350 C 515 1340, 505 1415, 455 1400"/>
+<ellipse class="leaf" cx="540" cy="1230" rx="42" ry="18" transform="rotate(-30 540 1230)"/>
+<ellipse class="leaf" cx="630" cy="1095" rx="42" ry="18" transform="rotate(25 630 1095)"/>
+<ellipse class="leaf" cx="500" cy="1380" rx="42" ry="18" transform="rotate(35 500 1380)"/>
+</g>
+</svg>

@@ -8,15 +8,13 @@ import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_button.dart';
+import 'package:time_verse/core/components/custom_date_picker.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
-import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
-import 'package:time_verse/features/calender/widget/custom_chip.dart';
-import 'package:time_verse/features/calender/widget/custom_date_picker.dart';
 import 'package:time_verse/features/calender/widget/time_picker_custom_widget.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 
@@ -51,7 +49,7 @@ class AddEventPage extends StatelessWidget {
             Text(
               'Add Event',
               style: GoogleFonts.outfit(
-                color: Colors.white,
+                color: isDarkMode ?Colors.white:Colors.black,
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -87,18 +85,15 @@ class AddEventPage extends StatelessWidget {
               _buildSectionHeader('Basics'),
               SizedBox(height: 8.h),
              _buildFormContainer(
+                context,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Gold Star Icon aligned with the input layout
                     Padding(
                       padding: EdgeInsets.only(top: 2.h, right: 12.w),
                       child: Icon(
-                        Icons
-                            .star_purple500_sharp, // Sharp geometric star icon match
-                        color: const Color(
-                          0xFFFFA500,
-                        ), // Match the prominent orange/gold color
+                        Icons.star_purple500_sharp,
+                        color: const Color(0xFFFFA500,), 
                         size: 22.sp,
                       ),
                     ),
@@ -111,7 +106,7 @@ class AddEventPage extends StatelessWidget {
                           Text(
                             'Event Name',
                             style: GoogleFonts.inter(
-                              color: Colors.white,
+                              color: isDarkMode?Colors.white:Colors.black,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -144,6 +139,7 @@ class AddEventPage extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               _buildFormContainer(
+                context,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -161,8 +157,7 @@ class AddEventPage extends StatelessWidget {
                           Text(
                             'Add A Note',
                             style: GoogleFonts.inter(
-                              color: Colors
-                                  .white, // Pure white matching the image layout
+                              color: isDarkMode?Colors.white: Colors.black, // Pure white matching the image layout
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -177,12 +172,9 @@ class AddEventPage extends StatelessWidget {
                             ),
                             cursorColor: const Color(0xFFFFA500),
                             decoration: InputDecoration(
-                              hintText:
-                                  'What would you like to Remember For This Special Moment?',
+                              hintText:'What would you like to Remember For This Special Moment?',
                               hintStyle: GoogleFonts.inter(
-                                color: Colors
-                                    .grey
-                                    .shade500, // Matching the soft layout gray text
+                                color: Colors.grey.shade500, // Matching the soft layout gray text
                                 fontSize: 13.sp,
                               ),
                               isDense: true,
@@ -203,37 +195,30 @@ class AddEventPage extends StatelessWidget {
               _buildSectionHeader('Schedule'),
               SizedBox(height: 8.h),
               _buildFormContainer(
+                context,
                 child: GestureDetector(
                   onTap: () async {
-                    final DateTime? pickedDate = await showDatePicker(
+                    final DateTime? pickedDate = await showDialog<DateTime>(
                       context: context,
-                      initialDate:
-                          Provider.of<CalendarController>(
-                            context,
-                            listen: false,
-                          ).selectedDay ??
-                          DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
+                      builder: (BuildContext context) => CustomDatePickerDialog(
+                        initialDate:Provider.of<CalendarController>(context,listen: false,).selectedDay ??
+                         DateTime.now(),
+                        isDarkMode: isDarkMode,
+                      ),
                     );
 
                     if (pickedDate != null) {
-                      // Formats the date precisely to "MMMM d, yyyy" (e.g., May 4, 2026)
-                      String formattedDate = DateFormat(
-                        'MMMM d, yyyy',
-                      ).format(pickedDate);
+                      String formattedDate = DateFormat('MMMM d, yyyy').format(pickedDate);
                       addEventController.dateController.text = formattedDate;
                     }
                   },
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Left Calendar Icon
                       Padding(
                         padding: EdgeInsets.only(right: 12.w),
                         child: Text('📅', style: TextStyle(fontSize: 20.sp)),
                       ),
-                      // Central labels block
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +227,7 @@ class AddEventPage extends StatelessWidget {
                             Text(
                               'Date',
                               style: GoogleFonts.inter(
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white : Colors.black,
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -253,13 +238,9 @@ class AddEventPage extends StatelessWidget {
                                   addEventController.dateController,
                               builder: (context, value, child) {
                                 return Text(
-                                  value.text.isEmpty
-                                      ? "Select Date"
-                                      : value.text,
+                                  value.text.isEmpty? "Select Date": value.text,
                                   style: GoogleFonts.inter(
-                                    color: Colors
-                                        .grey
-                                        .shade500, // Matches the soft color layer in the image
+                                    color: isDarkMode ? Colors.white : Colors.black,
                                     fontSize: 13.sp,
                                   ),
                                 );
@@ -268,7 +249,6 @@ class AddEventPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Orange-tinted dropdown indicator arrow
                       Icon(
                         Icons.keyboard_arrow_down_rounded,
                         color: const Color(0xFFFFA500),
@@ -283,12 +263,12 @@ class AddEventPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _buildFormContainer(
+                      context,
                       child: Consumer<TimePickerController>(
                         builder: (context, controller, _) => TimePickerField(
                           fieldKey: 'start',
                           label: 'Start Time',
-                          textController: addEventController
-                              .startTimeController, // optional
+                          textController: addEventController.startTimeController, // optional
                         ),
                       ),
                     ),
@@ -296,12 +276,12 @@ class AddEventPage extends StatelessWidget {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: _buildFormContainer(
+                      context,
                       child: Consumer<TimePickerController>(
                         builder: (context, controller, _) => TimePickerField(
                           fieldKey: 'end',
                           label: 'End Time',
-                          textController:
-                              addEventController.endTimeController, // optional
+                          textController: addEventController.endTimeController, // optional
                         ),
                       ),
                     ),
@@ -315,6 +295,7 @@ class AddEventPage extends StatelessWidget {
               _buildSectionHeader('Details'),
               SizedBox(height: 8.h),
               _buildFormContainer(
+                context,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -332,7 +313,7 @@ class AddEventPage extends StatelessWidget {
                           Text(
                             'Where is this happening? (optional)',
                             style: GoogleFonts.inter(
-                              color: Colors.white,
+                              color: isDarkMode?Colors.white: Colors.black,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -365,13 +346,13 @@ class AddEventPage extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               _buildFormContainer(
+                context,
                 child: Consumer<TimePickerController>(
                   builder: (context, controller, _) {
                     // Get dynamic saved alarm text value or fallback to default placeholder hint string
                     final alarmTime = controller.getTime('alarm');
                     final formattedAlarm = alarmTime != null
-                        ? controller.formatTime(alarmTime)
-                        : null;
+                    ? controller.formatTime(alarmTime): null;
 
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque, 
@@ -395,7 +376,7 @@ class AddEventPage extends StatelessWidget {
                                 Text(
                                   'Remind me',
                                   style: GoogleFonts.inter(
-                                    color: Colors.white,
+                                    color: isDarkMode?Colors.white: Colors.black,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -429,7 +410,7 @@ class AddEventPage extends StatelessWidget {
                     return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
@@ -442,7 +423,7 @@ class AddEventPage extends StatelessWidget {
                   return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
@@ -457,24 +438,31 @@ class AddEventPage extends StatelessWidget {
                         onTap: () => controller.selectCategory(category.name),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isSelected ? goldColor.withOpacity(0.15) : inputBgColor,
+                            // If selected, overlays opacity tint; otherwise switches background depending on isDarkMode
+                            // ignore: deprecated_member_use
+                            color: isSelected ? goldColor.withOpacity(0.15): (isDarkMode ? inputBgColor : Colors.white),
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
-                              color: isSelected ? goldColor : Colors.grey.shade800,
+                              color: isSelected? goldColor : Colors.grey.shade800,
                               width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(_getCategoryIcon(category.name), color: goldColor, size: 24.sp),
+                              Icon(
+                                _getCategoryIcon(category.name),
+                                color: goldColor,
+                                size: 24.sp,
+                              ),
                               SizedBox(height: 6.h),
                               Text(
                                 category.name,
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 14.sp,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                style: GoogleFonts.inter(
+                                  color: isDarkMode ? Colors.white: Colors.black, // Adjusts text contrast dynamically for screen visibility
+                                  fontSize: 16.sp,
+                                  fontWeight: isSelected
+                                  ? FontWeight.w700 : FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -530,10 +518,10 @@ class AddEventPage extends StatelessWidget {
                       startTime: start,
                       endTime: end,
                       location: addEventController.locationController.text.trim().isEmpty 
-                          ? null : addEventController.locationController.text.trim(),
+                      ? null : addEventController.locationController.text.trim(),
                       alarmTime: alarm,
                       categoryName: addEventController.selectedCategory?.isEmpty == true 
-                          ? null : addEventController.selectedCategory,
+                      ? null : addEventController.selectedCategory,
                       note: addEventController.noteController.text.trim(),
                     );
                     
@@ -614,12 +602,13 @@ class AddEventPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFormContainer({required Widget child}) {
+  Widget _buildFormContainer(BuildContext context,{required Widget child}) {
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
   return Container(
     width: double.infinity,
     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
     decoration: BoxDecoration(
-      color: const Color(0xFF041023), // Deep dark background matching the image
+      color: isDarkMode?const Color(0xFF041023):Colors.white, // Deep dark background matching the image
       borderRadius: BorderRadius.circular(12.r),
       border: Border.all(
         color: const Color(0xFFD4AF37).withOpacity(0.3), // Subtle gold border hue

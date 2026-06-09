@@ -50,7 +50,7 @@ class Settings extends StatelessWidget {
                   title: 'Notifications',
                   subtitle: 'Manage alerts and reminders',
                   badgeCount: 1, // Dynamically input your real backend unread count here
-                  onTap: () => context.push('/notifications_settings'),
+                  onTap: () => context.push('/notification'),
                 ),
                 SizedBox(height: 24.h),
                 // Section 1: Security (Profile & Change Password)
@@ -73,7 +73,7 @@ class Settings extends StatelessWidget {
                       label: 'Premium Plan',
                       subtitle: 'Unlimited AI quotes • Priority support',
                       statusText: 'Active until June 20, 2026',
-                      iconPath: 'assets/icons/subscription.svg',
+                      iconPath: 'assets/icons/dollar_icon.svg',
                       onTap: () => context.push('/subscription'),
                     ),
                   ],
@@ -98,6 +98,7 @@ class Settings extends StatelessWidget {
                 // Section 4: Danger Zone
                 SettingsSection(
                   title: 'Danger Zone',
+                  isDangerZone:true, // Tells the widget to apply the red danger styling from the design
                   items: [
                     SettingsItem(
                       label: 'Delete Account',

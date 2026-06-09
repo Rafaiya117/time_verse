@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 
 class FancyCalendarView extends StatelessWidget {
@@ -13,10 +14,9 @@ class FancyCalendarView extends StatelessWidget {
     final controller = Provider.of<CalendarController>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
-    const goldColor = Color(0xFFFFA500); //
-    const whiteColor = Colors.white; //
+    const goldColor = Color(0xFFFFA500); 
+    const whiteColor = Colors.white; 
 
-    // Get today's weekday integer (1 = Monday, ..., 7 = Sunday)
     final int todayWeekday = DateTime.now().weekday;
 
     return Container(
@@ -42,8 +42,8 @@ class FancyCalendarView extends StatelessWidget {
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
-          leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFFF5B301), size: 28.sp), //
-          rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFFF5B301), size: 28.sp), //
+          leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFFF5B301), size: 28.sp), 
+          rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFFF5B301), size: 28.sp), 
           headerPadding: EdgeInsets.symmetric(vertical: 12.h),
           titleTextStyle: const TextStyle(height: 0), 
           titleTextFormatter: (date, locale) => '', 
@@ -58,16 +58,16 @@ class FancyCalendarView extends StatelessWidget {
                 Text(
                   _monthName(date.month),
                   style: GoogleFonts.outfit(
-                    color: Color(0xFFF5B301), //
+                    color: Color(0xFFF5B301), 
                     fontSize: 24.sp,
-                    fontWeight: FontWeight.w500, //
+                    fontWeight: FontWeight.w500, 
                   ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   '${date.year}',
                   style: GoogleFonts.outfit(
-                    color: Color(0xFFF5B301), //
+                    color: Color(0xFFF5B301), 
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                   ),
@@ -76,7 +76,6 @@ class FancyCalendarView extends StatelessWidget {
             );
           },
           
-          // 💡 Fix: Dynamically styles today's weekday name as golden, others as white
           dowBuilder: (context, day) {
             final text = _weekdayName(day.weekday);
             final isTodayWeekday = day.weekday == todayWeekday;
@@ -85,7 +84,7 @@ class FancyCalendarView extends StatelessWidget {
               child: Text(
                 text,
                 style: GoogleFonts.outfit(
-                  color: isTodayWeekday ? goldColor : whiteColor, // Golden for today, white for others
+                  color: isTodayWeekday ? goldColor : (isDarkMode ? whiteColor : const Color(0xFF7B7B7B)), 
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -102,16 +101,18 @@ class FancyCalendarView extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           selectedDecoration: BoxDecoration(
-            color: goldColor, //
-            borderRadius: BorderRadius.circular(12.r), //
+            color: goldColor, 
+            shape: BoxShape.rectangle, // Explicitly rectangular
+            borderRadius: BorderRadius.circular(12.r), 
           ),
           selectedTextStyle: GoogleFonts.outfit(
-            color: Colors.black, //
+            color: Colors.black, 
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
           todayDecoration: BoxDecoration(
             color: goldColor.withOpacity(0.3), 
+            shape: BoxShape.rectangle, // Explicitly rectangular
             borderRadius: BorderRadius.circular(12.r),
           ),
           todayTextStyle: GoogleFonts.outfit(
@@ -119,30 +120,64 @@ class FancyCalendarView extends StatelessWidget {
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
+          
+          // 💡 Fix: Explicitly turned unselected shapes into rectangles to prevent shape conflicts during selections
+          defaultDecoration: const BoxDecoration(
+            shape: BoxShape.rectangle,
+          ),
+          weekendDecoration: const BoxDecoration(
+            shape: BoxShape.rectangle,
+          ),
+          outsideDecoration: const BoxDecoration(
+            shape: BoxShape.rectangle,
+          ),
+          
           defaultTextStyle: GoogleFonts.outfit(
-            color: whiteColor, //
+            color: isDarkMode ? whiteColor : AppColors.heading_color, 
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
+            shadows: [
+              if (!isDarkMode)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 4.0,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
           weekendTextStyle: GoogleFonts.outfit(
-            color: whiteColor,
+            color: isDarkMode ? whiteColor : AppColors.heading_color,
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
+            shadows: [
+              if (!isDarkMode)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 4.0,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
           outsideTextStyle: GoogleFonts.outfit(
-            color: whiteColor.withOpacity(0.25), //
+            color: isDarkMode ? whiteColor.withOpacity(0.25) : AppColors.heading_color.withOpacity(0.2), 
             fontSize: 14.sp,
+            shadows: [
+              if (!isDarkMode)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 4.0,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
           markersAlignment: Alignment.bottomCenter,
           cellMargin: EdgeInsets.all(5.w),
         ),
-        calendarFormat: CalendarFormat.month,
       ),
     );
   }
 }
 
-/// ✅ Helper to return month name
 String _monthName(int month) {
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -151,8 +186,7 @@ String _monthName(int month) {
   return months[month - 1];
 }
 
-/// ✅ Helper to return short weekday name
 String _weekdayName(int weekday) {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; //
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; 
   return days[weekday - 1];
 }

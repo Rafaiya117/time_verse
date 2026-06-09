@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048" width="2048" height="2048">
+  <defs>
+    <linearGradient id="gold" x1="25%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FFF2A6"/>
+      <stop offset="28%" stop-color="#F6C343"/>
+      <stop offset="62%" stop-color="#D69A13"/>
+      <stop offset="100%" stop-color="#8A5B00"/>
+    </linearGradient>
+    <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE484"/>
+      <stop offset="100%" stop-color="#B97900"/>
+    </linearGradient>
+    <style>
+      .letter { fill: url(#gold); stroke:#f7c948; stroke-width:8; stroke-linejoin:round; }
+      .vine { fill:none; stroke:url(#goldStroke); stroke-width:12; stroke-linecap:round; stroke-linejoin:round; }
+      .thin { stroke-width:7; }
+      .leaf { fill:url(#gold); stroke:#f7c948; stroke-width:5; }
+    </style>
+  </defs>
+  <path id="letter-Q" class="letter" d="M 1038.03 1415.33 Q 837.55 1415.33 718.79 1292.28 Q 600.23 1169.22 600.23 962.95 Q 600.23 857.10 632.02 773.88 Q 664.00 690.65 729.45 625.20 Q 786.68 567.79 860.36 538.99 Q 934.05 510.00 1024.00 510.00 Q 1214.01 510.00 1330.89 634.55 Q 1447.77 758.91 1447.77 962.95 Q 1447.77 1135.93 1360.06 1253.75 Q 1272.35 1371.38 1118.07 1405.42 Q 1149.67 1444.50 1194.93 1463.21 Q 1240.19 1481.91 1303.96 1481.91 L 1322.10 1481.91 L 1322.10 1590.00 Q 1223.36 1585.32 1152.85 1541.75 Q 1082.54 1498.18 1038.03 1415.33 Z M 1024.00 1352.68 Q 1167.25 1352.68 1240.19 1254.31 Q 1313.31 1155.76 1313.31 962.95 Q 1313.31 769.39 1240.19 671.02 Q 1167.25 572.46 1024.00 572.46 Q 880.19 572.46 807.06 671.02 Q 734.13 769.39 734.13 962.95 Q 734.13 1155.76 807.06 1254.31 Q 880.19 1352.68 1024.00 1352.68 Z"/>
+  <g id="vine-Q">
+<path class="vine" d="M 470 1600 C 380 1440, 520 1200, 680 1100"/>
+<path class="vine thin" d="M 535 1480 C 590 1410, 675 1390, 710 1305"/>
+<path class="vine" d="M 480 1530 C 400 1490, 400 1410, 470 1400 C 535 1390, 525 1465, 475 1450"/>
+<ellipse class="leaf" cx="560" cy="1280" rx="42" ry="18" transform="rotate(-30 560 1280)"/>
+<ellipse class="leaf" cx="650" cy="1145" rx="42" ry="18" transform="rotate(25 650 1145)"/>
+<ellipse class="leaf" cx="520" cy="1430" rx="42" ry="18" transform="rotate(35 520 1430)"/>
+</g>
+</svg>

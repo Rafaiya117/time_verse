@@ -183,13 +183,14 @@ class CustomBottomNavBar extends StatelessWidget {
                 height: 64.h,
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 decoration: BoxDecoration(
+                  color:isDark? AppColors.containers_bgd : Colors.white,
                   border: Border(
                     top: BorderSide(
                       color: isDark ? AppColors.text_color : AppColors.heading_color,
                       width: 0.4,
                     ),
                   ),
-                  color: isDark ? AppColors.containers_bgd : AppColors.l_bottom_nav,
+                  //color: isDark ? AppColors.containers_bgd : AppColors.l_bottom_nav,
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -219,7 +220,9 @@ class CustomBottomNavBar extends StatelessWidget {
                               width: 24.w,
                               height: 24.h,
                               colorFilter: ColorFilter.mode(
-                                isSelected ? AppColors.fourth_color : AppColors.text_color,
+                                isSelected? AppColors.fourth_color
+                                : (isDark ? Colors.white : const Color(0xFF636363)
+                                ),
                                 BlendMode.srcIn,
                               ),
                             ),
@@ -229,7 +232,11 @@ class CustomBottomNavBar extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 10.2.sp,
                                 fontWeight: FontWeight.normal,
-                                color: isSelected ? AppColors.fourth_color : AppColors.text_color,
+                                color: isSelected
+                                  ? AppColors.fourth_color
+                                  : (isDark ? Colors.white
+                                  : const Color(0xFF636363)
+                                ), // Retains fourth_color if selected; otherwise checks dark mode
                               ),
                             ),
                           ],

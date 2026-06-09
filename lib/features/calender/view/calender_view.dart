@@ -53,7 +53,7 @@ class CalenderView extends StatelessWidget {
                     style: GoogleFonts.playfairDisplay(
                       fontWeight: FontWeight.w500,
                       fontSize: 20.sp,
-                      color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
+                      color: AppColors.fourth_color,
                     ),
                   ),
                   // "View all" action item sitting nicely on the right side
@@ -104,8 +104,8 @@ class CalenderView extends StatelessWidget {
                   }
                   
                   return ListView.builder(
-                    shrinkWrap: true, // Prevents bounded layout expansion exceptions inside SingleChildScrollView
-                    physics: const NeverScrollableScrollPhysics(), // Passes outer touch gestures directly up 
+                    shrinkWrap: true, 
+                    physics: const NeverScrollableScrollPhysics(),  
                     itemCount: controller.events.length,
                     itemBuilder: (context, index) {
                       final EventModel event = controller.events[index];

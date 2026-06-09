@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
+import 'package:time_verse/core/components/initial_name_widget.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
@@ -165,11 +166,16 @@ class HomeView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                  Image.asset(
-                    logoPath,
-                    width:68.w ,
-                    height:54.h ,
-                    fit: BoxFit.contain,
+                  // Image.asset(
+                  //   logoPath,
+                  //   width:68.w ,
+                  //   height:54.h ,
+                  //   fit: BoxFit.contain,
+                  // ),
+                  CustomUserInitialsAvatar(
+                    userFirstName:UserSession().formattedUsername, // Pass your dynamic username variable here
+                    //isDarkMode: isDarkMode,
+                    size: 56.w,
                   ),
                   Row(
                   children: [
@@ -250,9 +256,7 @@ class HomeView extends StatelessWidget {
                     style: GoogleFonts.playfairDisplay(
                       fontWeight: FontWeight.w700,
                       fontSize: 34.sp,
-                      color: isDarkMode
-                        ? AppColors.fourth_color
-                        : const Color(0xFF403D3B),
+                      color:  AppColors.fourth_color,
                       ),
                     );
                   },
@@ -279,133 +283,140 @@ class HomeView extends StatelessWidget {
             // ),
             SizedBox(height: 30.h),
               Column(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    // 1. Floating Header Container Stack with background reference line
-    Stack(
-      alignment: Alignment.center,
-      children: [
-        // The continuous accent line passing strictly behind the center card
-        Container(
-          height: 1.h,
-          width: double.infinity,
-          color: Colors.white.withOpacity(0.12),
-        ),
-        // The floating Date Pill Header
-        Center(
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.w,
-              vertical: 10.h,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFF060B13),
-              borderRadius: BorderRadius.circular(30.r),
-              // Clean brand border frame outline
-              border: Border.all(
-                color: const Color(0xFFC5A880).withOpacity(0.2),
-                width: 1,
-              ),
-              // Ambient glow shadow effect
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFF1A80A).withOpacity(0.08),
-                  blurRadius: 12,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/calender_1.svg',
-                  width: 16.w,
-                  height: 16.h,
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  DateFormat('EEEE, MMMM d').format(DateTime.now()),
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16.sp,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-    SizedBox(height: 25.h),            
-    // 2. Capsule Calendar Row Selection Grid
-    SizedBox(
-      height: 80.h,
-        child: Consumer<HomeController>(
-          builder: (context, controller, _) {
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 7,
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              itemBuilder: (context, index) {
-                final now = DateTime.now();
-                final date = now.add(Duration(days: index - 3));
-                final isSelected = date.day == controller.selectedDate.day && date.month == controller.selectedDate.month && date.year == controller.selectedDate.year;
-                  return GestureDetector(
-                  onTap: () {
-                    controller.selectDate(date, profileController);
-                  },
-                  child: Container(
-                    width: 54.w,
-                    margin: EdgeInsets.symmetric(horizontal: 6.w),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFF1A80A) : const Color(0xFF070F1A),
-                      borderRadius: BorderRadius.circular(24.r),
-                      border: Border.all(
-                        color: !isSelected ? Colors.white : Colors.transparent,width: 0.2.sp,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 1.h,
+                        width: double.infinity,
+                        color: Colors.white.withOpacity(0.12),
                       ),
-                      boxShadow: [
-                        if (!isSelected) ...[
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.3),
-                            blurRadius: 4,
-                            spreadRadius: 0,
+                      // The floating Date Pill Header
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20.w,
+                            vertical: 10.h,
                           ),
-                          // BoxShadow(
-                          //   color: Colors.white.withOpacity(0.35),
-                          //   blurRadius: 12,
-                          //   spreadRadius: 2,
-                          // ),
-                          ] else ...[
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 1),
+                          decoration: BoxDecoration(
+                            color: isDarkMode? Color(0xFF060B13):Colors.white,
+                            borderRadius: BorderRadius.circular(30.r),
+                            // Clean brand border frame outline
+                            border: Border.all(
+                              // ignore: deprecated_member_use
+                              color: AppColors.fourth_color.withOpacity(0.2),
+                              width: 1,
+                            ),
+                            // Ambient glow shadow effect
+                            boxShadow: [
+                              BoxShadow(
+                                // ignore: deprecated_member_use
+                                color: const Color(0xFFF1A80A,).withOpacity(0.08),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                              ),
+                            ],
                           ),
-                        ],
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _getDayName(date.weekday),
-                          style: GoogleFonts.outfit(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
-                            color: isSelected ? const Color(0xFF060B13): const Color(0xFF7A8B9E),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/calender_1.svg',
+                                width: 16.w,
+                                height: 16.h,
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                DateFormat(
+                                  'EEEE, MMMM d',
+                                ).format(DateTime.now()),
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16.sp,
+                                  color: isDarkMode ?Colors.white: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 6.h),
-                          Text(
-                            date.day.toString(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected
-                                ? const Color(0xFF060B13)
-                                : Colors.white,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25.h),
+                  // 2. Capsule Calendar Row Selection Grid
+                  SizedBox(
+                    height: 80.h,
+                    child: Consumer<HomeController>(
+                      builder: (context, controller, _) {
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 7,
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          itemBuilder: (context, index) {
+                            final now = DateTime.now();
+                            final date = now.add(Duration(days: index - 3));
+                            final isSelected =
+                            date.day == controller.selectedDate.day &&
+                            date.month == controller.selectedDate.month &&
+                            date.year == controller.selectedDate.year;
+                            return GestureDetector(
+                              onTap: () {
+                                controller.selectDate(date, profileController);
+                              },
+                              child: Container(
+                                width: 54.w,
+                                margin: EdgeInsets.symmetric(horizontal: 6.w),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                  ? const Color(0xFFF1A80A): (isDarkMode ? const Color(0xFF070F1A): Colors.white),
+                                  borderRadius: BorderRadius.circular(24.r),
+                                  border: Border.all(
+                                    color: !isSelected
+                                    ? (isDarkMode ? Colors.white: Colors.grey.shade300) : Colors.transparent,
+                                    width: 0.2.sp,
+                                  ),
+                                  boxShadow: [
+                                    if (!isSelected) ...[
+                                      BoxShadow(
+                                        color: isDarkMode
+                                        // ignore: deprecated_member_use
+                                        ? Colors.white.withOpacity(0.3)
+                                        // ignore: deprecated_member_use
+                                        : Colors.black.withOpacity(0.05),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ] else ...[
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.4),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _getDayName(date.weekday),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: isSelected ? const Color(0xFF060B13): (isDarkMode? const Color(0xFF7A8B9E): Colors.grey.shade600), // Dynamic unselected day color text
+                                      ),
+                                    ),
+                                    SizedBox(height: 6.h),
+                                    Text(
+                                      date.day.toString(),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                        ? const Color(0xFF060B13)
+                                        : (isDarkMode? Colors.white: Colors.black), // Dynamic unselected date number text
                                       ),
                                     ),
                                   ],
@@ -419,7 +430,7 @@ class HomeView extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 30.h),                        
+              SizedBox(height: 30.h),
               Container(
                 width: 360.w,
                 height: 421.h,
@@ -431,9 +442,9 @@ class HomeView extends StatelessWidget {
                     width: 1,
                   ),
                   // 🖼️ YOUR BACKGROUND IMAGE PLACEMENT:
-                  image: const DecorationImage(
+                  image: DecorationImage(
                     image: AssetImage(
-                      'assets/images/container_bgimg.png',
+                      isDarkMode ?'assets/images/container_bgimg.png':'assets/images/container_bgimg_light.png',
                     ), // Replace with your asset path
                     fit: BoxFit.cover,
                   ),
@@ -457,7 +468,8 @@ class HomeView extends StatelessWidget {
                               vertical: 6.h,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.3),
+                              // ignore: deprecated_member_use
+                              color: isDarkMode ?Colors.black.withOpacity(0.3): Color(0xFFFFF7E5),
                               borderRadius: BorderRadius.circular(20.r),
                               border: Border.all(
                                 color: const Color(0xFFC5A880).withOpacity(0.4),
@@ -518,8 +530,8 @@ class HomeView extends StatelessWidget {
                               key: homeController.quoteShareKey,
                               child: Container(
                                 color: isDarkMode
-                                ? const Color(0xFF051123).withOpacity(0.2)
-                                : Colors.transparent,
+                                    ? const Color(0xFF051123).withOpacity(0.2)
+                                    : Colors.transparent,
                                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                                 child: DefaultTextStyle(
                                   style: const TextStyle(
@@ -544,7 +556,7 @@ class HomeView extends StatelessWidget {
                                               style:GoogleFonts.playfairDisplay(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 22.sp,
-                                                color: Colors.white,
+                                                color: isDarkMode?Colors.white:Colors.black,
                                                 height: 1.3,
                                               ),
                                             ),
@@ -561,10 +573,10 @@ class HomeView extends StatelessWidget {
                                                 color: const Color(0xFFFFA500,).withOpacity(0.5),
                                               ),
                                               Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.w,),
+                                                padding: EdgeInsets.symmetric(horizontal: 8.w),
                                                 child: Icon(
                                                   Icons.star,
-                                                  color: const Color(0xFFFFA500,),
+                                                  color: const Color(0xFFFFA500),
                                                   size: 12.sp,
                                                 ),
                                               ),
@@ -582,7 +594,7 @@ class HomeView extends StatelessWidget {
                                             style: GoogleFonts.outfit(
                                               fontWeight: FontWeight.w400,
                                               fontSize: 14.sp,
-                                              color: Colors.white60,
+                                              color: isDarkMode ?Colors.white60: Colors.black,
                                               fontStyle: FontStyle.italic,
                                             ),
                                           ),
@@ -603,13 +615,15 @@ class HomeView extends StatelessWidget {
                       builder: (context, homeController, _) {
                         return Container(
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.35),
+                            // ignore: deprecated_member_use
+                            color: isDarkMode ?Colors.black.withOpacity(0.35):Colors.white,
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(12.r),
                               bottomRight: Radius.circular(12.r),
                             ),
                             border: Border(
                               top: BorderSide(
+                                // ignore: deprecated_member_use
                                 color: Colors.white.withOpacity(0.08),
                                 width: 1,
                               ),
@@ -624,7 +638,9 @@ class HomeView extends StatelessWidget {
                                   onTap: () async {
                                     if (homeController.inspirationalQuotes.isNotEmpty) {
                                       final currentQuote = homeController.inspirationalQuotes[homeController.currentQuoteIndex];
-                                      debugPrint('Saving quote with ID: ${currentQuote.id}',);
+                                      debugPrint(
+                                        'Saving quote with ID: ${currentQuote.id}',
+                                      );
                                       final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
                                       if (success) {
                                         await showMessageDialog(
@@ -642,14 +658,14 @@ class HomeView extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.favorite_border_rounded,
-                                        color: Colors.white,
+                                        color: isDarkMode?Colors.white: AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Favorite',
                                         style: GoogleFonts.outfit(
-                                          color: Colors.white,
+                                          color: isDarkMode?Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -690,14 +706,14 @@ class HomeView extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.bookmark_border_rounded,
-                                        color: Colors.white,
+                                        color: isDarkMode?Colors.white: AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Save',
                                         style: GoogleFonts.outfit(
-                                          color: Colors.white,
+                                          color: isDarkMode?Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -720,14 +736,14 @@ class HomeView extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.share_outlined,
-                                        color: Colors.white,
+                                        color: isDarkMode?Colors.white: AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Share',
                                         style: GoogleFonts.outfit(
-                                          color: Colors.white,
+                                          color: isDarkMode?Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -745,7 +761,7 @@ class HomeView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 30.h),
-            // Today's Schedule section
+              // Today's Schedule section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -759,15 +775,16 @@ class HomeView extends StatelessWidget {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6AD14).withOpacity(0.65),
-                      borderRadius: BorderRadius.circular(30.r),
+                      // ignore: deprecated_member_use
+                      color: isDarkMode ? Color(0xFFF6AD14).withOpacity(0.65):  Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: InkWell(
                       onTap: () {
                         //context.push('/add_event');
                         context.push('/all_events');
                       },
-                      borderRadius: BorderRadius.circular(30.r),
+                      borderRadius: BorderRadius.circular(12.r),
                       child: Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 16.w,
@@ -779,7 +796,7 @@ class HomeView extends StatelessWidget {
                             Text(
                               'See all',
                               style: GoogleFonts.outfit(
-                                color: const Color(0xFFFFA500,), // Vibrant amber brand font tone
+                                color: const Color(0xFFFFA500,), 
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -797,20 +814,18 @@ class HomeView extends StatelessWidget {
                   ),
                 ],
               ),
-            SizedBox(height: 16.h),            
-            // Schedule events list
-            Consumer<HomeController>(
-              builder: (context, controller, _) {
-                final events = controller.todaysEvents;
+              SizedBox(height: 16.h),
+              // Schedule events list
+              Consumer<HomeController>(
+                builder: (context, controller, _) {
+                  final events = controller.todaysEvents;
                   if (events.isEmpty) {
                     return Text(
                       'No review yet',
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w400,
                         fontSize: 14.sp,
-                        color: isDarkMode
-                        ? AppColors.fourth_color
-                        : AppColors.heading_color,
+                        color: isDarkMode? AppColors.fourth_color: AppColors.heading_color,
                       ),
                     );
                   }
@@ -819,8 +834,7 @@ class HomeView extends StatelessWidget {
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
                       color: isDarkMode
-                      ? const Color(0xFF051123)
-                      : AppColors.l_schedule_clr1,
+                      ? const Color(0xFF051123): Colors.white,
                       borderRadius: BorderRadius.circular(16.r),
                       border: Border.all(
                         color: const Color(0xFFC5A880).withOpacity(0.35),
@@ -837,7 +851,7 @@ class HomeView extends StatelessWidget {
                             final isLastItem = index == events.length - 1;
                             String calculatedPeriod = "Morning";
                             try {
-                              final startHourStr =(event.startTime).split(':').first.trim();
+                              final startHourStr = (event.startTime).split(':').first.trim();
                               final int hourValue = int.parse(startHourStr);
                               if (hourValue >= 12) {
                                 calculatedPeriod = "Afternoon";
@@ -852,7 +866,7 @@ class HomeView extends StatelessWidget {
                               final priorEvent = events[index - 1];
                               String priorPeriod = "Morning";
                               try {
-                                final priorHourStr =(priorEvent.startTime).split(':').first.trim();
+                                final priorHourStr = (priorEvent.startTime).split(':').first.trim();
                                 if (int.parse(priorHourStr) >= 12)
                                   priorPeriod = "Afternoon";
                               } catch (_) {}
@@ -865,7 +879,10 @@ class HomeView extends StatelessWidget {
                               children: [
                                 if (showHeaderLabel) ...[
                                   Padding(
-                                    padding: EdgeInsets.only(bottom: 16.h,top: index > 0 ? 16.h : 0,),
+                                    padding: EdgeInsets.only(
+                                      bottom: 16.h,
+                                      top: index > 0 ? 16.h : 0,
+                                    ),
                                     child: Text(
                                       calculatedPeriod,
                                       style: GoogleFonts.playfairDisplay(
@@ -898,114 +915,110 @@ class HomeView extends StatelessWidget {
                   );
                 },
               ),
-            SizedBox(height: 30.h,),
-            Container(
-              padding: EdgeInsets.all(24.w),
-              decoration: BoxDecoration(
-                // ignore: deprecated_member_use
-                color: isDarkMode? const Color(0xFFF6AD14).withOpacity(0.2): const Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color: isDarkMode
+              SizedBox(height: 30.h),
+              Container(
+                padding: EdgeInsets.all(24.w),
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: const Color(0xFFF6AD14).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
                     // ignore: deprecated_member_use
-                    ? const Color(0xFFFFB800).withOpacity(0.3)
-                    : Colors.transparent,
+                    color:const Color(0xFFFFB800).withOpacity(0.3),
+                  ),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'AI Reflections',
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 20.sp,
-                        color: isDarkMode
-                        ? AppColors.fourth_color
-                        : AppColors.heading_color,
+                        color: AppColors.fourth_color
                       ),
                     ),
                     SizedBox(height: 16.h),
                     Text(
                       'Today feels centered around connection, gratitude and emotionally meaningful movement.',
-                      textAlign: TextAlign.start, 
+                      textAlign: TextAlign.start,
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w400,
                         fontSize: 14.sp,
-                        color: isDarkMode
-                        ? AppColors.l_schedule_clr3
-                        : AppColors.new_clr,
+                        color: isDarkMode? AppColors.l_schedule_clr3: Colors.black,
                       ),
                     ),
                   ],
                 ),
               ),
-            SizedBox(height: 30.h),            
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'What Other Users Are Saying?',
-                  style: GoogleFonts.playfairDisplay(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20.sp,
-                    color: AppColors.l_schedule_clr3,
+              SizedBox(height: 30.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'What\'s Our Users Are Saying?',
+                    style: GoogleFonts.playfairDisplay(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20.sp,
+                      color: isDarkMode?AppColors.l_schedule_clr3: Colors.black,
+                    ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: () => _showFeedbackDialog(context, isDarkMode, homeController),
-                  child: Container(
-                    width: 32.w,
-                    height: 32.h,
-                    decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
+                  GestureDetector(
+                    onTap: () => _showFeedbackDialog(
+                      context,
+                      isDarkMode,
+                      homeController,
+                    ),
+                    child: Container(
+                      width: 32.w,
+                      height: 32.h,
+                      decoration: BoxDecoration(
                         // ignore: deprecated_member_use
-                        color: AppColors.fourth_color.withOpacity(0.2),
-                        width: 0.5,
+                        color: isDarkMode ?Colors.white.withOpacity(0.1): AppColors.button_color.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          // ignore: deprecated_member_use
+                          color: AppColors.fourth_color.withOpacity(0.2),
+                          width: 0.5,
+                        ),
                       ),
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color:Colors.white,
-                      size: 20.sp,
+                      child: Icon(Icons.add, color: Colors.white, size: 20.sp),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16.h),            
-            Consumer<HomeController>(
-              builder: (context, controller, _) {
-                if (controller.reviews.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No reviews available.',
-                      style: GoogleFonts.outfit(
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 14.sp,
+                ],
+              ),
+              SizedBox(height: 16.h),
+              Consumer<HomeController>(
+                builder: (context, controller, _) {
+                  if (controller.reviews.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No reviews available.',
+                        style: GoogleFonts.outfit(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 14.sp,
+                        ),
                       ),
-                    ),
-                  );
-                }
-                return Column(
-                  children: List.generate(controller.reviews.length, (index) {
-                    final review = controller.reviews[index];
+                    );
+                  }
+                  return Column(
+                    children: List.generate(controller.reviews.length, (index) {
+                      final review = controller.reviews[index];
                       return Container(
                         width: double.infinity,
                         margin: EdgeInsets.only(bottom: 12.h),
                         padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
-                          color: isDarkMode? AppColors.containers_bgd: AppColors.background_color,
+                          color: isDarkMode
+                          ? AppColors.containers_bgd
+                          : Colors.white,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: isDarkMode
-                              // ignore: deprecated_member_use
-                              ? const Color(0xFFFFB800).withOpacity(0.3)
-                              // ignore: deprecated_member_use
-                              : Colors.grey.withOpacity(0.2),
+                            // ignore: deprecated_member_use
+                            ? const Color(0xFFFFB800).withOpacity(0.3)
+                            // ignore: deprecated_member_use
+                            : Colors.grey.withOpacity(0.2),
                           ),
                         ),
                         child: Column(
@@ -1036,7 +1049,9 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14.sp,
-                                        color: isDarkMode? Colors.white: Colors.black,
+                                        color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
                                       ),
                                     ),
                                     Row(
@@ -1060,10 +1075,10 @@ class HomeView extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14.sp,
                                 color: isDarkMode
-                                  // ignore: deprecated_member_use
-                                  ? Colors.white.withOpacity(0.8)
-                                  // ignore: deprecated_member_use
-                                  : Colors.black.withOpacity(0.8),
+                                // ignore: deprecated_member_use
+                                ? Colors.white.withOpacity(0.8)
+                                // ignore: deprecated_member_use
+                                : Colors.black.withOpacity(0.8),
                                 height: 1.4,
                               ),
                             ),
@@ -1074,9 +1089,9 @@ class HomeView extends StatelessWidget {
                   );
                 },
               ),
-            SizedBox(height: 30.h),            
-            // Unlock More Blessings section
-            Container(
+              SizedBox(height: 30.h),
+              // Unlock More Blessings section
+              Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
@@ -1098,7 +1113,7 @@ class HomeView extends StatelessWidget {
                       style: GoogleFonts.playfairDisplay(
                         fontWeight: FontWeight.bold,
                         fontSize: 22.sp,
-                        color: const Color(0xFFFFA500,), 
+                        color: const Color(0xFFFFA500),
                       ),
                     ),
                     SizedBox(height: 16.h),
@@ -1113,11 +1128,11 @@ class HomeView extends StatelessWidget {
                         context.push('/subscription');
                       },
                       child: Container(
-                        width: 160.w, 
+                        width: 160.w,
                         height: 48.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5B301,), 
-                          borderRadius: BorderRadius.circular(14.r,), 
+                          color: const Color(0xFFF5B301),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         child: Center(
                           child: Text(
@@ -1161,8 +1176,8 @@ class HomeView extends StatelessWidget {
   //     width: double.infinity,
   //     padding: EdgeInsets.all(16.w),
   //     decoration: BoxDecoration(
-  //       color: isDarkMode 
-  //         ? AppColors.containers_bgd 
+  //       color: isDarkMode
+  //         ? AppColors.containers_bgd
   //         : (lightModeBackgroundColor ?? Colors.white),
   //       borderRadius: BorderRadius.circular(12.r),
   //       border: Border.all(
@@ -1211,195 +1226,215 @@ class HomeView extends StatelessWidget {
   //     )
   //   );
   // }
-  
+
   Widget _buildScheduleEvent(
-  BuildContext context,
-  int id,
-  String title,
-  String time,
-  String category, 
-  String location,     
-  String subtitle,      
-  Color indicatorColor,
-  bool isDarkMode, {
-  Color? lightModeBackgroundColor,
-  bool isLastItem = false,
-}) {
-  return IntrinsicHeight(
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Left custom tracker track spine framework matching design target visuals
-        SizedBox(
-          width: 24.w,
-          child: Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              // Continuous vertical alignment connecting background path pillar line segment
-              if (!isLastItem)
-                Positioned(
-                  top: 6.h,
-                  bottom: 0,
-                  child: Container(
-                    width: 1.5.w,
-                    color: const Color(0xFFC5A880).withOpacity(0.35),
-                  ),
-                ),
-              // Horizontal cross-connecting node offset row segment
-              Positioned(
-                top: 6.h,
-                left: 6.w,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Outer structural glowing circular core badge node accent
-                    Container(
-                      width: 12.w,
-                      height: 12.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFA500),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFFA500).withOpacity(0.4),
-                            blurRadius: 6.r,
-                            spreadRadius: 1.r,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Linking line projecting outward into matching edge of target cell block frame container
-                    Container(
-                      width: 6.w,
-                      height: 1.5.h,
+    BuildContext context,
+    int id,
+    String title,
+    String time,
+    String category,
+    String location,
+    String subtitle,
+    Color indicatorColor,
+    bool isDarkMode, {
+    Color? lightModeBackgroundColor,
+    bool isLastItem = false,
+  }) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left custom tracker track spine framework matching design target visuals
+          SizedBox(
+            width: 24.w,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                // Continuous vertical alignment connecting background path pillar line segment
+                if (!isLastItem)
+                  Positioned(
+                    top: 6.h,
+                    bottom: 0,
+                    child: Container(
+                      width: 1.5.w,
+                      // ignore: deprecated_member_use
                       color: const Color(0xFFC5A880).withOpacity(0.35),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Right Content Dynamic Textured Panel Card Container Frame
-        Expanded(
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  context.push('/event_details', extra: id);
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? const Color(0xFF09121F) : Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: const Color(0xFFC5A880).withOpacity(0.2),
-                    ),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/container_bgm.jpg'), 
-                      fit: BoxFit.cover,
-                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // Horizontal cross-connecting node offset row segment
+                Positioned(
+                  top: 6.h,
+                  left: 6.w,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.25),
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.15),
-                              ),
-                            ),
-                            child: Text(
-                              category.isEmpty ? 'General' : category,
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xFF7A8B9E),
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            time,
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13.sp,
-                              color: const Color(0xFFFFA500),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        title,
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.sp,
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      if (location.isNotEmpty) ...[
-                        SizedBox(height: 8.h),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_rounded, color: const Color(0xFFFF4D4D), size: 14.sp),
-                            SizedBox(width: 6.w),
-                            Expanded(
-                              child: Text(
-                                location,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color: isDarkMode ? Colors.white70 : Colors.black,
-                                ),
-                              ),
+                      // Outer structural glowing circular core badge node accent
+                      Container(
+                        width: 12.w,
+                        height: 12.h,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFA500),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFA500).withOpacity(0.4),
+                              blurRadius: 6.r,
+                              spreadRadius: 1.r,
                             ),
                           ],
                         ),
-                      ],
-                      if (subtitle.isNotEmpty) ...[
-                        SizedBox(height: 4.h),
-                        Row(
-                          children: [
-                            Icon(Icons.description_outlined, color: const Color(0xFF7A8B9E), size: 14.sp),
-                            SizedBox(width: 6.w),
-                            Expanded(
-                              child: Text(
-                                subtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color: isDarkMode ? Colors.white60 : Colors.black54,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
+                      // Linking line projecting outward into matching edge of target cell block frame container
+                      Container(
+                        width: 6.w,
+                        height: 1.5.h,
+                        color: const Color(0xFFC5A880).withOpacity(0.35),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(height: isLastItem ? 0 : 16.h),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+
+          // Right Content Dynamic Textured Panel Card Container Frame
+          Expanded(
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    context.push('/event_details', extra: id);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                      ? const Color(0xFF09121F)
+                      : Colors.grey.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: const Color(0xFFC5A880).withOpacity(0.2),
+                      ),
+                      image:DecorationImage(
+                        image: AssetImage(
+                          isDarkMode ?'assets/images/container_bgm.jpg': 'assets/images/container_bgm_light.png'
+                        ),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.25),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.15),
+                                ),
+                              ),
+                              child: Text(
+                                category.isEmpty ? 'General' : category,
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xFF7A8B9E),
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              time,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13.sp,
+                                color: const Color(0xFFFFA500),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          title,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20.sp,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        if (location.isNotEmpty) ...[
+                          SizedBox(height: 8.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                color: const Color(0xFFFF4D4D),
+                                size: 14.sp,
+                              ),
+                              SizedBox(width: 6.w),
+                              Expanded(
+                                child: Text(
+                                  location,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.sp,
+                                    color: isDarkMode
+                                        ? Colors.white70
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (subtitle.isNotEmpty) ...[
+                          SizedBox(height: 4.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.description_outlined,
+                                color: const Color(0xFF7A8B9E),
+                                size: 14.sp,
+                              ),
+                              SizedBox(width: 6.w),
+                              Expanded(
+                                child: Text(
+                                  subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.sp,
+                                    color: isDarkMode
+                                        ? Colors.white60
+                                        : Colors.black54,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: isLastItem ? 0 : 16.h),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   String _getDayName(int weekday) {
     switch (weekday) {

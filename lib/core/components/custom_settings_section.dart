@@ -35,7 +35,10 @@ class SettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
-    final Color headerColor = isDangerZone ? const Color(0xFFEF4444) : (isDarkMode ? const Color(0xFFD97706) : const Color(0xFFB45309));
+    // Set section header title colors exactly from the design specifications
+    final Color headerColor = isDangerZone 
+        ? const Color(0xFFEF4444) 
+        : (isDarkMode ? const Color(0xFFD97706) : const Color(0xFFB45309));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,6 +54,7 @@ class SettingsSection extends StatelessWidget {
             ),
           ),
         ),
+        // Maps out standalone custom containers for individual items in the Danger Zone
         Column(
           children: items.map((item) {
             return Container(
@@ -59,9 +63,11 @@ class SettingsSection extends StatelessWidget {
                 color: isDarkMode ? const Color(0xFF0B1528) : Colors.white,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: isDarkMode 
-                  ? const Color(0xFFFFB703).withOpacity(0.15) 
-                  : const Color(0xFFE5E7EB),
+                  color: isDangerZone
+                      ? const Color(0xFFEF4444).withOpacity(0.2) // Red accent borders for Danger Zone
+                      : (isDarkMode 
+                          ? const Color(0xFFFFB703).withOpacity(0.15) 
+                          : const Color(0xFFE5E7EB)),
                   width: 1,
                 ),
               ),
@@ -73,19 +79,20 @@ class SettingsSection extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
                     child: Row(
                       children: [
-                        // Left Icon Asset
+                        // Left-side vector graphics
                         SvgPicture.asset(
                           item.iconPath,
                           width: 20.w,
                           height: 20.h,
                           colorFilter: ColorFilter.mode(
                             isDangerZone 
-                            ? const Color(0xFFEF4444) 
-                            : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
+                                ? const Color(0xFFEF4444) 
+                                : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
                             BlendMode.srcIn,
                           ),
                         ),
-                        SizedBox(width: 14.w),                       
+                        SizedBox(width: 14.w),
+                        
                         // Text Layout (Title + Subtitle)
                         Expanded(
                           child: Column(
@@ -97,9 +104,9 @@ class SettingsSection extends StatelessWidget {
                                 style: GoogleFonts.outfit(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w500,
-                                  color: isDangerZone
-                                  ? const Color(0xFFEF4444)
-                                  : (isDarkMode ? Colors.white: const Color(0xFF1F2937)),
+                                  color: isDangerZone 
+                                      ? const Color(0xFFEF4444) 
+                                      : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
                                 ),
                               ),
                               if (item.subtitle != null) ...[
@@ -109,9 +116,7 @@ class SettingsSection extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w400,
-                                    color: isDarkMode
-                                    ? const Color(0xFF9CA3AF)
-                                    : const Color(0xFF6B7280),
+                                    color: isDarkMode ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                                   ),
                                 ),
                               ],
@@ -122,7 +127,7 @@ class SettingsSection extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFFFFB703,), // Precise golden color from design assets
+                                    color: const Color(0xFFFFB703),
                                   ),
                                 ),
                               ],
@@ -130,6 +135,8 @@ class SettingsSection extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 8.w),
+                        
+                        // Right-side structural chevron directional arrows
                         Icon(
                           Icons.arrow_right_alt_rounded,
                           color: isDangerZone ? const Color(0xFFEF4444) : const Color(0xFFFFB703),

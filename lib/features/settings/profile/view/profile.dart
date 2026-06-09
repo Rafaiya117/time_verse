@@ -54,48 +54,74 @@ class Profile extends StatelessWidget {
                     onCameraTap: controller.pickImage,
                   ),
                   SizedBox(height: 20.h),
-                  CustomInputField(
-                    label: 'Name',
-                    hintText: 'Enter your name',
-                    controller: controller.nameController,
-                    isPassword: false,
-                    fontSize: 16.sp,
-                    height: 44.h,
-                    hintFontSize: 14.sp,
-                  ),
-                  SizedBox(height: 20.h),
-                  // CustomInputField(
-                  //   label: 'Email',
-                  //   hintText: 'example@mail.com',
-                  //   controller: controller.emailController,
-                  //   isPassword: false,
-                  //   fontSize: 16.sp,
-                  //   height: 44.h,
-                  //   hintFontSize: 14.sp,
-                  // ),
-                  // SizedBox(height: 20.h),
-                  DateField(
-                    label: 'Date of Birth',
-                    selectedDate:
-                      DateTime.tryParse(controller.dateController.text) ??
-                      DateTime(1995, 5, 23),
-                    onDateSelected: (newDate) {
-                      controller.setBirthDate(newDate);
-                    },
-                  ),
-                  SizedBox(height: 20.h),
-                  CustomButton(
-                    text: "Update",
-                    onPressed: () {
-                      controller.updateProfile(context);
-                    },
-                    gradient: AppGradientColors.button_gradient,
-                    textColor: AppColors.text_color,
-                    fontFamily: 'outfit',
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.normal,
-                    height: 50.h,
-                    width: double.infinity,
+                  Container(
+                    padding: EdgeInsets.all(24.sp),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF051123),
+                      borderRadius: BorderRadius.circular(12.sp),
+                      border: Border.all(
+                        color: AppColors.button_color,
+                        width: 0.5,
+                      )
+                    ),
+                    child: Column(
+                      children: [
+                        CustomInputField(
+                          label: 'Name',
+                          hintText: 'Enter your name',
+                          controller: controller.nameController,
+                          isPassword: false,
+                          fontSize: 16.sp,
+                          height: 44.h,
+                          hintFontSize: 14.sp,
+                        ),
+                        SizedBox(height: 20.h),
+                        
+                        CustomInputField(
+                          label: 'Email',
+                          hintText: 'example@mail.com',
+                          controller: controller.emailController,
+                          isPassword: false,
+                          fontSize: 16.sp,
+                          height: 44.h,
+                          hintFontSize: 14.sp,
+                        ),
+                        SizedBox(height: 20.h),
+                        CustomInputField(
+                          label: 'Password',
+                          hintText: '***********',
+                          controller: controller.passwordController,
+                          isPassword: false,
+                          fontSize: 16.sp,
+                          height: 44.h,
+                          hintFontSize: 14.sp,
+                        ),
+                        SizedBox(height: 20.h),
+                        DateField(
+                          label: 'Date of Birth',
+                          selectedDate:
+                            DateTime.tryParse(controller.dateController.text) ??
+                            DateTime(1995, 5, 23),
+                          onDateSelected: (newDate) {
+                            controller.setBirthDate(newDate);
+                          },
+                        ),
+                        SizedBox(height: 20.h),
+                        CustomButton(
+                          text: "Update",
+                          onPressed: () {
+                            controller.updateProfile(context);
+                          },
+                          gradient: AppGradientColors.button_gradient,
+                          textColor: Colors.black,
+                          fontFamily: 'outfit',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          height: 50.h,
+                          width: double.infinity,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ],

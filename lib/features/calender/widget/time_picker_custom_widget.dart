@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 
 class TimePickerField extends StatelessWidget {
@@ -24,6 +22,7 @@ class TimePickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final controller = Provider.of<TimePickerController>(context);
     final time = controller.getTime(fieldKey);
     final formattedTime = controller.formatTime(time);
@@ -43,7 +42,7 @@ class TimePickerField extends StatelessWidget {
                 Text(
                   label,
                   style: GoogleFonts.inter(
-                    color: Colors.grey.shade500, // Matches the dim description style
+                    color: isDarkMode?Colors.white: Colors.black, // Matches the dim description style
                     fontSize: 12.sp,
                     fontWeight: FontWeight.normal,
                   ),

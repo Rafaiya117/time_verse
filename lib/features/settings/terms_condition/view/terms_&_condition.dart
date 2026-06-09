@@ -26,50 +26,62 @@ class TermsAndCondition extends StatelessWidget {
               CustomHeaderBar(
                 title: 'Terms & Condition',
                 leftSpacing: 60.w,
-                rightSpacing: 40.w,
+                rightSpacing: 30.w,
               ),
               SizedBox(height: 20.h),
-              Consumer<TermsController>(
-                builder: (context, controller, child) {
-                  if (controller.isLoading) {
-                    return const CircularProgressIndicator();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: RichText(
-                        text: TextSpan(
-                        style: GoogleFonts.outfit(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.normal,
-                          color: isDarkMode
-                            ? AppColors.text_color
-                            : const Color(0xFF373F4B),
-                        ),
-                        children: [
-                          TextSpan(
-                            text: 'Clause \n\n',
-                            style: GoogleFonts.lato(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.sp,
-                               color: isDarkMode
-                                ? AppColors.text_color
-                                : const Color(0xFF373F4B),
-                            ),
+              Container(
+                padding: EdgeInsets.all(10.sp),
+                decoration: BoxDecoration(
+                  color: AppColors.containers_bgd,
+                  border: Border.all(
+                    color: AppColors.fourth_color,
+                    width: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(10.sp),
+                ),
+                child: Consumer<TermsController>(
+                  builder: (context, controller, child) {
+                    if (controller.isLoading) {
+                      return const CircularProgressIndicator();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: RichText(
+                          text: TextSpan(
+                          style: GoogleFonts.outfit(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.normal,
+                            color: isDarkMode
+                              ? AppColors.text_color
+                              : const Color(0xFF373F4B),
                           ),
-                          TextSpan(
-                            text: controller.description.isNotEmpty
-                              ? controller.description
-                              : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.\n\n',
+                          children: [
+                            TextSpan(
+                              text: 'Clause \n\n',
+                              style: GoogleFonts.lato(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20.sp,
+                                 color: isDarkMode
+                                  ? AppColors.text_color
+                                  : const Color(0xFF373F4B),
+                              ),
                             ),
-                          ],
+                            TextSpan(
+                              text: (controller.description.isNotEmpty
+                                ? controller.description
+                                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.\n\n').replaceAll(RegExp(r'<[^>]*>'), '').trim(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
+              SizedBox(height: 20.h,),
               Row(
                 children: [
                   Consumer<TermsController>(

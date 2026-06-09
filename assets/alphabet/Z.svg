@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048" width="2048" height="2048">
+  <defs>
+    <linearGradient id="gold" x1="25%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FFF2A6"/>
+      <stop offset="28%" stop-color="#F6C343"/>
+      <stop offset="62%" stop-color="#D69A13"/>
+      <stop offset="100%" stop-color="#8A5B00"/>
+    </linearGradient>
+    <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE484"/>
+      <stop offset="100%" stop-color="#B97900"/>
+    </linearGradient>
+    <style>
+      .letter { fill: url(#gold); stroke:#f7c948; stroke-width:8; stroke-linejoin:round; }
+      .vine { fill:none; stroke:url(#goldStroke); stroke-width:12; stroke-linecap:round; stroke-linejoin:round; }
+      .thin { stroke-width:7; }
+      .leaf { fill:url(#gold); stroke:#f7c948; stroke-width:5; }
+    </style>
+  </defs>
+  <path id="letter-Z" class="letter" d="M 571.61 1590.00 L 571.61 1537.92 L 1244.24 599.11 L 685.72 599.11 L 685.72 760.44 L 596.84 760.44 L 596.84 510.00 L 1450.24 510.00 L 1450.24 562.08 L 777.61 1501.12 L 1388.20 1501.12 L 1388.20 1349.74 L 1476.39 1349.74 L 1476.39 1590.00 L 571.61 1590.00 Z"/>
+  <g id="vine-Z">
+<path class="vine" d="M 600 1510 C 530 1350, 630 1180, 800 1080"/>
+<path class="vine thin" d="M 630 1370 C 700 1300, 790 1320, 840 1230"/>
+<path class="vine" d="M 570 1500 C 490 1460, 490 1380, 560 1370 C 625 1360, 615 1435, 565 1420"/>
+<ellipse class="leaf" cx="650" cy="1250" rx="42" ry="18" transform="rotate(-30 650 1250)"/>
+<ellipse class="leaf" cx="740" cy="1115" rx="42" ry="18" transform="rotate(25 740 1115)"/>
+<ellipse class="leaf" cx="610" cy="1400" rx="42" ry="18" transform="rotate(35 610 1400)"/>
+</g>
+</svg>

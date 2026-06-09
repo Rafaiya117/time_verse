@@ -16,6 +16,7 @@ import 'package:time_verse/features/lending/view/lending.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/view/saved_qoutatio.dart';
 import 'package:time_verse/features/settings/change_password/view/change_password.dart';
 import 'package:time_verse/features/settings/delete_account/view/delete_account.dart';
+import 'package:time_verse/features/settings/notification/view/notification.dart';
 import 'package:time_verse/features/settings/privacy/view/privacy.dart';
 import 'package:time_verse/features/settings/profile/view/profile.dart';
 import 'package:time_verse/features/settings/settings.dart';
@@ -97,6 +98,12 @@ final GoRouter appRouter = GoRouter(
       path: '/terms_and_condition',
       builder: (context, state) => ThemedBackgroundWrapper(
         child: TermsAndCondition(), 
+      ),
+    ),
+    GoRoute(
+      path: '/notification',
+      builder: (context, state) => ThemedBackgroundWrapper(
+        child: NotificationsScreen(),
       ),
     ),
     GoRoute(

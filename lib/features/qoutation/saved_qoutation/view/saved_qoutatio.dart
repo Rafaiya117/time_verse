@@ -58,8 +58,9 @@ class SavedQoutation extends StatelessWidget {
                     overlayColor: const WidgetStatePropertyAll<Color>(
                       Colors.transparent,
                     ),
-                    backgroundColor: const WidgetStatePropertyAll<Color>(
-                      Colors.transparent,
+                    backgroundColor: WidgetStatePropertyAll<Color>(
+                      // ignore: deprecated_member_use
+                      isDarkMode?Colors.transparent:Color(0xFFDADADA).withOpacity(0.3),
                     ),
                     textStyle: const WidgetStatePropertyAll<TextStyle>(
                       TextStyle(color: Colors.white),

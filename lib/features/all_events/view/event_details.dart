@@ -85,7 +85,7 @@ class EventDetails extends StatelessWidget {
                         Container(
                           width: 327.w,
                           decoration: BoxDecoration(
-                            color: isDarkMode ? null : const Color(0xFFB4AB9C),
+                            color: isDarkMode ? null : const Color(0xFFFFFFFF),
                             gradient: isDarkMode
                               ? const LinearGradient(
                                 colors: [
@@ -110,8 +110,7 @@ class EventDetails extends StatelessWidget {
                             child: Consumer<EventController>(
                               builder: (context, eventController, _) {
                                 return Column(
-                                  mainAxisSize: MainAxisSize
-                                      .min, // <-- ADDED this so the Column shrinks/grows with content
+                                  mainAxisSize: MainAxisSize.min, 
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -139,7 +138,7 @@ class EventDetails extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 20.sp,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: isDarkMode?Colors.white:Colors.black,
                                       ),
                                     ),
                                     SizedBox(height: 6.h),
@@ -150,7 +149,7 @@ class EventDetails extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w400,
-                                        color: const Color(0xFF9CA3AF),
+                                        color: isDarkMode?const Color(0xFF9CA3AF): Colors.black,
                                       ),
                                     ),
                                     SizedBox(height: 14.h),
@@ -205,15 +204,15 @@ class EventDetails extends StatelessWidget {
                                     Column(
                                       mainAxisAlignment:MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          '“',
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: 42.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFFFFB703),
-                                            height: 0.8,
-                                          ),
-                                        ),
+                                        // Text(
+                                        //   '“',
+                                        //   style: GoogleFonts.playfairDisplay(
+                                        //     fontSize: 42.sp,
+                                        //     fontWeight: FontWeight.bold,
+                                        //     color: const Color(0xFFFFB703),
+                                        //     height: 0.8,
+                                        //   ),
+                                        // ),
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 8.w,),
                                           child: Text(
@@ -223,7 +222,7 @@ class EventDetails extends StatelessWidget {
                                             style: GoogleFonts.playfairDisplay(
                                               fontSize: 20.sp,
                                               fontWeight: FontWeight.w500,
-                                              color: Colors.white,
+                                              color: isDarkMode?Colors.white:Colors.black,
                                               height: 1.4,
                                             ),
                                           ),

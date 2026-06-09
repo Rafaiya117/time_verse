@@ -104,8 +104,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
             ),
             child: TextFormField(
               controller: widget.controller,
-              obscureText:
-                  widget.isPassword ? _obscureText : false,
+              obscureText:widget.isPassword ? _obscureText : false,
               textAlignVertical: TextAlignVertical.center,
 
               style: GoogleFonts.outfit(
@@ -132,8 +131,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
                 hintText: widget.hintText,
 
                 hintStyle: GoogleFonts.outfit(
-                  fontSize:
-                      widget.hintFontSize ?? 12.sp,
+                  fontSize:widget.hintFontSize ?? 12.sp,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF9CA3AF),
                 ),

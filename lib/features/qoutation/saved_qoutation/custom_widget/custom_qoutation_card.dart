@@ -171,7 +171,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 width: 16.w,
                                 height: 14.h,
                                 colorFilter: ColorFilter.mode(
-                                  isLiked ? Colors.red: (isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
+                                  isLiked ? Colors.red: (isDarkMode ? AppColors.text_color : AppColors.fourth_color),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -180,7 +180,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 'Favorite',
                                 style: GoogleFonts.outfit(
                                   fontSize: 11,
-                                  color: isDarkMode ? AppColors.text_color : const Color(0xFF353535),
+                                  color: isDarkMode ? AppColors.text_color : AppColors.fourth_color,
                                 ),
                               ),
                             ],
@@ -208,9 +208,8 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 width: 13.w,
                                 height: 16.h,
                                 colorFilter: ColorFilter.mode(
-                                  isBookmarked
-                                      ? AppColors.fourth_color
-                                      : (isDarkMode ? AppColors.text_color : const Color(0xFF353535)),
+                                  isBookmarked ? AppColors.fourth_color
+                                  : (isDarkMode ? AppColors.text_color : AppColors.fourth_color),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -219,7 +218,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 'Save',
                                 style: GoogleFonts.outfit(
                                   fontSize: 11,
-                                  color: isDarkMode ? AppColors.text_color : const Color(0xFF353535),
+                                  color: isDarkMode ? AppColors.text_color : AppColors.fourth_color,
                                 ),
                               ),
                             ],
@@ -242,7 +241,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 width: 16.w,
                                 height: 14.h,
                                 colorFilter: ColorFilter.mode(
-                                  isDarkMode ? AppColors.text_color : const Color(0xFF353535),
+                                  isDarkMode ? AppColors.text_color : AppColors.fourth_color,
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -251,7 +250,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 'Share',
                                 style: GoogleFonts.outfit(
                                   fontSize: 11,
-                                  color: isDarkMode ? AppColors.text_color : const Color(0xFF353535),
+                                  color: isDarkMode ? AppColors.text_color : AppColors.fourth_color,
                                 ),
                               ),
                             ],
