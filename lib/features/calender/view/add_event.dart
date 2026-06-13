@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:time_verse/config/services/alerm_notification_service.dart';
-import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_date_picker.dart';
-import 'package:time_verse/core/components/custom_dialogue.dart';
+import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/utils/colors.dart';
-import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/calender/widget/time_picker_custom_widget.dart';
-import 'package:time_verse/features/home/controller/home_controller.dart';
 
 class AddEventPage extends StatelessWidget {
   const AddEventPage({super.key});
@@ -34,53 +30,18 @@ class AddEventPage extends StatelessWidget {
     const inputBgColor = Color(0xFF0A192F); // Dark input card backgrounds
 
     return Scaffold(
-      //backgroundColor: isDarkMode ? const Color(0xFF051123) : AppColors.text_color,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Add Event',
-              style: GoogleFonts.outfit(
-                color: isDarkMode ?Colors.white:Colors.black,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              'Create a moment that matters ✨',
-              style: GoogleFonts.outfit(
-                color: Colors.grey.shade400,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isDarkMode ? Icons.wb_sunny : Icons.nightlight_round,
-              color: goldColor,
-            ),
-            onPressed: () {},
-          )
-        ],
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              CustomHeaderBar(
+                  title: 'Add event',
+                  leftSpacing: 90.w,
+                  rightSpacing: 79.w,
+                ),
+                SizedBox(height: 20.h,),
               // --- SECTION: BASICS ---
               _buildSectionHeader('Basics'),
               SizedBox(height: 8.h),
@@ -91,10 +52,10 @@ class AddEventPage extends StatelessWidget {
                   children: [
                     Padding(
                       padding: EdgeInsets.only(top: 2.h, right: 12.w),
-                      child: Icon(
-                        Icons.star_purple500_sharp,
-                        color: const Color(0xFFFFA500,), 
-                        size: 22.sp,
+                      child: SvgPicture.asset(
+                        'assets/icons/sparkle.svg',
+                        width: 20.w,
+                        height: 20.h,
                       ),
                     ),
                     // Expanded Input Text Field
@@ -217,7 +178,11 @@ class AddEventPage extends StatelessWidget {
                     children: [
                       Padding(
                         padding: EdgeInsets.only(right: 12.w),
-                        child: Text('📅', style: TextStyle(fontSize: 20.sp)),
+                        child: SvgPicture.asset(
+                          'assets/icons/calender_2.svg',
+                          width: 20.w,
+                          height: 20.h,
+                        ),
                       ),
                       Expanded(
                         child: Column(
@@ -234,8 +199,7 @@ class AddEventPage extends StatelessWidget {
                             ),
                             SizedBox(height: 4.h),
                             ValueListenableBuilder<TextEditingValue>(
-                              valueListenable:
-                                  addEventController.dateController,
+                              valueListenable:addEventController.dateController,
                               builder: (context, value, child) {
                                 return Text(
                                   value.text.isEmpty? "Select Date": value.text,
@@ -480,98 +444,28 @@ class AddEventPage extends StatelessWidget {
               CustomButton(
                 text: "Save",
                 onPressed: () async {
-                  final timeController = Provider.of<TimePickerController>(context, listen: false);
-
-                  final start = timeController.formatTime(timeController.getTime('start'));
-                  final end = timeController.formatTime(timeController.getTime('end'));
-                  final alarm = timeController.formatTime(timeController.getTime('alarm'));
-
-                  final validationError = addEventController.validateFields(
-                    title: addEventController.titleController.text,
-                    date: addEventController.dateController.text,
-                    startTime: start,
-                    endTime: end,
-                    note: addEventController.noteController.text,
+                  final timeController = Provider.of<TimePickerController>(
+                    context,
+                    listen: false,
                   );
 
-                  if (validationError != null) {
-                    await showMessageDialog(
-                      context,
-                      validationError,
-                      title: 'Validation Error',
-                      icon: Icons.warning_amber_outlined,
-                      iconColor: Colors.orange,
-                    );
-                    return;
-                  }
-
-                  showDialog(
+                  // ✅ Single clean call to handle parsing, validation, loading, saving, and state resets
+                  await addEventController.saveEvent(
                     context: context,
-                    barrierDismissible: false,
-                    builder: (_) => const Center(child: CircularProgressIndicator()),
+                    rawStart: timeController.formatTime(
+                      timeController.getTime('start'),
+                    ),
+                    rawEnd: timeController.formatTime(
+                      timeController.getTime('end'),
+                    ),
+                    rawAlarm: timeController.formatTime(
+                      timeController.getTime('alarm'),
+                    ),
+                    onSuccess: () {
+                      // If your TimePickerController has a reset/clear method, call it here
+                      // e.g., timeController.clearTimes();
+                    },
                   );
-
-                  try {
-                    final result = await addEventController.createTask(
-                      title: addEventController.titleController.text.trim(),
-                      date: addEventController.dateController.text.trim(),
-                      startTime: start,
-                      endTime: end,
-                      location: addEventController.locationController.text.trim().isEmpty 
-                      ? null : addEventController.locationController.text.trim(),
-                      alarmTime: alarm,
-                      categoryName: addEventController.selectedCategory?.isEmpty == true 
-                      ? null : addEventController.selectedCategory,
-                      note: addEventController.noteController.text.trim(),
-                    );
-                    
-                    Navigator.pop(context); // Pop Loader
-
-                    if (result != null) {
-                      final eventModel = EventModel.fromMap(result);
-                      await AlarmHelper.scheduleEventAlarm(eventModel);
-                      
-                      DateTime? alarmTime;
-                      try {
-                        alarmTime = DateTime.parse(result['alarm_time']);
-                      } catch (e) {
-                        debugPrint("⚠️ Alarm time format error: ${result['alarm_time']}");
-                      }
-
-                      if (alarmTime != null) {
-                        await NotificationService.scheduleNotification(
-                          id: result['id'],
-                          title: result['title'],
-                          body: result['description'],
-                          alarmTime: alarmTime,
-                          payload: result['id'],
-                        );
-                      }
-
-                      addEventController.clearFields();
-                      await showMessageDialog(
-                        context,
-                        'Saved successfully',
-                        title: 'Success',
-                        icon: Icons.check_circle_outline,
-                        iconColor: Colors.green,
-                      );
-                      await context.read<HomeController>().fetchEvents();
-                      if (context.mounted) {
-                        final int id = result['id'];
-                        context.push('/event_details', extra: id);
-                      }
-                    }
-                  } catch (e) {
-                    Navigator.pop(context); // Pop Loader
-                    await showMessageDialog(
-                      context,
-                      'Failed to save event: $e',
-                      title: 'Error',
-                      icon: Icons.error_outline,
-                      iconColor: Colors.red,
-                    );
-                  }
                 },
                 gradient: AppGradientColors.button_gradient,
                 textColor: AppColors.text_color,

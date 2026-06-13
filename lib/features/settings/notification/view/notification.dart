@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:time_verse/core/components/custom_header.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -37,66 +38,10 @@ class NotificationsScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: EdgeInsets.all(10.w),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A).withOpacity(0.6),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFF1E293B),
-                              width: 1,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 20.sp,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Notifications',
-                        style: GoogleFonts.outfit(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Icon(
-                        Icons.wb_sunny_outlined,
-                        color: const Color(0xFFFFB703),
-                        size: 22.sp,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40.w),
-                  child: Row(
-                    children: [
-                      const Expanded(
-                        child: GradientDivider(isLeft: true),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w),
-                        child: Icon(
-                          Icons.star_purple500_rounded,
-                          color: const Color(0xFFFFB703),
-                          size: 14.sp,
-                        ),
-                      ),
-                      const Expanded(
-                        child: GradientDivider(isLeft: false),
-                      ),
-                    ],
-                  ),
+                CustomHeaderBar(
+                  title: 'Notification',
+                  leftSpacing: 90.w,
+                  rightSpacing: 79.w,
                 ),
                 SizedBox(height: 24.h),
                 Expanded(

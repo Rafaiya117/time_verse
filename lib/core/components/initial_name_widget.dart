@@ -32,6 +32,10 @@ class CustomUserInitialsAvatar extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.contain,
+      colorFilter:ColorFilter.mode(
+        Colors.amber,
+        BlendMode.srcIn,
+      ),
       // Replaced deprecated placeholderBuilder with crisp modern errorBuilder 
       errorBuilder: (context, error, stackTrace) {
         debugPrint('⚠️ Asset Missing or Load Error on: $alphabetSvgPath. Error: $error');

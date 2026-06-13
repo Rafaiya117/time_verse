@@ -120,27 +120,27 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
     final String formattedDateStr = DateFormat('EEE d MMMM').format(widget.alarmSettings.dateTime);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF030A16), // Dark outer space layout palette background background
+      //backgroundColor: const Color(0xFF030A16), // Dark outer space layout palette background background
       body: Stack(
         children: [
           // Background soft landscape graphics gradient mimicry
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF030A16),
-                    Color(0xFF06152B),
-                    Color(0xFF1B2E4A),
-                    Color(0xFF4A3B32), // Warm subtle ground glow profile
-                  ],
-                  stops: [0.0, 0.4, 0.75, 1.0],
-                ),
-              ),
-            ),
-          ),
+          // Positioned.fill(
+          //   child: Container(
+          //     decoration: const BoxDecoration(
+          //       gradient: LinearGradient(
+          //         begin: Alignment.topCenter,
+          //         end: Alignment.bottomCenter,
+          //         colors: [
+          //           Color(0xFF030A16),
+          //           Color(0xFF06152B),
+          //           Color(0xFF1B2E4A),
+          //           Color(0xFF4A3B32), // Warm subtle ground glow profile
+          //         ],
+          //         stops: [0.0, 0.4, 0.75, 1.0],
+          //       ),
+          //     ),
+          //   ),
+          // ),
           
           // Foreground content interface structure matching exactly image
           SafeArea(
@@ -160,11 +160,11 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                   // Subtitle Title Text Layer
                   Text(
                     'ALARM RINGING FOR',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       color: const Color(0xFFFFB703),
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 2.0,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 5.5,
                     ),
                   ),
                   SizedBox(height: 12.h),
@@ -172,7 +172,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                   Text(
                     notification.title ?? 'Alarm Ringing',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.playfairDisplay(
                       color: Colors.white,
                       fontSize: 28.sp,
                       fontWeight: FontWeight.w700,
@@ -191,11 +191,11 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       Container(width: 40.w, height: 1.h, color: Colors.white24),
                     ],
                   ),
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 20.h),
                   // Big Clock Render digits text stack block element
                   Text(
                     formattedTime,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.playfairDisplay(
                       color: const Color(0xFFFF9F1C),
                       fontSize: 68.sp,
                       fontWeight: FontWeight.w800,
@@ -242,9 +242,9 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                         Text(
                           notification.body ?? 'Every journey leads ahead, stepping into the potential trapped beneath your dreams.',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.outfit(
                             color: Colors.white.withOpacity(0.9),
-                            fontSize: 13.sp,
+                            fontSize: 14.sp,
                             height: 1.5,
                             fontWeight: FontWeight.w400,
                           ),
@@ -259,13 +259,18 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                     height: 90.h,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFFFB703).withOpacity(0.2), width: 1),
+                      // Soft outer ambient fill layer
+                      color: const Color(0xFFFFB703).withOpacity(0.12),
+                      border: Border.all(
+                        color: const Color(0xFFFFB703).withOpacity(0.2),
+                        width: 1,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFFB703).withOpacity(0.15),
-                          blurRadius: 30,
-                          spreadRadius: 10,
-                        )
+                          color: const Color(0xFFFFB703).withOpacity(0.25),
+                          blurRadius: 35,
+                          spreadRadius: 12,
+                        ),
                       ],
                     ),
                     child: Center(
@@ -274,19 +279,26 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                         height: 70.h,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFFFB703).withOpacity(0.4), width: 1.5),
+                          // Semi-transparent mid-layer fill matching the image gradient profile
+                          color: const Color(0xFFFFB703).withOpacity(0.18),
+                          border: Border.all(
+                            color: const Color(0xFFFFB703).withOpacity(0.35),
+                            width: 1.2,
+                          ),
                         ),
                         child: Center(
                           child: Container(
                             width: 54.w,
                             height: 54.h,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFB703),
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
+                              // Central core container is a highly saturated soft layer, NOT solid
+                              color: const Color(0xFFFFB703).withOpacity(0.3),
                             ),
                             child: Icon(
                               Icons.notifications,
-                              color: const Color(0xFF030A16),
+                              // The icon holds the bright, vibrant color definition
+                              color: const Color(0xFFFFB703),
                               size: 28.sp,
                             ),
                           ),

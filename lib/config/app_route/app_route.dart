@@ -158,7 +158,10 @@ final GoRouter appRouter = GoRouter(
       path: '/alarm',
       builder: (context, state) {
         final alarm = state.extra as AlarmSettings;
-        return ExampleAlarmRingScreen(alarmSettings: alarm);
+        // ✅ Wrapped smoothly without touching anything else
+        return ThemedBackgroundWrapper(
+          child: ExampleAlarmRingScreen(alarmSettings: alarm),
+        );
       },
     ),
   ],

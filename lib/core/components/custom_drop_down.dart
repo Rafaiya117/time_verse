@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -77,11 +79,11 @@ class CustomDropdownField<T> extends StatelessWidget {
                 color: labelColor ?? (isDarkMode ? Colors.white38 : Colors.grey),
               ),
               border: OutlineInputBorder(
-                borderSide: BorderSide(color: borderColor ?? AppColors.third_color),
+                borderSide: BorderSide(color: borderColor ?? AppColors.third_color.withOpacity(0.4)),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: borderColor ?? AppColors.third_color),
+                borderSide: BorderSide(color: borderColor ?? AppColors.third_color.withOpacity(0.4)),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               focusedBorder: OutlineInputBorder(

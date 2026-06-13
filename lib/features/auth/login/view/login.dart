@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -80,7 +82,8 @@ class LoginPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isDarkMode ? Color(0xFF051123): AppColors.background_color,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: AppColors.fourth_color, width: 0.6.w),
+                  // ignore: deprecated_member_use
+                  border: Border.all(color: AppColors.fourth_color.withOpacity(0.5), width: 1.w),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,12 +234,8 @@ class LoginPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(
-                              0.0,
-                            ), // Fades out completely at outer edge
-                            Colors.white.withOpacity(
-                              0.65,
-                            ), // Solid/visible near the text
+                            Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
+                            Colors.white.withOpacity(0.65,), // Solid/visible near the text
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -248,9 +247,7 @@ class LoginPage extends StatelessWidget {
                   Text(
                     'Or continue with',
                     style: GoogleFonts.inter(
-                      color: const Color(
-                        0xFF9E9E9E,
-                      ), // Muted grey color matching the image text
+                      color: const Color(0xFF9E9E9E), // Muted grey color matching the image text
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),

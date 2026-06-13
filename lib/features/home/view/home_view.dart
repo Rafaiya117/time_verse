@@ -150,10 +150,6 @@ class HomeView extends StatelessWidget {
     });
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final String logoPath = isDarkMode
-      ? 'assets/images/logo.png'
-      : 'assets/images/logo_light.png';
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SingleChildScrollView(

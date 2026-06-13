@@ -64,10 +64,10 @@ class SettingsSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
                   color: isDangerZone
-                      ? const Color(0xFFEF4444).withOpacity(0.2) // Red accent borders for Danger Zone
-                      : (isDarkMode 
-                          ? const Color(0xFFFFB703).withOpacity(0.15) 
-                          : const Color(0xFFE5E7EB)),
+                    // ignore: deprecated_member_use
+                    ? const Color(0xFFEF4444).withOpacity(0.2) 
+                    // ignore: deprecated_member_use
+                    : (isDarkMode ? const Color(0xFFFFB703).withOpacity(0.15) : const Color(0xFFE5E7EB)),
                   width: 1,
                 ),
               ),
@@ -85,9 +85,7 @@ class SettingsSection extends StatelessWidget {
                           width: 20.w,
                           height: 20.h,
                           colorFilter: ColorFilter.mode(
-                            isDangerZone 
-                                ? const Color(0xFFEF4444) 
-                                : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
+                            isDangerZone ? const Color(0xFFEF4444) : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
                             BlendMode.srcIn,
                           ),
                         ),
@@ -105,8 +103,8 @@ class SettingsSection extends StatelessWidget {
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w500,
                                   color: isDangerZone 
-                                      ? const Color(0xFFEF4444) 
-                                      : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
+                                  ? const Color(0xFFEF4444) 
+                                  : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
                                 ),
                               ),
                               if (item.subtitle != null) ...[

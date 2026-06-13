@@ -24,7 +24,7 @@ class Settings extends StatelessWidget {
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

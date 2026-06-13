@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -264,20 +266,15 @@ class Signup extends StatelessWidget {
               SizedBox(height: 20.h,),
               Row(
                 children: [
-                  // Left divider line
                   Expanded(
                     child: Container(
-                      height: 1.5, // Total line thickness
-                      margin: EdgeInsets.only(right: 12.w), // Space before text
+                      height: 1.5, 
+                      margin: EdgeInsets.only(right: 12.w), 
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(
-                              0.0,
-                            ), // Fades out completely at outer edge
-                            Colors.white.withOpacity(
-                              0.65,
-                            ), // Solid/visible near the text
+                            Colors.white.withOpacity(0.0), 
+                            Colors.white.withOpacity(0.65), 
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
