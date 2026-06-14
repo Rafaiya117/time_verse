@@ -85,7 +85,7 @@ class SettingsSection extends StatelessWidget {
                           width: 20.w,
                           height: 20.h,
                           colorFilter: ColorFilter.mode(
-                            isDangerZone ? const Color(0xFFEF4444) : (isDarkMode ? Colors.white : const Color(0xFF1F2937)),
+                            isDangerZone ? const Color(0xFFEF4444) : (isDarkMode ? Colors.white : const Color(0xFFFFA500)),
                             BlendMode.srcIn,
                           ),
                         ),

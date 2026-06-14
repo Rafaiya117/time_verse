@@ -54,7 +54,7 @@ class TappableNotificationCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.notifications,
-                      color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                      color: isDarkMode ? Colors.white : const Color(0xFFFFA500),
                       size: 26.sp,
                     ),
                     if (badgeCount > 0)

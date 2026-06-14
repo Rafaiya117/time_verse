@@ -257,6 +257,15 @@ class HomeView extends StatelessWidget {
                     );
                   },
                 ),
+              //SizedBox(height: 10.h),
+            Text(
+              'Have a mindful and blessed day',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.normal,
+                fontSize: 14.sp,
+                color: isDarkMode?Colors.white: Color(0xFF414141),
+              ),
+            ),
             // Container(
             //   width: 384.w,
             //   height: 224.h,
@@ -287,7 +296,9 @@ class HomeView extends StatelessWidget {
                       Container(
                         height: 1.h,
                         width: double.infinity,
-                        color: Colors.white.withOpacity(0.12),
+                        color: isDarkMode
+                        ? const Color(0xFF3B3B3B)
+                        : const Color(0xFFF1A80A).withOpacity(0.6),
                       ),
                       // The floating Date Pill Header
                       Center(
@@ -297,19 +308,23 @@ class HomeView extends StatelessWidget {
                             vertical: 10.h,
                           ),
                           decoration: BoxDecoration(
-                            color: isDarkMode? Color(0xFF060B13):Colors.white,
+                            color: isDarkMode
+                            ? const Color(0xFF060B13)
+                            : Colors.white,
                             borderRadius: BorderRadius.circular(30.r),
-                            // Clean brand border frame outline
+                            // ✅ FIX: Main border frame line follows matching theme rules
                             border: Border.all(
+                              color: isDarkMode
+                              ? const Color(0xFF3B3B3B)
                               // ignore: deprecated_member_use
-                              color: AppColors.fourth_color.withOpacity(0.2),
+                              : const Color(0xFFF1A80A).withOpacity(0.7),
                               width: 1,
                             ),
                             // Ambient glow shadow effect
                             boxShadow: [
                               BoxShadow(
                                 // ignore: deprecated_member_use
-                                color: const Color(0xFFF1A80A,).withOpacity(0.08),
+                                color: const Color(0xFFF1A80A).withOpacity(isDarkMode ? 0.05 : 0.08),
                                 blurRadius: 12,
                                 spreadRadius: 1,
                               ),
@@ -331,7 +346,9 @@ class HomeView extends StatelessWidget {
                                 style: GoogleFonts.outfit(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 16.sp,
-                                  color: isDarkMode ?Colors.white: Colors.black,
+                                  color: isDarkMode
+                                  ? Colors.white
+                                  : Colors.black,
                                 ),
                               ),
                             ],
@@ -1369,10 +1386,11 @@ class HomeView extends StatelessWidget {
                           SizedBox(height: 8.h),
                           Row(
                             children: [
-                              Icon(
-                                Icons.location_on_rounded,
-                                color: const Color(0xFFFF4D4D),
-                                size: 14.sp,
+                              Text(
+                                '📍',
+                                style: TextStyle(
+                                  fontSize: 14.sp, 
+                                ),
                               ),
                               SizedBox(width: 6.w),
                               Expanded(

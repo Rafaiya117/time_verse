@@ -98,7 +98,7 @@ class NotificationCard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       decoration: BoxDecoration(
         // ignore: deprecated_member_use
-        color: const Color(0xFF091222).withOpacity(0.85),
+        color: Theme.of(context).brightness == Brightness.dark?const Color(0xFF091222).withOpacity(0.85): Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           // ignore: deprecated_member_use
@@ -121,7 +121,7 @@ class NotificationCard extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Theme.of(context).brightness == Brightness.dark?Colors.white:Colors.black,
                   ),
                 ),
                 SizedBox(height: 6.h),

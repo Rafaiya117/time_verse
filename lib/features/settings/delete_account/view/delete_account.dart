@@ -1,19 +1,14 @@
-import 'package:alarm/alarm.dart';
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/core/components/custom_button.dart';
-import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/utils/colors.dart';
-import 'package:time_verse/features/auth/auth_service/auth_service.dart';
-import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/settings/delete_account/controller/delete_ac_controller.dart';
-import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
 class DeleteAccount extends StatelessWidget {
   const DeleteAccount({super.key});
@@ -36,15 +31,13 @@ class DeleteAccount extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
               decoration: BoxDecoration(
                 color: isDarkMode
-                    ? const Color(0xFF0B1528)
-                    : Colors.white, // Dark background canvas match
+                ? const Color(0xFF0B1528)
+                : Colors.white, // Dark background canvas match
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
                   color: isDarkMode
-                      ? const Color(0xFFFFB703).withOpacity(
-                          0.2,
-                        ) // Subtle gold outline accent frame ring
-                      : const Color(0xFFE5E7EB),
+                    ? const Color(0xFFFFB703).withOpacity(0.2) // Subtle gold outline accent frame ring
+                    : const Color(0xFFE5E7EB),
                   width: 1.2,
                 ),
                 boxShadow: [
@@ -62,10 +55,9 @@ class DeleteAccount extends StatelessWidget {
                   // 1. Vector Asset Layer
                   SvgPicture.asset(
                     isDarkMode
-                        ? 'assets/icons/delete_logo.svg'
-                        : 'assets/icons/delete_logo_light.svg',
-                    width: 90
-                        .w, // Scaled cleanly to match image mockup proportion rules
+                    ? 'assets/icons/delete_logo.svg'
+                    : 'assets/icons/delete_logo_light.svg',
+                    width: 90.w,
                     height: 90.h,
                   ),
                   SizedBox(height: 24.h),
@@ -75,11 +67,10 @@ class DeleteAccount extends StatelessWidget {
                     'Delete Account',
                     style: GoogleFonts.outfit(
                       fontSize: 24.sp,
-                      fontWeight:
-                          FontWeight.w700, // Strong prominent weight match
+                      fontWeight:FontWeight.w700, 
                       color: isDarkMode
-                          ? Colors.white
-                          : const Color(0xFF1F2937),
+                      ? Colors.white
+                      : const Color(0xFF1F2937),
                     ),
                   ),
                   SizedBox(height: 12.h),
@@ -93,8 +84,8 @@ class DeleteAccount extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                       height: 1.4,
                       color: isDarkMode
-                          ? const Color(0xFF9CA3AF)
-                          : const Color(0xFF4B5563),
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF4B5563),
                     ),
                   ),
                   SizedBox(height: 24.h),
@@ -104,9 +95,7 @@ class DeleteAccount extends StatelessWidget {
                     width: double.infinity,
                     padding: EdgeInsets.all(14.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFB703).withOpacity(
-                        0.06,
-                      ), // Translucent premium warning container amber tint fill
+                      color: const Color(0xFFFFB703).withOpacity(0.06,), 
                       borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(
                         color: const Color(0xFFFFB703).withOpacity(0.25),
@@ -136,9 +125,7 @@ class DeleteAccount extends StatelessWidget {
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w400,
                               height: 1.4,
-                              color: const Color(
-                                0xFFFFB703,
-                              ), // Matching matching gold-orange warning output color properties
+                              color: const Color(0xFFFFB703,), // Matching matching gold-orange warning output color properties
                             ),
                           ),
                         ),
@@ -146,62 +133,23 @@ class DeleteAccount extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 32.h),
-
-                  // 5. Destructive Danger Confirmation Trigger Button
                   Consumer<DeleteAcController>(
                     builder: (context, controller, _) {
                       return CustomButton(
                         text: "Delete",
                         onPressed: () async {
+                          // Prompt user verification upfront
                           final password = await showPasswordDialog(context);
                           if (password == null || password.isEmpty) return;
-
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-
-                          final success = await controller.deleteAccount(password,);
-                          Navigator.pop(context); // close loader
-                          if (success) {
-                            await showMessageDialog(
-                              context,
-                              'Your account has been permanently deleted.',
-                              title: 'Success',
-                              icon: Icons.check_circle_outline,
-                              iconColor: Colors.green,
-                            );
-                            await Alarm.stopAll();
-                            await AppPrefs.setLoggedIn(false);
-                            await AuthService().clearToken();
-                            context.read<HomeController>().todaysEvents.clear();
-                            context.read<ProfileController>().clearProfile();
-
-                            await Future.delayed(const Duration(milliseconds: 800),
-                            );
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                              context.go('/login');
-                            }
-                          } else {
-                            await showMessageDialog(
-                              context,
-                              'Failed to delete account. Check password.',
-                              title: 'Error',
-                              icon: Icons.error_outline,
-                              iconColor: Colors.red,
+                          if (context.mounted) {
+                            await controller.executeAccountDeletion(
+                              context: context,
+                              password: password,
                             );
                           }
                         },
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFBA1A1A),
-                            Color(0xFF7A0000),
-                          ], // Crimson/Dark Red profile warning colors
-                        ),
+                        solidColor: const Color(0xFFFF0000).withOpacity(0.2),
+                        borderColor: const Color(0xFFFF0000),
                         textColor: Colors.white,
                         fontFamily: 'outfit',
                         fontSize: 16.sp,
@@ -212,7 +160,6 @@ class DeleteAccount extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: 14.h),
-                  // 6. Action Abort/Cancel Overlay Layer Frame Component
                   CustomButton(
                     text: "Cancel",
                     onPressed: () => Navigator.pop(context),

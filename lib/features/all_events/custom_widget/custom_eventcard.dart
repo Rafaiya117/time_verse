@@ -107,7 +107,7 @@ class EventCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SvgPicture.asset(
-                      'assets/icons/calender_icon.svg',
+                      'assets/icons/today.svg',
                       width: 20.w,
                       height: 20.h,
                     ),
@@ -151,7 +151,7 @@ class EventCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SvgPicture.asset(
-                      'assets/icons/location_icon.svg',
+                      'assets/icons/pin.svg',
                       width: 20.w,
                       height: 20.h,
                     ),

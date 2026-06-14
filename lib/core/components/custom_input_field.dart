@@ -244,30 +244,35 @@ class _CustomInputFieldState extends State<CustomInputField> {
         ),
         if (widget.label.isNotEmpty) SizedBox(height: 5.h),
         Container(
-          // ✅ FIXED: Height calculated via clean internal dynamic padding to avoid line-squishing
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              // ignore: deprecated_member_use
-              color: widget.borderColor ?? const Color(0xFFDF951F).withOpacity(0.4),
+              color:widget.borderColor ??const Color(0xFFDF951F).withOpacity(0.4), // Clean subtle border for light mode
               width: 1.w,
             ),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF020617), // top
-                Color(0xFF111827), // middle
-                Color(0xFF0F172A), // bottom
-              ],
+              colors: Theme.of(context).brightness == Brightness.dark
+              ? [
+                const Color(0xFF020617), // top
+                const Color(0xFF111827), // middle
+                const Color(0xFF0F172A), // bottom
+              ]
+              : [
+                Colors.white,
+                Colors.white,
+              ], 
             ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFDF951F).withValues(alpha: 0.12),
-                blurRadius: 6,
-                spreadRadius: 0.5,
-              ),
-            ],
+            boxShadow: Theme.of(context).brightness == Brightness.dark
+              ? [
+                BoxShadow(
+                  color: const Color(0xFFDF951F).withValues(alpha: 0.12),
+                  blurRadius: 6,
+                  spreadRadius: 0.5,
+                ),
+              ]
+            : null, // No box shadow in light mode
           ),
           child: TextFormField(
             controller: widget.controller,
@@ -278,7 +283,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
               color: Colors.white,
             ),
             decoration: InputDecoration(
-              isDense: true, // ✅ FIXED: Strips internal padding quirks for flawless text centering
+              isDense: true, 
               filled: true,
               fillColor: Colors.transparent,
               contentPadding: EdgeInsets.symmetric(
@@ -292,9 +297,9 @@ class _CustomInputFieldState extends State<CustomInputField> {
               focusedErrorBorder: InputBorder.none,
               hintText: widget.hintText,
               hintStyle: GoogleFonts.outfit(
-                fontSize: widget.hintFontSize ?? 13.sp, // ✅ Matches custom image size tracking
+                fontSize: widget.hintFontSize ?? 13.sp, 
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF4B5563), // ✅ FIXED: Slightly darker gray matching input mockup snapshot precisely
+                color: const Color(0xFF4B5563), 
               ),
               prefixIcon: widget.prefixSvgPath != null
                 ? Padding(

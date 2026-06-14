@@ -1,62 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:time_verse/core/utils/colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 void showRemoveEventDialog(BuildContext context, {required VoidCallback onConfirm}) {
   final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (context) {
       return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: isDarkMode?AppColors.containers_bgd:AppColors.background_color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        // ✅ FIX: Modal background color matches the warm/cream tint in light mode
+        backgroundColor: isDarkMode ? const Color(0xFF060B13) : const Color(0xFFFAF6F0),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
-              SizedBox(height: 16),
+              // ✅ FIX: Accurate vibrant red circle outline icon from image
+              Icon(
+                Icons.error_outline_rounded, 
+                color: const Color(0xFFE52525), 
+                size: 44.sp,
+              ),
+              SizedBox(height: 18.h),
+              
               Text(
                 'Are you sure you want to\nRemove this Event?',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style: GoogleFonts.outfit(
+                  fontSize: 20.sp, 
+                  fontWeight: FontWeight.w700,
+                  // ✅ FIX: Deep navy/charcoal text color for light mode title
+                  color: isDarkMode ? Colors.white : const Color(0xFF0C1923),
+                  height: 1.3,
+                ),
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 14.h),
+              
               Text(
                 'This action cannot be undone. Are you sure you want to continue?',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                style: GoogleFonts.outfit(
+                  fontSize: 13.sp, 
+                  fontWeight: FontWeight.w400,
+                  // ✅ FIX: Muted slate gray body text matching the image opacity
+                  color: isDarkMode ? Colors.white60 : const Color(0xFF707070),
+                  height: 1.4,
+                ),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 24.h),
+              
               Row(
                 children: [
+                  // Cancel Button
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2E2E2E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      height: 44.h,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          // ✅ FIX: Cancel button background is near-black/dark charcoal in light mode
+                          backgroundColor: isDarkMode ? Colors.white : const Color(0xFF222222),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15.sp,
+                            color: isDarkMode ? const Color(0xFF222222) : Colors.white,
+                          ),
                         ),
                       ),
-                      child: Text('Cancel'),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  SizedBox(width: 14.w),
+                  
+                  // Remove Button
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onConfirm(); // 👈 Call removeEvent here
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      height: 44.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onConfirm();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          // ✅ FIX: Remove button background is bright vibrant cherry red
+                          backgroundColor: const Color(0xFFE51C1C),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Remove',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15.sp,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      child: Text('Remove'),
                     ),
                   ),
                 ],
@@ -68,4 +119,3 @@ void showRemoveEventDialog(BuildContext context, {required VoidCallback onConfir
     },
   );
 }
-

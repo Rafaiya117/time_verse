@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,12 +12,16 @@ class CustomHeaderBar extends StatelessWidget {
   final String title;
   final double leftSpacing;
   final double rightSpacing;
+  final bool showLeftLine;
+  final bool showRightLine;
 
   const CustomHeaderBar({
     super.key,
     required this.title,
     required this.leftSpacing,
     required this.rightSpacing,
+    this.showLeftLine = true,
+    this.showRightLine = true,
   });
 
   @override
@@ -36,11 +39,11 @@ class CustomHeaderBar extends StatelessWidget {
                 context.pop();
               },
               icon: SvgPicture.asset(
-                'assets/icons/arrow_back.svg',
+                isDarkMode
+                    ? 'assets/icons/arrow_back.svg'
+                    : 'assets/icons/arrow_back_light.svg',
                 width: 37.w,
                 height: 37.h,
-                // ignore: deprecated_member_use
-                //color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
               ),
             ),
             SizedBox(width: leftSpacing),
@@ -49,7 +52,9 @@ class CustomHeaderBar extends StatelessWidget {
               style: GoogleFonts.playfairDisplay(
                 fontWeight: FontWeight.bold,
                 fontSize: 17.sp,
-                color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
+                color: isDarkMode
+                    ? AppColors.text_color
+                    : AppColors.heading_color,
               ),
             ),
             SizedBox(width: rightSpacing),
@@ -58,50 +63,63 @@ class CustomHeaderBar extends StatelessWidget {
                 themeProvider.toggleTheme();
               },
               icon: SvgPicture.asset(
-                isDarkMode ? 'assets/icons/theme_dark.svg' : 'assets/icons/light_theme.svg',
+                isDarkMode
+                    ? 'assets/icons/theme_dark.svg'
+                    : 'assets/icons/light_theme.svg',
                 width: 37.w,
                 height: 37.h,
               ),
             ),
           ],
         ),
-        SizedBox(height: 10.h,),
+        SizedBox(height: 10.h),
         Row(
           children: [
-            // Left divider line
-            Expanded(
-              child: Container(
-                height: 1, // Total line thickness
-                margin: EdgeInsets.only(right: 12.w), // Space before text
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
-                      Colors.white.withOpacity(0.65,), // Solid/visible near the text
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+            if (showLeftLine)
+              Expanded(
+                child: Container(
+                  height: 1,
+                  margin: EdgeInsets.only(right: 12.w),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors:Theme.of(context).brightness == Brightness.light
+                    ? [
+                      const Color(0xFF878787).withOpacity(0.0),
+                      const Color(0xFFD9D9D9),
+                      ]
+                      : [
+                       Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.65),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
                   ),
                 ),
               ),
-            ),
             SvgPicture.asset(
               'assets/icons/sparkle.svg',
-              height:14.h ,
-              width:14.w,
+              height: 14.h,
+              width: 14.w,
             ),
-            Expanded(
-              child: Container(
-                height: 1,
-                margin: EdgeInsets.only(left: 12.w), // Space after text
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                  colors: [
-                  Colors.white.withOpacity(0.55,), // Solid/visible near the text
-                    Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+            if (showRightLine)
+              Expanded(
+                child: Container(
+                  height: 1,
+                  margin: EdgeInsets.only(left: 12.w),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors:Theme.of(context).brightness == Brightness.light
+                  ? [
+                    const Color(0xFFD9D9D9),
+                    const Color(0xFF878787).withOpacity(0.0),
+                  ]
+                  : [
+                    Colors.white.withOpacity(0.65),
+                    Colors.white.withOpacity(0.0),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
                 ),
               ),

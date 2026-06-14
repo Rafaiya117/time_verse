@@ -57,7 +57,7 @@ class Profile extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(24.sp),
                     decoration: BoxDecoration(
-                      color: Color(0xFF051123),
+                      color: Theme.of(context).brightness == Brightness.dark?Color(0xFF051123):Colors.white,
                       borderRadius: BorderRadius.circular(12.sp),
                       border: Border.all(
                         color: AppColors.button_color,

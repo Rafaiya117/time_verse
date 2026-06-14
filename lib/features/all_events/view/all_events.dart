@@ -1,14 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
+import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
-import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
 import 'package:time_verse/features/all_events/custom_widget/custom_eventcard.dart';
+import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 
 class AllEvents extends StatelessWidget {
@@ -16,7 +17,7 @@ class AllEvents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    Provider.of<ThemeProvider>(context);
     final location = GoRouterState.of(context).uri.toString();
     final controller = Provider.of<AllEventsController>(context, listen: false);
     controller.updateIndexFromRoute(location);
@@ -26,45 +27,13 @@ class AllEvents extends StatelessWidget {
     });
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 32.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 40.h),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: (){
-                    context.pop();
-                  }, 
-                  icon: SvgPicture.asset(
-                    'assets/icons/arrow_back.svg',
-                    width: 17.5.w,
-                    height: 15.01.h,
-                    // ignore: deprecated_member_use
-                    color: isDarkMode?AppColors.text_color:AppColors.heading_color,
-                  ),
-                ),
-                SizedBox(width: 90.w,),
-                Text(
-                  'All Events',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 20.sp,
-                    color: isDarkMode? AppColors.text_color: AppColors.heading_color,
-                  ),
-                ),
-                SizedBox(width: 70.w,),
-                IconButton(
-                  onPressed: (){
-                    themeProvider.toggleTheme();
-                  }, 
-                  icon: SvgPicture.asset(
-                    isDarkMode?'assets/icons/theme_dark.svg':'assets/icons/light_theme.svg',
-                    width: 15.w,
-                    height: 15.h,
-                  ),
-                ),
-              ],
+            CustomHeaderBar(
+              title: 'All Events', 
+              leftSpacing: 100, 
+              rightSpacing: 70
             ),
             //SizedBox(height: 20.h,),
             Consumer<AllEventsController>(
@@ -85,34 +54,46 @@ class AllEvents extends StatelessWidget {
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         confirmDismiss: (_) async {
-                          final success = controller.runWithLoaderAndTimer(
-                            context: context,
-                            task: () =>controller.removeEventFromList(event.id),
-                          );
-
-                          if (success != true) {
-                            debugPrint('❌ Failed to delete event');
-                          }
-
-                          return success;
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
-                          child: EventCard(
-                            title: event.title,
-                            sub_title: event.description??"",
-                            date: event.date,
-                            time: '${event.startTime}-${event.endTime}',
-                            location: event.location,
-                            isDarkMode: isDarkMode,
-                            onDelete: () async {
-                              final success = controller.runWithLoaderAndTimer(
+                          final completer = Completer<bool>();
+                          showRemoveEventDialog(
+                            context,
+                            onConfirm: () async {
+                              final success = await controller.runWithLoaderAndTimer(
                                 context: context,
                                 task: () => controller.removeEventFromList(event.id),
                               );
                               if (success != true) {
                                 debugPrint('❌ Failed to delete event');
                               }
+                              completer.complete(success == true);
+                            },
+                          );
+                          return await completer.future.catchError(
+                            (_) => false,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: EventCard(
+                            title: event.title,
+                            sub_title: event.description ?? "",
+                            date: event.date,
+                            time: '${event.startTime}-${event.endTime}',
+                            location: event.location,
+                            isDarkMode: isDarkMode,
+                            onDelete: () async {
+                              showRemoveEventDialog(
+                                context,
+                                onConfirm: () async {
+                                  final success = await controller.runWithLoaderAndTimer(
+                                    context: context,
+                                    task: () => controller.removeEventFromList(event.id),
+                                      );
+                                  if (success != true) {
+                                    debugPrint('❌ Failed to delete event');
+                                  }
+                                },
+                              );
                             },
                             id: event.id,
                           ),
@@ -123,7 +104,6 @@ class AllEvents extends StatelessWidget {
                 );
               },
             ),
-
             // SizedBox(height: 10.h),
             //   Center(
             //     child: CustomButton(
