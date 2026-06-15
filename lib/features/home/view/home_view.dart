@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -162,18 +164,12 @@ class HomeView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                  // Image.asset(
-                  //   logoPath,
-                  //   width:68.w ,
-                  //   height:54.h ,
-                  //   fit: BoxFit.contain,
-                  // ),
-                  CustomUserInitialsAvatar(
-                    userFirstName:UserSession().formattedUsername, // Pass your dynamic username variable here
-                    //isDarkMode: isDarkMode,
-                    size: 56.w,
-                  ),
-                  Row(
+                CustomUserInitialsAvatar(
+                  userFirstName:UserSession().formattedUsername, 
+                  //isDarkMode: isDarkMode,
+                  size: 56.w,
+                ),
+                Row(
                   children: [
                     IconButton(
                       onPressed: () {
@@ -187,19 +183,17 @@ class HomeView extends StatelessWidget {
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
-                        onTap: () {
-                          context.push('/profile');
+                      onTap: () {
+                        context.push('/profile');
                         },
                         child: SizedBox(
                           width: 40.w,
-                          height: 40.w, // ✅ FIX: use same scaling unit to prevent stretch
+                          height: 40.w, 
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isDarkMode
-                                  ? AppColors.text_color
-                                  : AppColors.heading_color,
+                                color: isDarkMode ? AppColors.text_color: AppColors.heading_color,
                                 width: 2,
                               ),
                             ),
@@ -211,13 +205,9 @@ class HomeView extends StatelessWidget {
                                   debugPrint(
                                     '!----Profile image -----------$profilePicture',
                                   );
-
                                   final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
                                     ? NetworkImage(profilePicture) as ImageProvider<Object>
-                                      : const AssetImage(
-                                      'assets/images/profile_img.png',
-                                    ) as ImageProvider<Object>;
-
+                                    : const AssetImage('assets/images/profile_img.png') as ImageProvider<Object>;
                                   return Image(
                                     image: imageProvider,
                                     fit: BoxFit.cover,
@@ -266,26 +256,6 @@ class HomeView extends StatelessWidget {
                 color: isDarkMode?Colors.white: Color(0xFF414141),
               ),
             ),
-            // Container(
-            //   width: 384.w,
-            //   height: 224.h,
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(12.r),
-            //   ),
-            //   child: Stack(
-            //     children: [
-            //       //Background SVG
-            //       SvgPicture.asset(
-            //         isDarkMode 
-            //           ? 'assets/images/WelcomeSection_d.svg'
-            //           : 'assets/images/WelcomeSection_w.svg',
-            //         width: 384.w,
-            //         height: 224.h,
-            //         fit: BoxFit.cover,
-            //       ),                                    
-            //     ],
-            //   ),
-            // ),
             SizedBox(height: 30.h),
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -296,34 +266,24 @@ class HomeView extends StatelessWidget {
                       Container(
                         height: 1.h,
                         width: double.infinity,
-                        color: isDarkMode
-                        ? const Color(0xFF3B3B3B)
-                        : const Color(0xFFF1A80A).withOpacity(0.6),
+                        // ignore: deprecated_member_use
+                        color: isDarkMode ? const Color(0xFF3B3B3B): const Color(0xFFF1A80A).withOpacity(0.6),
                       ),
                       // The floating Date Pill Header
                       Center(
                         child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20.w,
-                            vertical: 10.h,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 10.h),
                           decoration: BoxDecoration(
-                            color: isDarkMode
-                            ? const Color(0xFF060B13)
-                            : Colors.white,
+                            color: isDarkMode ? const Color(0xFF060B13): Colors.white,
                             borderRadius: BorderRadius.circular(30.r),
                             // ✅ FIX: Main border frame line follows matching theme rules
                             border: Border.all(
-                              color: isDarkMode
-                              ? const Color(0xFF3B3B3B)
-                              // ignore: deprecated_member_use
-                              : const Color(0xFFF1A80A).withOpacity(0.7),
+                              color: isDarkMode ? const Color(0xFF3B3B3B): const Color(0xFFF1A80A).withOpacity(0.7),
                               width: 1,
                             ),
                             // Ambient glow shadow effect
                             boxShadow: [
                               BoxShadow(
-                                // ignore: deprecated_member_use
                                 color: const Color(0xFFF1A80A).withOpacity(isDarkMode ? 0.05 : 0.08),
                                 blurRadius: 12,
                                 spreadRadius: 1,
@@ -340,9 +300,7 @@ class HomeView extends StatelessWidget {
                               ),
                               SizedBox(width: 8.w),
                               Text(
-                                DateFormat(
-                                  'EEEE, MMMM d',
-                                ).format(DateTime.now()),
+                                DateFormat('EEEE, MMMM d').format(DateTime.now()),
                                 style: GoogleFonts.outfit(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 16.sp,
@@ -386,18 +344,13 @@ class HomeView extends StatelessWidget {
                                   ? const Color(0xFFF1A80A): (isDarkMode ? const Color(0xFF070F1A): Colors.white),
                                   borderRadius: BorderRadius.circular(24.r),
                                   border: Border.all(
-                                    color: !isSelected
-                                    ? (isDarkMode ? Colors.white: Colors.grey.shade300) : Colors.transparent,
+                                    color: !isSelected ? (isDarkMode ? Colors.white: Colors.grey.shade300) : Colors.transparent,
                                     width: 0.2.sp,
                                   ),
                                   boxShadow: [
                                     if (!isSelected) ...[
                                       BoxShadow(
-                                        color: isDarkMode
-                                        // ignore: deprecated_member_use
-                                        ? Colors.white.withOpacity(0.3)
-                                        // ignore: deprecated_member_use
-                                        : Colors.black.withOpacity(0.05),
+                                        color: isDarkMode ? Colors.white.withOpacity(0.3): Colors.black.withOpacity(0.05),
                                         blurRadius: 4,
                                         spreadRadius: 0,
                                       ),
@@ -427,9 +380,7 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 18.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: isSelected
-                                        ? const Color(0xFF060B13)
-                                        : (isDarkMode? Colors.white: Colors.black), // Dynamic unselected date number text
+                                        color: isSelected ? const Color(0xFF060B13): (isDarkMode? Colors.white: Colors.black), // Dynamic unselected date number text
                                       ),
                                     ),
                                   ],
@@ -476,12 +427,8 @@ class HomeView extends StatelessWidget {
                         children: [
                           // Floating Category Tag Badge
                           Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
-                              vertical: 6.h,
-                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 6.h),
                             decoration: BoxDecoration(
-                              // ignore: deprecated_member_use
                               color: isDarkMode ?Colors.black.withOpacity(0.3): Color(0xFFFFF7E5),
                               borderRadius: BorderRadius.circular(20.r),
                               border: Border.all(
@@ -520,16 +467,6 @@ class HomeView extends StatelessWidget {
                       width: 19.w,
                       height: 20.h,
                     ),
-                    // Text(
-                    //   '“',
-                    //   style: GoogleFonts.playfairDisplay(
-                    //     fontSize: 48.sp,
-                    //     color: const Color(0xFFFFA500),
-                    //     fontWeight: FontWeight.bold,
-                    //     height: 0.6,
-                    //   ),
-                    // ),
-
                     // 2. Core Inspirational Quote Content Carousel (PageView)
                     Expanded(
                       child: Consumer<HomeController>(
@@ -542,9 +479,7 @@ class HomeView extends StatelessWidget {
                             child: RepaintBoundary(
                               key: homeController.quoteShareKey,
                               child: Container(
-                                color: isDarkMode
-                                    ? const Color(0xFF051123).withOpacity(0.2)
-                                    : Colors.transparent,
+                                color: isDarkMode ? const Color(0xFF051123).withOpacity(0.2): Colors.transparent,
                                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                                 child: DefaultTextStyle(
                                   style: const TextStyle(
@@ -582,7 +517,6 @@ class HomeView extends StatelessWidget {
                                               Container(
                                                 width: 30.w,
                                                 height: 1,
-                                                // ignore: deprecated_member_use
                                                 color: const Color(0xFFFFA500,).withOpacity(0.5),
                                               ),
                                               Padding(
@@ -596,7 +530,6 @@ class HomeView extends StatelessWidget {
                                               Container(
                                                 width: 30.w,
                                                 height: 1,
-                                                // ignore: deprecated_member_use
                                                 color: const Color(0xFFFFA500,).withOpacity(0.5),
                                               ),
                                             ],
@@ -628,7 +561,6 @@ class HomeView extends StatelessWidget {
                       builder: (context, homeController, _) {
                         return Container(
                           decoration: BoxDecoration(
-                            // ignore: deprecated_member_use
                             color: isDarkMode ?Colors.black.withOpacity(0.35):Colors.white,
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(12.r),
@@ -636,7 +568,6 @@ class HomeView extends StatelessWidget {
                             ),
                             border: Border(
                               top: BorderSide(
-                                // ignore: deprecated_member_use
                                 color: Colors.white.withOpacity(0.08),
                                 width: 1,
                               ),
@@ -651,9 +582,7 @@ class HomeView extends StatelessWidget {
                                   onTap: () async {
                                     if (homeController.inspirationalQuotes.isNotEmpty) {
                                       final currentQuote = homeController.inspirationalQuotes[homeController.currentQuoteIndex];
-                                      debugPrint(
-                                        'Saving quote with ID: ${currentQuote.id}',
-                                      );
+                                      debugPrint('Saving quote with ID: ${currentQuote.id}',);
                                       final success = await homeController.saveQuoteToFavorite(eventId: currentQuote.id ?? 0,);
                                       if (success) {
                                         await showMessageDialog(
@@ -738,7 +667,6 @@ class HomeView extends StatelessWidget {
                               Container(
                                 height: 24.h,
                                 width: 1,
-                                // ignore: deprecated_member_use
                                 color: Colors.white.withOpacity(0.12),
                               ),
                               Expanded(
@@ -788,21 +716,16 @@ class HomeView extends StatelessWidget {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
                       color: isDarkMode ? Color(0xFFF6AD14).withOpacity(0.65):  Colors.white,
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: InkWell(
                       onTap: () {
-                        //context.push('/add_event');
                         context.push('/all_events');
                       },
                       borderRadius: BorderRadius.circular(12.r),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 8.h,),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -932,11 +855,9 @@ class HomeView extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(24.w),
                 decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
                   color: const Color(0xFFF6AD14).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
-                    // ignore: deprecated_member_use
                     color:const Color(0xFFFFB800).withOpacity(0.3),
                   ),
                 ),
@@ -1109,13 +1030,12 @@ class HomeView extends StatelessWidget {
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
                   color: isDarkMode
-                      ? const Color(0xFF051123)
-                      : const Color(0xFFFFFFFF),
+                  ? const Color(0xFF051123): const Color(0xFFFFFFFF),
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
                     color: isDarkMode
-                        ? const Color(0xFFC5A880).withOpacity(0.35)
-                        : Colors.transparent,
+                    ? const Color(0xFFC5A880).withOpacity(0.35)
+                    : Colors.transparent,
                   ),
                 ),
                 child: Column(

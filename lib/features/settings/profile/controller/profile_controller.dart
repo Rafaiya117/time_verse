@@ -106,7 +106,7 @@ class ProfileController extends ChangeNotifier {
     final updatedUser = User(
       id: currentUser?.id ?? 0,
       name: nameController.text.trim(),
-      birthDate: dateController.text.trim().isNotEmpty ? dateController.text.trim(): null,
+      birthDate: dateController.text.trim().isNotEmpty ? dateController.text:null,
       profilePicture: null,
       password: passwordController.text.trim().isNotEmpty? passwordController.text.trim(): null,
     );
@@ -127,6 +127,7 @@ class ProfileController extends ChangeNotifier {
         dateController.text = result.birthDate ?? '';
         UserSession().profileImageUrl = result.profilePicture;
 
+        debugPrint("✅ Updated birthday : ${dateController.text}");
         debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
 
         ScaffoldMessenger.of(context).showSnackBar(

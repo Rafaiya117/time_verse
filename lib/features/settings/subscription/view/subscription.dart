@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
 class Subscription extends StatelessWidget {
@@ -63,13 +66,15 @@ class Subscription extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+                      },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
-                      icon: Icon(
-                        Icons.wb_sunny_outlined,
-                        color: const Color(0xFFFFB703),
-                        size: 22.sp,
+                      icon: SvgPicture.asset(
+                        'assets/icons/theme_dark.svg',
+                        width:37.w,
+                        height: 37.h,
                       ),
                     ),
                   ],
