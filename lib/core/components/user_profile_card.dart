@@ -60,9 +60,30 @@ class UserProfileCard extends StatelessWidget {
                   height: 64.h,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14.r),
-                    image: DecorationImage(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.cover,
+                    // Removed explicit decoration image to allow smooth layout fallback mapping
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14.r),
+                    child: imageUrl.startsWith('http')
+                      ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/profile_img.png',
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        )
+                        : Image.asset(
+                          imageUrl.isNotEmpty? imageUrl: 'assets/images/profile_img.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/images/profile_img.png',
+                          fit: BoxFit.cover,
+                        );
+                      },
                     ),
                   ),
                 ),

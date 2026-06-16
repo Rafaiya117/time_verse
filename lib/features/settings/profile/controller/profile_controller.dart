@@ -85,69 +85,75 @@ class ProfileController extends ChangeNotifier {
 }
 
   Future<void> updateProfile(BuildContext context) async {
-    // ✅ BLOCK update for Google login users
-    final isGoogleLogin = await AppPrefs.isGoogleLogin();
-    if (isGoogleLogin) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Google profile cannot be updated from here"),
-        ),
-      );
-      return;
-    }
+  final isGoogleLogin = await AppPrefs.isGoogleLogin();
+  if (isGoogleLogin) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Google profile cannot be updated from here"),
+      ),
+    );
+    return;
+  }
 
-    if (nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Name cannot be empty")),
-      ); 
-      return; 
-    }
+  if (nameController.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Name cannot be empty")),
+    ); 
+    return; 
+  }
 
-    final updatedUser = User(
-      id: currentUser?.id ?? 0,
-      name: nameController.text.trim(),
-      birthDate: dateController.text.trim().isNotEmpty ? dateController.text:null,
-      profilePicture: null,
-      password: passwordController.text.trim().isNotEmpty? passwordController.text.trim(): null,
+  debugPrint("🚀 Sending birthdate payload: '${dateController.text}'");
+
+  final updatedUser = User(
+    id: currentUser?.id ?? 0,
+    name: nameController.text.trim(),
+    birthDate: dateController.text.trim().isNotEmpty ? dateController.text : null,
+    profilePicture: null,
+    password: passwordController.text.trim().isNotEmpty ? passwordController.text.trim() : null,
+  );
+
+  isLoading = true;
+  notifyListeners();
+
+  try {
+    final result = await _userService.updateUserProfile(
+      updatedUser,
+      profileImage: pickedImage,
     );
 
-    isLoading = true;
-    notifyListeners();
+    if (result != null) {
+      currentUser = result;
+      UserSession().profileImageUrl = result.profilePicture;
 
-    try {
-      final result = await _userService.updateUserProfile(
-        updatedUser,
-        profileImage: pickedImage,
-      );
-
-      if (result != null) {
-        currentUser = result;
-        nameController.text = result.name;
-        passwordController.text = result.password ?? '';
-        dateController.text = result.birthDate ?? '';
-        UserSession().profileImageUrl = result.profilePicture;
-
-        debugPrint("✅ Updated birthday : ${dateController.text}");
-        debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile updated successfully")),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to update profile")),
-        );
-      }
-    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Something went wrong. Please try again.")),
+        const SnackBar(content: Text("Profile updated successfully")),
       );
-    } finally {
-      isLoading = false;
-      loadUserProfile();
-      notifyListeners();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update profile")),
+      );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Something went wrong. Please try again.")),
+    );
+  } finally {
+    isLoading = false;
+    
+    await loadUserProfile(); 
+    
+    if (currentUser != null) {
+      nameController.text = currentUser!.name;
+      passwordController.text = currentUser!.password ?? '';
+      dateController.text = currentUser!.birthDate ?? '';
+    }
+
+    debugPrint("✅ Updated birthday : ${dateController.text}");
+    debugPrint("✅ Updated image path: ${UserSession().profileImageUrl}");
+    
+    notifyListeners();
   }
+}
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
@@ -182,10 +188,13 @@ class ProfileController extends ChangeNotifier {
     return '$baseurl$picture';
   }
 
-  void setBirthDate(DateTime date) { 
-    dateController.text = DateFormat('yyyy-MM-dd').format(date); 
-    notifyListeners(); 
-  }
+  void setBirthDate(DateTime date) {
+  final formatted = DateFormat('yyyy-MM-dd').format(date);
+  dateController.text = formatted;
+  debugPrint("🎯 Controller set text to: ${dateController.text}"); 
+  
+  notifyListeners();
+}
 
   /// ------------------ NEW: Clear profile on logout ------------------ ///
   void clearProfile() {

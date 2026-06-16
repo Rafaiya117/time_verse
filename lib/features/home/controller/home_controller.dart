@@ -207,7 +207,7 @@ class HomeController extends ChangeNotifier {
   }
 
   void submitFeedback() {
-    clearFeedback();
+    //clearFeedback();
     postReviewToApi();
   }
 
@@ -257,13 +257,16 @@ Future<void> fetchReviewsFromApi() async {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final response = await _dio.get(
       '$baseUrl/api/v1/event/my-feedbacks/',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
           },
         ),
       );
+
+      // 🛠️ Added to print fetched reviews data
+      debugPrint('📥 Fetched Reviews Data: ${response.data}');
 
       if (response.statusCode == 200 && response.data is List) {
         final List<dynamic> dataList = response.data as List<dynamic>;
@@ -296,6 +299,8 @@ Future<void> fetchReviewsFromApi() async {
           'Content-Type': 'application/json',
         }),
       );
+
+      debugPrint('📤 Post Review Response Data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         clearFeedback();

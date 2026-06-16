@@ -14,14 +14,15 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-  return User(
-    id: json['id'] as int,
-    name: "${json['first_name'] ?? ''} ${json['last_name'] ?? ''}".trim(),
-    profilePicture: json['profile_picture'] as String?,
-    birthDate: null, // not provided anymore
-    password: null,
-  );
-}
+    return User(
+      id: json['id'] as int,
+      name: "${json['first_name'] ?? ''} ${json['last_name'] ?? ''}".trim(),
+      profilePicture: json['profile_picture'] as String?,
+      // 🛠️ FIX: Map the key from your backend instead of hardcoding null
+      birthDate: json['birth_date'] as String?, 
+      password: null,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     final data = {

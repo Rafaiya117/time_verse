@@ -3,33 +3,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
 class Subscription extends StatelessWidget {
-  final dynamic controller; // Kept your controller integration intact
+  final dynamic controller; 
 
   const Subscription({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // Full-screen background gradient matching the dark atmospheric theme
-        decoration:BoxDecoration(
-          gradient: LinearGradient(
+        decoration: BoxDecoration(
+        gradient: isDarkMode
+          ? LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.center,
             colors: [
-              AppColors.containers_bgd, 
-              AppColors.containers_bgd.withOpacity(0.7),// Color at the very bottom
-              Colors.transparent, // Color at the center
+              AppColors.containers_bgd,
+              AppColors.containers_bgd.withOpacity(0.7), 
+              Colors.transparent, 
             ],
-          ),
+          )
+          : null, 
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -37,32 +40,19 @@ class Subscription extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Top Navigation Bar (Back Arrow Button and Sun/Theme Icon)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.pop();
+                      },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
-                      icon: Container(
-                        width: 40.w,
-                        height: 40.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFFFFFFF).withOpacity(0.06),
-                          border: Border.all(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.15),
-                            width: 1,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
+                      icon: SvgPicture.asset(
+                        isDarkMode? 'assets/icons/arrow_back.svg': 'assets/icons/arrow_back_light.svg',
+                        width: 37.w,
+                        height: 37.h,
                       ),
                     ),
                     IconButton(
@@ -72,7 +62,7 @@ class Subscription extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       icon: SvgPicture.asset(
-                        'assets/icons/theme_dark.svg',
+                        isDarkMode?'assets/icons/theme_dark.svg':'assets/icons/light_theme.svg',
                         width:37.w,
                         height: 37.h,
                       ),
@@ -80,8 +70,6 @@ class Subscription extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 15.h),
-
-                // Top Rose Premium Logo
                 Image.asset(
                   'assets/images/premium_logo.png',
                   width: 50.w,
@@ -89,18 +77,15 @@ class Subscription extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
                 SizedBox(height: 12.h),
-
-                // Header Labels
                 Text(
                   'Welcome To',
                   style: GoogleFonts.lora(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w400,
-                    color: Colors.white,
+                    color: isDarkMode?Colors.white:AppColors.heading_color,
                   ),
                 ),
                 SizedBox(height: 12.h),
-
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
@@ -109,8 +94,8 @@ class Subscription extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
-                    children: const [
-                      TextSpan(text: 'Infini '),
+                    children:[
+                      TextSpan(text: 'Infini ',style: TextStyle(color: isDarkMode?Colors.white:AppColors.heading_color)),
                       TextSpan(
                         text: 'Quote',
                         style: TextStyle(color: Color(0xFFFFB703)),
@@ -119,7 +104,6 @@ class Subscription extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8.h),
-
                 Text(
                   'Start Your 14 Day\nFree Trial',
                   textAlign: TextAlign.center,
@@ -131,7 +115,6 @@ class Subscription extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 14.h),
-
                 Text(
                   'Unlock Daily Wisdom, Premium Reminders,\nSaved Inspiration, And Deeper\nPersonal Insights.',
                   textAlign: TextAlign.center,
@@ -143,8 +126,6 @@ class Subscription extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 28.h),
-
-                // Premium Features Blueprint List Container
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(
@@ -152,7 +133,7 @@ class Subscription extends StatelessWidget {
                     vertical: 16.h,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A).withOpacity(0.9),
+                    color:  isDarkMode?Color(0xFF0F172A).withOpacity(0.9):Colors.white,
                     borderRadius: BorderRadius.circular(20.r),
                     border: Border.all(
                       color: const Color(0xFFFFB703).withOpacity(0.4),
@@ -162,22 +143,27 @@ class Subscription extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildFeatureItem(
+                        context,
                         Icons.auto_awesome,
                         'Unlimited Daily Inspiration',
                       ),
                       _buildFeatureItem(
+                        context,
                         Icons.calendar_today_rounded,
                         'Smart Event Reminders',
                       ),
                       _buildFeatureItem(
+                        context,
                         Icons.local_offer_outlined,
                         'Save Your Favorite Quotes',
                       ),
                       _buildFeatureItem(
+                        context,
                         Icons.brightness_3_outlined,
                         'Premium Calming Backgrounds',
                       ),
                       _buildFeatureItem(
+                        context,
                         Icons.notifications_none_outlined,
                         'Personal Notification Messages',
                       ),
@@ -185,8 +171,6 @@ class Subscription extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 18.h),
-
-                // Pricing Card
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(
@@ -194,7 +178,7 @@ class Subscription extends StatelessWidget {
                     vertical: 18.h,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A).withOpacity(0.9),
+                    color:  isDarkMode?Color(0xFF0F172A).withOpacity(0.9):Colors.white,
                     borderRadius: BorderRadius.circular(20.r),
                     border: Border.all(
                       color: const Color(0xFFFFB703),
@@ -223,8 +207,8 @@ class Subscription extends StatelessWidget {
                                   fontSize: 16.sp,
                                   color: Colors.white,
                                 ),
-                                children: const [
-                                  TextSpan(text: 'Then '),
+                                children:[
+                                  TextSpan(text: 'Then ',style: TextStyle(color:isDarkMode? AppColors.background_color:AppColors.heading_color)),
                                   TextSpan(
                                     text: '\$1.99',
                                     style: TextStyle(
@@ -232,7 +216,7 @@ class Subscription extends StatelessWidget {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  TextSpan(text: ' /Month'),
+                                  TextSpan(text: ' /Month',style: TextStyle(color:isDarkMode? AppColors.background_color:AppColors.heading_color)),
                                 ],
                               ),
                             ),
@@ -250,7 +234,7 @@ class Subscription extends StatelessWidget {
                                     'No Charge Today',
                                     style: GoogleFonts.outfit(
                                       fontSize: 12.sp,
-                                      color: Colors.white70,
+                                      color: isDarkMode? AppColors.background_color:AppColors.heading_color,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -267,7 +251,7 @@ class Subscription extends StatelessWidget {
                                     'Cancel Anytime',
                                     style: GoogleFonts.outfit(
                                       fontSize: 12.sp,
-                                      color: Colors.white70,
+                                      color: isDarkMode? AppColors.background_color:AppColors.heading_color,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -287,8 +271,6 @@ class Subscription extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 22.h),
-
-                // CTA Button - Start Free Trial
                 Container(
                   width: double.infinity,
                   height: 52.h,
@@ -332,7 +314,7 @@ class Subscription extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w400,
-                    color: Colors.white60,
+                    color: isDarkMode? AppColors.background_color:AppColors.heading_color,
                   ),
                 ),
                 SizedBox(height: 24.h),
@@ -351,7 +333,7 @@ class Subscription extends StatelessWidget {
                       'Safe & Secure',
                       style: GoogleFonts.outfit(
                         fontSize: 12.sp,
-                        color: Colors.white54,
+                        color: isDarkMode? AppColors.background_color:AppColors.heading_color,
                       ),
                     ),
                   ],
@@ -366,7 +348,8 @@ class Subscription extends StatelessWidget {
   }
 
   // Helper widget to construct list feature segments cleanly
-  Widget _buildFeatureItem(IconData icon, String text) {
+  Widget _buildFeatureItem(BuildContext context,IconData icon, String text) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
@@ -376,7 +359,7 @@ class Subscription extends StatelessWidget {
             height: 36.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF1E3A8A).withOpacity(0.3),
+              color:  isDarkMode?Color(0xFF1E3A8A).withOpacity(0.3):AppColors.l_schedule_clr2,
             ),
             child: Icon(icon, color: const Color(0xFFFFB703), size: 18.sp),
           ),
@@ -387,7 +370,7 @@ class Subscription extends StatelessWidget {
               style: GoogleFonts.outfit(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w400,
-                color: Colors.white,
+                color: isDarkMode?Colors.white:AppColors.heading_color,
               ),
             ),
           ),

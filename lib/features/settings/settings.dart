@@ -36,7 +36,7 @@ class Settings extends StatelessWidget {
                 SizedBox(height: 24.h),
 
                 UserProfileCard(
-                  imageUrl: userSession.profileImageUrl ?? '',
+                  imageUrl: userSession.profileImageUrl ?? 'assets/images/profile_img.png',
                   userName: userSession.username ?? '',
                   isPremium: false,
                   subtitle: 'Manage your account and preferences',

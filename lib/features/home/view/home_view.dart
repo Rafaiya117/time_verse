@@ -177,8 +177,8 @@ class HomeView extends StatelessWidget {
                       },
                       icon: SvgPicture.asset(
                         isDarkMode ? 'assets/icons/theme_dark.svg' : 'assets/icons/light_theme.svg',
-                        width: 20.w,
-                        height: 20.h,
+                        width: 37.w,
+                        height: 37.h,
                       ),
                     ),
                     SizedBox(width: 8.w),
@@ -266,7 +266,6 @@ class HomeView extends StatelessWidget {
                       Container(
                         height: 1.h,
                         width: double.infinity,
-                        // ignore: deprecated_member_use
                         color: isDarkMode ? const Color(0xFF3B3B3B): const Color(0xFFF1A80A).withOpacity(0.6),
                       ),
                       // The floating Date Pill Header
@@ -907,11 +906,9 @@ class HomeView extends StatelessWidget {
                       width: 32.w,
                       height: 32.h,
                       decoration: BoxDecoration(
-                        // ignore: deprecated_member_use
                         color: isDarkMode ?Colors.white.withOpacity(0.1): AppColors.button_color.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
-                          // ignore: deprecated_member_use
                           color: AppColors.fourth_color.withOpacity(0.2),
                           width: 0.5,
                         ),
@@ -949,9 +946,7 @@ class HomeView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: isDarkMode
-                            // ignore: deprecated_member_use
                             ? const Color(0xFFFFB800).withOpacity(0.3)
-                            // ignore: deprecated_member_use
                             : Colors.grey.withOpacity(0.2),
                           ),
                         ),
@@ -964,7 +959,6 @@ class HomeView extends StatelessWidget {
                                   width: 40.w,
                                   height: 40.h,
                                   decoration: BoxDecoration(
-                                    // ignore: deprecated_member_use
                                     color: Colors.grey.withOpacity(0.3),
                                     borderRadius: BorderRadius.circular(20.r),
                                   ),
@@ -979,7 +973,7 @@ class HomeView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      review.userEmail,
+                                      review.userName,
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14.sp,
@@ -990,7 +984,7 @@ class HomeView extends StatelessWidget {
                                     ),
                                     Row(
                                       children: List.generate(
-                                        review.rating ?? 0,
+                                        review.rating,
                                         (index) => Icon(
                                           Icons.star,
                                           color: const Color(0xFFFFB800),
@@ -1009,9 +1003,7 @@ class HomeView extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14.sp,
                                 color: isDarkMode
-                                // ignore: deprecated_member_use
                                 ? Colors.white.withOpacity(0.8)
-                                // ignore: deprecated_member_use
                                 : Colors.black.withOpacity(0.8),
                                 height: 1.4,
                               ),
