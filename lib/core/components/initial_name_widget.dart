@@ -14,18 +14,11 @@ class CustomUserInitialsAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Cleans up spaces and securely grabs the target uppercase character
-    String firstLetter = 'R';
-    String cleanName = userFirstName.trim();
-    if (cleanName.isNotEmpty) {
-      firstLetter = cleanName[0].toUpperCase();
-    }
-
-    // 2. Explicitly formats path to match uppercase assets matching your pubspec.yaml configurations
-    final String alphabetSvgPath = 'assets/alphabet/$firstLetter.svg';
-    
-    // 💡 Helpful Debug: Check your debug console output to see exactly what file path it's searching for!
-    debugPrint('Loading Avatar Asset Path: ---> "$alphabetSvgPath"');
+  String cleanName = userFirstName.trim();
+  String firstLetter = cleanName.isNotEmpty ? cleanName[0].toUpperCase() : 'R';
+  final String alphabetSvgPath = 'assets/alphabet/$firstLetter.svg';
+  
+  debugPrint('Loading Avatar Asset Path: ---> "$alphabetSvgPath"');
 
     return SvgPicture.asset(
       alphabetSvgPath,

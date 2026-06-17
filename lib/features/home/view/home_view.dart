@@ -833,7 +833,7 @@ class HomeView extends StatelessWidget {
                                   event.id,
                                   event.title,
                                   '${event.startTime} - ${event.endTime}',
-                                  event.category ?? '',
+                                  event.category_name ?? '',
                                   event.location,
                                   event.description,
                                   Colors.grey,

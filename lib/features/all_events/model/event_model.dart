@@ -14,6 +14,7 @@ class EventModel {
   final int user;
   final String? category;
   final String? subtitle;
+  final String? category_name;
   EventModel({
     required this.id,
     required this.userName,
@@ -30,6 +31,7 @@ class EventModel {
     required this.user,
     this.category,
     this.subtitle,
+    this.category_name,
   });
 
   factory EventModel.fromMap(Map<String, dynamic> map) {
@@ -49,6 +51,7 @@ class EventModel {
     user: map['user'] ?? 0,
     category: map['category']?.toString(),
     subtitle: map['subtitle']?.toString(),
+    category_name: map['category_name'],
   );
 }
 
@@ -70,6 +73,7 @@ class EventModel {
       'user': user,
       'category': category,
       'subtitle': subtitle,
+      'category_name': category_name
     };
   }
 }

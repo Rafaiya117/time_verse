@@ -17,6 +17,7 @@ import 'package:time_verse/config/services/firebase/fire_base_service.dart';
 import 'package:time_verse/config/connectivity/no_connectivity.dart';
 import 'package:time_verse/config/services/firebase/firebase_forground.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
+import 'package:time_verse/core/components/mood_tracker/controller.dart';
 import 'package:time_verse/core/theme/theme.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/features/all_events/controller/all_events.dart';
@@ -189,6 +190,7 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_) => TermsController()),
             ChangeNotifierProvider(create: (_) => PrivacyController()),
             ChangeNotifierProvider(create: (_) => DeleteAcController()),
+            ChangeNotifierProvider(create: (_)=> MoodController()),
           ],
           child: Builder(
             builder: (context) {

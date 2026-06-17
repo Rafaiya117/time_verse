@@ -55,7 +55,7 @@ class EventController extends ChangeNotifier {
 
     if (response.statusCode == 200) {
       final data = response.data;
-      debugPrint('✅ Event details fetched: ${data['title']}');
+      debugPrint('✅ Event details fetched: $data');
       eventDetail = EventModel(
           id: data['id'] ?? 0,
           userName: "${data['user_first_name'] ?? ''} ${data['user_last_name'] ?? ''}".trim(),
