@@ -421,44 +421,54 @@ class HomeView extends StatelessWidget {
                         right: 16.w,
                         top: 16.h,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Floating Category Tag Badge
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 6.h),
-                            decoration: BoxDecoration(
-                              color: isDarkMode ?Colors.black.withOpacity(0.3): Color(0xFFFFF7E5),
-                              borderRadius: BorderRadius.circular(20.r),
-                              border: Border.all(
-                                color: const Color(0xFFC5A880).withOpacity(0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.wb_sunny_rounded,
-                                  color: const Color(0xFFFFA500),
-                                  size: 14.sp,
-                                ),
-                                SizedBox(width: 6.w),
-                                Text(
-                                  'Motivation',
-                                  style: GoogleFonts.outfit(
-                                    color: const Color(0xFFFFA500),
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
+                      child: Consumer<HomeController>(
+                        builder: (context, homeController, child) {
+                          final currentIdx = homeController.pageController.hasClients? homeController.pageController.page?.round() ?? 0: 0;
+                          final currentQuote = homeController.inspirationalQuotes.isNotEmpty? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]
+                          : null;
+
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Floating Category Tag Badge
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 6.h,),
+                                decoration: BoxDecoration(
+                                  color: isDarkMode? Colors.black.withOpacity(0.3): const Color(0xFFFFF7E5),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  border: Border.all(
+                                    color: const Color(
+                                      0xFFC5A880,
+                                    ).withOpacity(0.4),
+                                    width: 1,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.wb_sunny_rounded,
+                                      color: const Color(0xFFFFA500),
+                                      size: 14.sp,
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      // 🛠️ Outputs dynamic database category strings natively
+                                      currentQuote?.name ?? 'Motivation',
+                                      style: GoogleFonts.outfit(
+                                        color: const Color(0xFFFFA500),
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
-
                     // Giant Decorative Quote Marks Symbol
                     SizedBox(height: 10.h),
                     SvgPicture.asset(

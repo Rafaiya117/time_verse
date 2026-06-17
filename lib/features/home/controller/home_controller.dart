@@ -25,12 +25,14 @@ import 'package:time_verse/features/home/model/review_model.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
 class QuoteData {
-  final int? id;      
+  final int? id; 
+  final String name;     
   final String quote;
   final String reference;
 
   QuoteData({
     this.id,
+    required this.name,
     required this.quote,
     required this.reference,
   });
@@ -56,6 +58,7 @@ class HomeController extends ChangeNotifier {
   final List<QuoteData> _inspirationalQuotes = [
     QuoteData(
       id: 0,
+      name: '',
       quote:"Welcome to InfiniQuote.Your calendar has always kept you busy.Now let it inspire you.",
       reference: "",
     ),    
@@ -541,6 +544,7 @@ Future<void> fetchEvents() async {
         ..add(
           QuoteData(
             id: latest['id'],
+            name: latest['category_name'],
             quote: quoteText,
             reference: latest['title']?.toString() ?? '',
           ),

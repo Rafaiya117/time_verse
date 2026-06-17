@@ -24,14 +24,14 @@ class ThemedBackgroundWrapper extends StatelessWidget {
         ),
 
         //!-------- 2. FIXED: Bottom Solid Background Accent Layer ---------
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            color: isDarkMode ? const Color(0xFF060B13) : null,
-            height: 120.h,
-            width: double.infinity,
-          ),
-        ),
+        // Align(
+        //   alignment: Alignment.bottomCenter,
+        //   child: Container(
+        //     color: isDarkMode ? const Color(0xFF060B13) : null,
+        //     height: 100.h,
+        //     width: double.infinity,
+        //   ),
+        // ),
 
         //!------------ 3. Scaffold Body Content Layer --------------!
         child,
