@@ -62,6 +62,7 @@ class ProfileController extends ChangeNotifier {
       setUser(mergedUser);
 
       nameController.text = currentUser!.name;
+      emailController.text = currentUser!.email ?? '';
       passwordController.text = currentUser!.password ?? '';
       dateController.text = currentUser!.birthDate ?? '';
 

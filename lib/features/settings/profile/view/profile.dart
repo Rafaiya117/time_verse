@@ -86,6 +86,7 @@ class Profile extends StatelessWidget {
                           fontSize: 16.sp,
                           height: 44.h,
                           hintFontSize: 14.sp,
+                          isReadOnly: true,
                         ),
                         SizedBox(height: 20.h),
                         CustomInputField(
@@ -96,6 +97,7 @@ class Profile extends StatelessWidget {
                           fontSize: 16.sp,
                           height: 44.h,
                           hintFontSize: 14.sp,
+                          isReadOnly: true,
                         ),
                         SizedBox(height: 20.h),
                         DateField(

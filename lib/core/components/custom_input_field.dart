@@ -176,6 +176,7 @@ class CustomInputField extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
   final bool isPassword;
+  final bool isReadOnly; // 🛠️ ADDED: read-only property declaration
   final double fontSize;
   final Color? textColor;
   final Color? borderColor;
@@ -192,6 +193,7 @@ class CustomInputField extends StatefulWidget {
     required this.hintText,
     required this.controller,
     this.isPassword = false,
+    this.isReadOnly = false, // 🛠️ ADDED: default value assignment
     this.fontSize = 14,
     this.textColor,
     this.borderColor,
@@ -225,20 +227,18 @@ class _CustomInputFieldState extends State<CustomInputField> {
                 style: GoogleFonts.playfairDisplay(
                   fontWeight: FontWeight.w500,
                   fontSize: widget.fontSize.sp,
-                  color: widget.textColor ?? (isDarkMode
-                      ? AppColors.text_color
-                      : AppColors.heading_color),
+                  color: widget.textColor ?? (isDarkMode ? AppColors.text_color: AppColors.heading_color),
                 ),
               ),
               if (widget.label.contains('*'))
                 TextSpan(
-                  text: '*',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w500,
-                    fontSize: widget.fontSize.sp,
-                    color: Colors.red,
-                  ),
+                text: '*',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w500,
+                  fontSize: widget.fontSize.sp,
+                  color: Colors.red,
                 ),
+              ),
             ],
           ),
         ),
@@ -247,22 +247,22 @@ class _CustomInputFieldState extends State<CustomInputField> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color:widget.borderColor ??const Color(0xFFDF951F).withOpacity(0.4), // Clean subtle border for light mode
+              color: widget.borderColor ?? const Color(0xFFDF951F).withOpacity(0.4),
               width: 1.w,
             ),
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: Theme.of(context).brightness == Brightness.dark
-              ? [
-                const Color(0xFF020617), // top
-                const Color(0xFF111827), // middle
-                const Color(0xFF0F172A), // bottom
+                ? [
+                const Color(0xFF020617),
+                const Color(0xFF111827),
+                const Color(0xFF0F172A),
               ]
               : [
                 Colors.white,
                 Colors.white,
-              ], 
+              ],
             ),
             boxShadow: Theme.of(context).brightness == Brightness.dark
               ? [
@@ -272,23 +272,24 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   spreadRadius: 0.5,
                 ),
               ]
-            : null, // No box shadow in light mode
+            : null,
           ),
           child: TextFormField(
             controller: widget.controller,
+            readOnly: widget.isReadOnly, 
             obscureText: widget.isPassword ? _obscureText : false,
             style: GoogleFonts.outfit(
               fontSize: 14.sp,
               fontWeight: FontWeight.w400,
-              color: Colors.white,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
             decoration: InputDecoration(
-              isDense: true, 
+              isDense: true,
               filled: true,
               fillColor: Colors.transparent,
               contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w, 
-                vertical: widget.height != null ? (widget.height! / 3.5).h : 15.h, // ✅ FIXED: Perfectly targets matching proportions
+                horizontal: 16.w,
+                vertical: widget.height != null ? (widget.height! / 3.5).h : 15.h,
               ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -297,34 +298,32 @@ class _CustomInputFieldState extends State<CustomInputField> {
               focusedErrorBorder: InputBorder.none,
               hintText: widget.hintText,
               hintStyle: GoogleFonts.outfit(
-                fontSize: widget.hintFontSize ?? 13.sp, 
+                fontSize: widget.hintFontSize ?? 13.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF4B5563), 
+                color: const Color(0xFF4B5563),
               ),
               prefixIcon: widget.prefixSvgPath != null
                 ? Padding(
                   padding: EdgeInsets.all(14.w),
-                  child: SvgPicture.asset(
-                    widget.prefixSvgPath!,
-                    width: 16.w,
-                    height: 16.h,
-                    colorFilter: ColorFilter.mode(
-                      widget.prefixIconColor ?? const Color(0xFF9CA3AF),
-                      BlendMode.srcIn,
+                    child: SvgPicture.asset(
+                      widget.prefixSvgPath!,
+                      width: 16.w,
+                      height: 16.h,
+                      colorFilter: ColorFilter.mode(
+                        widget.prefixIconColor ?? const Color(0xFF9CA3AF),
+                        BlendMode.srcIn,
+                      ),
                     ),
+                  )
+                : null,
+                suffixIcon: widget.isPassword
+                  ? IconButton(
+                    icon: Icon(
+                    _obscureText? Icons.visibility_outlined: Icons.visibility_off_outlined,
+                    color: widget.suffixIconColor ?? const Color(0xFF9CA3AF),
+                    size: 20.sp,
                   ),
-                )
-              : null,
-              suffixIcon: widget.isPassword
-                ? IconButton(
-                  icon: Icon(
-                    _obscureText
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                      color: widget.suffixIconColor ?? const Color(0xFF9CA3AF),
-                      size: 20.sp,
-                    ),
-                    onPressed: () {
+                  onPressed: () {
                     setState(() {
                       _obscureText = !_obscureText;
                     });
