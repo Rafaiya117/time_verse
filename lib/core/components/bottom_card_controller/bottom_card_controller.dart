@@ -34,9 +34,6 @@ class BottomNavController extends ChangeNotifier {
 // }
 
 void navigateTo(int index, BuildContext context) {
-  selectedIndex = index;
-  notifyListeners();
-
   if (appRoutes[index] == '/add') {
     showBottomCard = true;
     notifyListeners();
@@ -47,11 +44,15 @@ void navigateTo(int index, BuildContext context) {
       backgroundColor: Colors.transparent,
       builder: (_) => const AddEventPage(),
     );
-  } else {
-    showBottomCard = false;
-    notifyListeners();
-    context.push(appRoutes[index]);
+    return;
   }
+
+  selectedIndex = index;
+  showBottomCard = false;
+
+  notifyListeners();
+
+  context.push(appRoutes[index]);
 }
 
   void hideBottomCard() {

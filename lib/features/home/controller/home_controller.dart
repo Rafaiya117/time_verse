@@ -20,6 +20,7 @@ import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
+import 'package:time_verse/features/home/model/ai_refelction_model.dart';
 import 'dart:async';
 import 'package:time_verse/features/home/model/review_model.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
@@ -43,9 +44,11 @@ class HomeController extends ChangeNotifier {
   int selectedIndex = 0;
   final List<ReviewData> _reviews = [];
   List<ReviewData> get reviews => List.unmodifiable(_reviews);
+  EventReflectionResponse? currentReflection;
 
   final List<EventModel> todaysEvents = [];
   bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
   DateTime selectedDate = DateTime.now();
 
   final Dio _dio =  Dio(BaseOptions(
@@ -53,6 +56,8 @@ class HomeController extends ChangeNotifier {
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));
+
+  
 
   // Daily Inspiration Quotes
   final List<QuoteData> _inspirationalQuotes = [
@@ -96,7 +101,7 @@ class HomeController extends ChangeNotifier {
 
   /// -------------------- Initialization -------------------- ///
  void initOnce(ProfileController profileController) {
-  if (_isInitialized) return;
+    if (_isInitialized) return;
   _isInitialized = true;
 
   startAutoSlide();
@@ -576,6 +581,39 @@ Future<void> fetchEvents() async {
     } catch (e) {
       debugPrint('⚠️ Error saving quote: $e');
       return false;
+    }
+  }
+
+  Future<void> fetchAIMooodReflection() async {
+    try {
+      final token = await AuthService().getToken();
+      if (token == null || token.isEmpty) {
+        debugPrint('⚠️ Error: Empty or missing auth token in fetchAIMooodReflection');
+        return;
+      }
+
+      final response = await _dio.get(
+        'api/v1/event/ai-reflection/', 
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      debugPrint('📥 AI Reflection Response Data: ${response.data}');
+
+      if (response.statusCode == 200 && response.data != null) {
+        currentReflection = EventReflectionResponse.fromJson(response.data);
+        debugPrint('ai_reflection ${response.data}');
+        notifyListeners();
+      }
+    } on DioException catch (e) {
+      debugPrint('❌ Dio error fetching AI reflection: ${e.response?.statusCode} -> ${e.response?.data}');
+    } catch (e) {
+      debugPrint('⚠️ Unexpected error fetching AI reflection: $e');
     }
   }
 

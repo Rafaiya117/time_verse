@@ -25,6 +25,7 @@ class EventDetails extends StatelessWidget {
       controller.fetchEventDetailsById(eventId);
     });
     return Scaffold(
+      extendBody: true,
       body: SingleChildScrollView(
         child: Consumer<EventController>(
           builder: (context, eventController, _) {
@@ -143,7 +144,7 @@ class EventDetails extends StatelessWidget {
                                           Padding(
                                             padding: EdgeInsets.symmetric(horizontal: 8.w,),
                                             child: SvgPicture.asset(
-                                              'assets/icons/star_sparkle.svg',
+                                              'assets/icons/sparkle.svg',
                                               width: 12.w,
                                               height: 12.h,
                                               colorFilter: const ColorFilter.mode(
@@ -296,11 +297,11 @@ class EventDetails extends StatelessWidget {
                           context.push('/all_events');
                         },
                         child: Text(
-                          'See all Qoutes',
+                          'Explore more quotes  →',
                           style: GoogleFonts.outfit(
-                            fontSize: 14.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.normal,
-                            color: AppColors.third_color,
+                            color: isDarkMode?AppColors.background_color:AppColors.heading_color,
                           ),
                         ),
                       ),

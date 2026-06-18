@@ -26,6 +26,7 @@ class AllEvents extends StatelessWidget {
       controller.fetchAllEvents();
     });
     return Scaffold(
+      extendBody: true,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 40.h),
         child: Column(

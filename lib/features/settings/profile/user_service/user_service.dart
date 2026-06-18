@@ -67,6 +67,7 @@ class UserService {
 
       // Support both direct and nested responses
       final userJson = data['data'] ?? data;
+      debugPrint('User data -> $userJson');
       _currentUser = User.fromJson(userJson);
 
       return _currentUser;

@@ -108,8 +108,8 @@ class EventCard extends StatelessWidget {
                   children: [
                     SvgPicture.asset(
                       'assets/icons/today.svg',
-                      width: 20.w,
-                      height: 20.h,
+                      width: 15.w,
+                      height: 15.h,
                     ),
                     SizedBox(width: 10.w),
                     Text(

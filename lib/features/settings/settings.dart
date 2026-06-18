@@ -19,6 +19,7 @@ class Settings extends StatelessWidget {
     final userSession = UserSession();
 
     return Scaffold(
+      extendBody: true,
       //backgroundColor: isDarkMode ? const Color(0xFF060E1E) : const Color(0xFFF9FAFB),
       body: SafeArea(
         child: SingleChildScrollView(

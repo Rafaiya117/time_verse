@@ -21,6 +21,7 @@ class SavedQoutation extends StatelessWidget {
       controller.fetchSavedQuotes();
     });
     return Scaffold(
+      extendBody: true,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),

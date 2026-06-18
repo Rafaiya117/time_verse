@@ -24,6 +24,7 @@ class CalenderView extends StatelessWidget {
     });
 
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
         bottom: false, // Allows content background to flow smoothly down behind the floating navbar
         child: SingleChildScrollView(

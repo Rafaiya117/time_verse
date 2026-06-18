@@ -30,6 +30,7 @@ class AddEventPage extends StatelessWidget {
     const inputBgColor = Color(0xFF0A192F); // Dark input card backgrounds
 
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),

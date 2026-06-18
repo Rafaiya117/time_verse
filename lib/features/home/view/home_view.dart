@@ -146,13 +146,16 @@ class HomeView extends StatelessWidget {
     final homeController = context.read<HomeController>();
     final profileController = context.read<ProfileController>();
 
-    /// ✅ Run once when widget appears
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      homeController.initOnce(profileController);
-    });
+    if (!homeController.isInitialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        homeController.initOnce(profileController);
+        homeController.fetchAIMooodReflection();
+      });
+    }
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         child: Padding(
@@ -202,9 +205,6 @@ class HomeView extends StatelessWidget {
                               child: Selector<ProfileController, String?>(
                                 selector: (_, controller) => controller.currentUser?.profilePicture,
                                 builder: (_, profilePicture, __) {
-                                  debugPrint(
-                                    '!----Profile image -----------$profilePicture',
-                                  );
                                   final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
                                     ? NetworkImage(profilePicture) as ImageProvider<Object>
                                     : const AssetImage('assets/images/profile_img.png') as ImageProvider<Object>;
@@ -437,9 +437,7 @@ class HomeView extends StatelessWidget {
                                   color: isDarkMode? Colors.black.withOpacity(0.3): const Color(0xFFFFF7E5),
                                   borderRadius: BorderRadius.circular(20.r),
                                   border: Border.all(
-                                    color: const Color(
-                                      0xFFC5A880,
-                                    ).withOpacity(0.4),
+                                    color: const Color(0xFFC5A880).withOpacity(0.4),
                                     width: 1,
                                   ),
                                 ),
@@ -861,38 +859,47 @@ class HomeView extends StatelessWidget {
                 },
               ),
               SizedBox(height: 30.h),
-              Container(
-                padding: EdgeInsets.all(24.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF6AD14).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color:const Color(0xFFFFB800).withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'AI Reflections',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20.sp,
-                        color: AppColors.fourth_color
+              Consumer<HomeController>(
+                builder: (context, homeController, _) {
+                  final aiReflectionText =homeController.currentReflection?.aiReflection.isNotEmpty == true
+                    ? homeController.currentReflection!.aiReflection
+                    : 'Today feels centered around connection, gratitude and emotionally meaningful movement.';
+                  return Container(
+                    padding: EdgeInsets.all(24.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF6AD14).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: const Color(0xFFFFB800).withValues(alpha: 0.3),
                       ),
                     ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'Today feels centered around connection, gratitude and emotionally meaningful movement.',
-                      textAlign: TextAlign.start,
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14.sp,
-                        color: isDarkMode? AppColors.l_schedule_clr3: Colors.black,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'AI Reflections',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 20.sp,
+                            color: AppColors.fourth_color,
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          aiReflectionText, // 🛠️ Dynamic reflection text rendered here
+                          textAlign: TextAlign.start,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14.sp,
+                            color: isDarkMode
+                            ? AppColors.l_schedule_clr3
+                            : Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
               SizedBox(height: 30.h),
               Row(
