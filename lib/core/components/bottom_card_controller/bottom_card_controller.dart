@@ -47,12 +47,19 @@ void navigateTo(int index, BuildContext context) {
     return;
   }
 
+  // 1. Update the local tab indexing state safely first
   selectedIndex = index;
   showBottomCard = false;
+  notifyListeners(); // This triggers the bar rebuild cleanly
 
-  notifyListeners();
-
-  context.push(appRoutes[index]);
+  // 2. 🛠️ THE PERMANENT FIX: Defer the push to the next frame macro-task loop.
+  // This completely eliminates the framework traversal error while using .push()
+  // so your history stack stays alive and context.pop() works perfectly.
+  Future.delayed(Duration.zero, () {
+    if (context.mounted) {
+      context.push(appRoutes[index]);
+    }
+  });
 }
 
   void hideBottomCard() {

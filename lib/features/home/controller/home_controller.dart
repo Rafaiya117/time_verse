@@ -42,6 +42,8 @@ class QuoteData {
 
 class HomeController extends ChangeNotifier {
   int selectedIndex = 0;
+  int _currentQuoteIndex = 0;
+  int get currentQuoteIndex => _currentQuoteIndex;
   final List<ReviewData> _reviews = [];
   List<ReviewData> get reviews => List.unmodifiable(_reviews);
   EventReflectionResponse? currentReflection;
@@ -82,10 +84,9 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  int _currentQuoteIndex = 0;
+
   Timer? _autoSlideTimer;
   final PageController _pageController = PageController();
-  int get currentQuoteIndex => _currentQuoteIndex;
   PageController get pageController => _pageController;
 
   int _selectedRating = 0;
@@ -157,6 +158,8 @@ class HomeController extends ChangeNotifier {
       notifyListeners();
     }
   }
+ 
+  
 
   void navigateTo(int index, BuildContext context) {
     selectedIndex = index;

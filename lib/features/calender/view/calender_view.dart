@@ -7,6 +7,7 @@ import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/all_events/custom_widget/custom_eventcard.dart';
+import 'package:time_verse/features/all_events/custom_widget/event_remove_modal.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/widget/custom_calender_widget.dart';
@@ -26,7 +27,7 @@ class CalenderView extends StatelessWidget {
     return Scaffold(
       extendBody: true,
       body: SafeArea(
-        bottom: false, // Allows content background to flow smoothly down behind the floating navbar
+        bottom: false, 
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 16.0.h),
@@ -121,13 +122,17 @@ class CalenderView extends StatelessWidget {
                           location: event.location,
                           isDarkMode: isDarkMode,
                           onDelete: () async {
-                            final success = controller.runWithLoaderAndTimer(
-                              context: context,
-                              task: () => controller.removeEventFromList(event.id),
+                            showRemoveEventDialog(
+                                context,
+                                onConfirm: () async {
+                                  final success = await controller.runWithLoaderAndTimer(
+                                    context: context,
+                                    task: () => controller.removeEventFromList(event.id),);
+                                  if (success != true) {
+                                    debugPrint('❌ Failed to delete event');
+                                }
+                              },
                             );
-                            if (success != true) {
-                              debugPrint('❌ Failed to delete event');
-                            }
                           },
                         ),
                       );
@@ -135,8 +140,6 @@ class CalenderView extends StatelessWidget {
                   );
                 },
               ),
-              // Added an intentional structural spacing padding at the bottom 
-              // to make sure your list elements are never obscured by the floating Add item
               SizedBox(height: 100.h),
             ],
           ),

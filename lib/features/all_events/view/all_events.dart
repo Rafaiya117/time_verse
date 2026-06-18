@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_header.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
@@ -20,10 +21,10 @@ class AllEvents extends StatelessWidget {
     Provider.of<ThemeProvider>(context);
     final location = GoRouterState.of(context).uri.toString();
     final controller = Provider.of<AllEventsController>(context, listen: false);
-    controller.updateIndexFromRoute(location);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchAllEvents();
+      context.read<BottomNavController>().updateIndexFromRoute(location);
     });
     return Scaffold(
       extendBody: true,
