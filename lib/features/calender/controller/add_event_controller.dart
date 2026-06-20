@@ -116,7 +116,7 @@ class AddEventController extends ChangeNotifier {
       "end_time": endTime,
       "alarm_time": _formatAlarmTime(date, alarmTime),
       "is_completed": isCompleted,
-      "type_event_description": note ?? "",
+      // ❌ REMOVED: "type_event_description": note ?? "",
     };
 
     if (location != null && location.trim().isNotEmpty) {
@@ -124,6 +124,11 @@ class AddEventController extends ChangeNotifier {
     }
     if (categoryName != null && categoryName.trim().isNotEmpty) {
       body["category_name"] = categoryName.trim();
+    }
+    
+    // 🛠️ FIX: Only attach description if a note actually exists and contains text
+    if (note != null && note.trim().isNotEmpty) {
+      body["type_event_description"] = note.trim();
     }
 
     try {
