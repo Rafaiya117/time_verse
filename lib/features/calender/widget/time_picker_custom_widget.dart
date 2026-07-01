@@ -56,7 +56,7 @@ class TimePickerField extends StatelessWidget {
                           ? textController!.text
                           : "Select Time"),
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: isDarkMode?Colors.white: Colors.black,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600, // Semi-bold style for the values
                   ),

@@ -109,13 +109,7 @@ class HomeController extends ChangeNotifier {
 
   /// 🔥 Load profile FIRST
   profileController.loadUserProfile().then((_) async {
-
-    /// 🔥 Now fetch events AFTER user is available
-    await fetchEvents();              // ← MOVED HERE
-
-    await fetchReviewsFromApi();
-
-    /// 🔥 Then load today's events
+    await fetchEvents();              
     await todaysfetchEvents(profileController);
 
     debugPrint("TODAYS EVENTS LENGTH: ${todaysEvents.length}");
@@ -222,76 +216,6 @@ class HomeController extends ChangeNotifier {
     postReviewToApi();
   }
 
-  /// -------------------- Share Quote -------------------- ///
-  void shareQuoteAsImage(BuildContext context) async {
-    final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary != null) {
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
-      final pngBytes = byteData!.buffer.asUint8List();
-
-      final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/quote.png').create();
-      await file.writeAsBytes(pngBytes);
-
-      await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration by Infiniqoute');
-    }
-  }
-
-  Future<bool> saveQuoteImageToGallery() async {
-  try {
-    // Request permission
-    final status = await Permission.photos.request();
-    if (!status.isGranted) return false;
-
-    // Capture widget
-    final boundary = quoteShareKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-
-    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
-
-    // Save to gallery
-    await Gal.putImageBytes(pngBytes);
-
-    return true;
-  } catch (e) {
-    debugPrint("Save error: $e");
-    return false;
-  }
-}
-
-Future<void> fetchReviewsFromApi() async {
-  try {
-    final token = await AuthService().getToken();
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    final response = await _dio.get(
-      '$baseUrl/api/v1/event/my-feedbacks/',
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          },
-        ),
-      );
-
-      // 🛠️ Added to print fetched reviews data
-      debugPrint('📥 Fetched Reviews Data: ${response.data}');
-
-      if (response.statusCode == 200 && response.data is List) {
-        final List<dynamic> dataList = response.data as List<dynamic>;
-        final List<ReviewData> loadedReviews = dataList.map((json) => ReviewData.fromJson(json as Map<String, dynamic>)).toList();
-        _reviews
-          ..clear()
-          ..addAll(loadedReviews);
-        notifyListeners();
-      }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching reviews: $e');
-    }
-  }
-
 
   Future<void> postReviewToApi() async {
     try {
@@ -315,7 +239,6 @@ Future<void> fetchReviewsFromApi() async {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         clearFeedback();
-        await fetchReviewsFromApi();
       }
     } catch (e) {
       debugPrint('⚠️ Error posting review: $e');
@@ -381,95 +304,6 @@ Future<void> _markAlarmsScheduled(int userId) async {
   final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
   await prefs.setBool('alarms_scheduled_${userId}_$todayKey', true);
 }
-
-
-//  Future<void> fetchEvents() async {
-//   try {
-//     debugPrint("🔥 fetchEvents CALLED");
-
-//     final token = await AuthService().getToken();
-//     final currentUserId = UserSession().userId?.toString();
-
-//     debugPrint("👤 Current User ID: $currentUserId");
-
-//     final response = await _dio.get(
-//       'api/v1/event/',
-//       options: Options(
-//         headers: {
-//           'Authorization': 'Bearer $token',
-//           'Content-Type': 'application/json',
-//         },
-//       ),
-//     );
-
-//     debugPrint("📡 Response Status: ${response.statusCode}");
-//     debugPrint("📦 Raw Response Type: ${response.data.runtimeType}");
-
-//     if (response.statusCode == 200) {
-//       final List data =
-//           response.data is List ? response.data : [response.data];
-
-//       debugPrint("📊 Total Events From API: ${data.length}");
-
-//       /// 🔥 Safe filtering
-//       final userEvents = data
-//           .where((event) {
-//             debugPrint("🔎 Checking Event User: ${event['user']}");
-//             return event['user'].toString() == currentUserId;
-//           })
-//           .toList();
-
-//       debugPrint("🎯 User Events After Filter: ${userEvents.length}");
-
-//       /// ⭐ No events → restore default
-//       if (userEvents.isEmpty) {
-//         debugPrint("⚠️ No user events found. Restoring default quote.");
-//         _inspirationalQuotes
-//           ..clear()
-//           ..addAll(allQuotes);
-//         notifyListeners();
-//         return;
-//       }
-
-//       /// Sort by created date
-//       userEvents.sort((a, b) {
-//         final aTime = DateTime.parse(a['created_at']);
-//         final bTime = DateTime.parse(b['created_at']);
-//         return aTime.compareTo(bTime);
-//       });
-
-//       final latest = userEvents.last;
-
-//       debugPrint("🏆 Latest Event ID: ${latest['id']}");
-//       debugPrint("📝 Description: ${latest['description']}");
-//       debugPrint("📌 Type Description: ${latest['type_event_description']}");
-
-//       /// ⭐ Use description OR fallback
-//       final quoteText =
-//           (latest['description']?.toString().trim().isNotEmpty == true)
-//               ? latest['description'].toString()
-//               : latest['type_event_description']?.toString() ?? '';
-
-//       debugPrint("✨ Final Quote Text: $quoteText");
-
-//       _inspirationalQuotes
-//         ..clear()
-//         ..add(
-//           QuoteData(
-//             id: latest['id'],
-//             quote: quoteText,
-//             reference: latest['title']?.toString() ?? '',
-//           ),
-//         );
-
-//       debugPrint("✅ Inspirational Quotes Length: ${_inspirationalQuotes.length}");
-
-//       notifyListeners();
-//     }
-//   } catch (e) {
-//     debugPrint('⚠️ Error fetching events: $e');
-//   }
-// }
 
 Future<void> fetchEvents() async {
   try {
@@ -566,13 +400,54 @@ Future<void> fetchEvents() async {
   }
 }
 
+ /// -------------------- Share Quote -------------------- ///
+void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
+    final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary != null) {
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/quote.png').create();
+      await file.writeAsBytes(pngBytes);
+
+      await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration by Infiniqoute');
+    }
+  }
+
+  // 🛠️ FIX 2: Pass the view's key as a parameter
+  Future<bool> saveQuoteImageToGallery(GlobalKey key) async {
+  try {
+    final status = await Permission.photos.request();
+    if (!status.isGranted) return false;
+
+    // 🛠️ Capture widget using the local parameter key safely
+    final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+
+    await Gal.putImageBytes(pngBytes);
+
+    return true;
+  } catch (e) {
+    debugPrint("Save error: $e");
+    return false;
+  }
+}
+
   Future<bool> saveQuoteToFavorite({required int eventId}) async {
     try {
-      final token = await AuthService().getToken();
+      final token = await AuthService().getToken(); 
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
       final response = await _dio.post(
-        '$baseUrl/api/v1/event/$eventId/favorite/',
+        '$baseUrl/api/v1/event/$eventId/favorite', 
+        // 🛠️ FIX: Pass an empty map layout to prevent the backend from throwing a null payload exception
+        data: {}, 
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',

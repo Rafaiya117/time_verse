@@ -105,8 +105,8 @@ class EventDetails extends StatelessWidget {
                                       Text(
                                         eventController.eventDetail?.title ?? 'Traveling to grandmother',
                                         textAlign: TextAlign.center,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 20.sp,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 27.sp,
                                           fontWeight: FontWeight.bold,
                                           color: isDarkMode?Colors.white:Colors.black,
                                         ),
@@ -186,13 +186,12 @@ class EventDetails extends StatelessWidget {
                                           Padding(
                                             padding: EdgeInsets.symmetric(horizontal: 8.w,),
                                             child: Text(
-                                              eventController.eventDetail?.description ??
-                                              'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.',
+                                              '“ ${eventController.eventDetail?.description ?? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.'} ”',
                                               textAlign: TextAlign.center,
-                                              style: GoogleFonts.playfairDisplay(
-                                                fontSize: 20.sp,
+                                              style:GoogleFonts.inter(
+                                                fontSize: 32.sp,
                                                 fontWeight: FontWeight.w500,
-                                                color: isDarkMode?Colors.white:Colors.black,
+                                                color: isDarkMode? Colors.white : Colors.black,
                                                 height: 1.4,
                                               ),
                                             ),

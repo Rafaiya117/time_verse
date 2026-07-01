@@ -82,7 +82,8 @@ class _CustomDatePickerDialogState extends State<CustomDatePickerDialog> {
           Padding(
             padding: EdgeInsets.all(12.w),
             child: TableCalendar(
-              firstDay: DateTime.utc(2000, 1, 1),
+              // 🛠️ FIX: Sets the earliest selectable date to today, blocking all past dates
+              firstDay: DateTime.now().subtract(const Duration(minutes: 1)), 
               lastDay: DateTime.utc(2100, 12, 31),
               focusedDay: _temporaryFocusedDay,
               headerVisible: true,
@@ -140,10 +141,14 @@ class _CustomDatePickerDialogState extends State<CustomDatePickerDialog> {
                   color: widget.isDarkMode ? Colors.white30 : Colors.black26,
                   fontSize: 14.sp,
                 ),
+                
+                disabledTextStyle: GoogleFonts.outfit(
+                  color: widget.isDarkMode ? Colors.white12 : Colors.black12,
+                  fontSize: 14.sp,
+                ),
               ),
             ),
           ),
-          
           // --- DIALOG ACTIONS ---
           Padding(
             padding: EdgeInsets.only(right: 16.w, bottom: 12.h),

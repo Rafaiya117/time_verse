@@ -84,13 +84,13 @@ class AddEventController extends ChangeNotifier {
     required String date,
     required String startTime,
     required String endTime,
-    required String note,
+    //required String note,
   }) {
     if (title.trim().isEmpty) return "Event title is required";
     if (date.trim().isEmpty) return "Event date is required";
     if (startTime.trim().isEmpty) return "Start time is required";
     if (endTime.trim().isEmpty) return "End time is required";
-    if (note.trim().isEmpty) return "Note/description is required";
+    //if (note.trim().isEmpty) return "Note/description is required";
     return null; 
   }
 
@@ -246,19 +246,28 @@ class AddEventController extends ChangeNotifier {
     required BuildContext context,
     required String rawStart,
     required String rawEnd,
-    required String rawAlarm,
+    required String rawAlarm, // Can be left as empty string from UI now
     required VoidCallback onSuccess,
   }) async {
     final start = _cleanTimeStr(rawStart);
     final end = _cleanTimeStr(rawEnd);
-    final alarm = _cleanTimeStr(rawAlarm).isEmpty ? start : _cleanTimeStr(rawAlarm);
+    
+    // 🛠️ FIX: Parse event start time and automatically subtract 10 minutes
+    String alarm = start;
+    try {
+      final parsedStart = DateFormat("HH:mm").parse(start);
+      final reminderTime = parsedStart.subtract(const Duration(minutes: 10));
+      alarm = DateFormat("HH:mm").format(reminderTime);
+    } catch (e) {
+      debugPrint("⚠️ Failed calculating 10-minute fallback offset: $e");
+    }
 
     final validationError = validateFields(
       title: titleController.text,
       date: dateController.text,
       startTime: start,
       endTime: end,
-      note: noteController.text,
+      //note: noteController.text,
     );
 
     if (validationError != null) {

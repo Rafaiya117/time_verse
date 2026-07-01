@@ -22,7 +22,8 @@ import 'package:time_verse/features/auth/signup/controller/signup_controller.dar
 import 'package:path/path.dart' as path;
 
 class Signup extends StatelessWidget {
-  const Signup({super.key});
+  Signup({super.key});
+  final ValueNotifier<bool> _isTermsAgreed = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +33,6 @@ class Signup extends StatelessWidget {
     final String logoAsset = isDarkMode
       ? 'assets/images/logo.png' 
       : 'assets/images/logo_light.png';
-    final Color secondaryTextColor = isDarkMode 
-      ? AppColors.fourth_color 
-      : AppColors.heading_color;
       WidgetsBinding.instance.addPostFrameCallback((_) {
       googleServices.init();
     });
@@ -228,6 +226,65 @@ class Signup extends StatelessWidget {
                   ],
                 ),
               ),
+              
+              // 🛠️ CHECKBOX EXTENSION ROW INJECTED HERE
+              SizedBox(height: 16.h),
+              ValueListenableBuilder<bool>(
+                valueListenable: _isTermsAgreed,
+                builder: (context, isAgreed, child) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 24.w,
+                          height: 24.h,
+                          child: Checkbox(
+                            value: isAgreed,
+                            activeColor: AppColors.third_color,
+                            checkColor: Colors.black,
+                            side: BorderSide(color: AppColors.fourth_color, width: 1.5),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                            onChanged: (bool? value) {
+                              _isTermsAgreed.value = value ?? false; // Updates the listener state cleanly
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.outfit(
+                                fontSize: 13.sp,
+                                color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
+                              ),
+                              children: [
+                                const TextSpan(text: 'I agree to the '),
+                                TextSpan(
+                                  text: 'Terms & Conditions',
+                                  style: TextStyle(color: AppColors.third_color, fontWeight: FontWeight.w600),
+                                  recognizer: TapGestureRecognizer()..onTap = () {
+                                    // Handle Terms Navigation Action
+                                  },
+                                ),
+                                const TextSpan(text: ' and '),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: TextStyle(color: AppColors.third_color, fontWeight: FontWeight.w600),
+                                  recognizer: TapGestureRecognizer()..onTap = () {
+                                    // Handle Privacy Policy Navigation Action
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
               SizedBox(height: 20.h,),
               Center(
                 child: CustomButton(
@@ -286,9 +343,7 @@ class Signup extends StatelessWidget {
                   Text(
                     'Or continue with',
                     style: GoogleFonts.inter(
-                      color: const Color(
-                        0xFF9E9E9E,
-                      ), // Muted grey color matching the image text
+                      color: const Color(0xFF9E9E9E), // Muted grey color matching the image text
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -297,12 +352,12 @@ class Signup extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 1.5,
-                      margin: EdgeInsets.only(left: 12.w), // Space after text
+                      margin: EdgeInsets.only(left: 12.w), 
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.55,), // Solid/visible near the text
-                            Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
+                            Colors.white.withOpacity(0.55,),
+                            Colors.white.withOpacity(0.0,), 
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,

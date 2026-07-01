@@ -11,7 +11,9 @@ import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_q
 import 'package:time_verse/features/qoutation/saved_qoutation/custom_widget/custom_qoutation_card.dart';
 
 class SavedQoutation extends StatelessWidget {
-  const SavedQoutation({super.key});
+  SavedQoutation({super.key});
+  
+  final GlobalKey _boundaryKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -24,71 +26,70 @@ class SavedQoutation extends StatelessWidget {
       extendBody: true,
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
           child: Column(
             children: [
               CustomHeaderBar(
-                title: 'The Wisdom Jounal',
+                title: 'The Wisdom Journal',
                 leftSpacing: 50.w,
                 rightSpacing: 23.w,
               ),
               SizedBox(height: 20.h,),
               SearchAnchor(
-                builder: (BuildContext context, SearchController controller) {
+                // 🛠️ FIX: Listens to text updates/keystrokes when the full-screen search view overlay is active
+                viewOnChanged: (value) {
+                  Provider.of<SavedQouteController>(context, listen: false).updateSearchQuery(value);
+                },
+                builder: (BuildContext context, SearchController searchController) {
                   return SearchBar(
                     elevation: const WidgetStatePropertyAll<double>(0), 
                     shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
-                    controller: controller,
+                    controller: searchController,
                     hintText: 'Search your wisdom...',
                     padding: const WidgetStatePropertyAll<EdgeInsets>(
                       EdgeInsets.symmetric(horizontal: 16.0),
                     ),
-                    leading: Icon(Icons.search, color: isDarkMode?AppColors.text_color:Color(0xFF373F4B),),
+                    leading: Icon(Icons.search, color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B)),
                     onTap: () {
-                      controller.openView();
+                      searchController.openView();
                     },
-                    onChanged: (_) {
-                      controller.openView();
+                    onChanged: (value) {
+                      // Listens to text updates when typing directly in collapsed layout bar
+                      Provider.of<SavedQouteController>(context, listen: false).updateSearchQuery(value);
                     },
                     shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side:BorderSide(color: isDarkMode?AppColors.text_color:Color(0xFF373F4B)),
+                        side: BorderSide(color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B)),
                       ),
                     ),
-                    overlayColor: const WidgetStatePropertyAll<Color>(
-                      Colors.transparent,
-                    ),
+                    overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
                     backgroundColor: WidgetStatePropertyAll<Color>(
-                      // ignore: deprecated_member_use
-                      isDarkMode?Colors.transparent:Color(0xFFDADADA).withOpacity(0.3),
+                      isDarkMode ? Colors.transparent : const Color(0xFFDADADA).withOpacity(0.3),
                     ),
-                    textStyle: const WidgetStatePropertyAll<TextStyle>(
-                      TextStyle(color: Colors.white),
-                    ),
-                    hintStyle:WidgetStatePropertyAll<TextStyle>(
-                      TextStyle(color: isDarkMode?AppColors.text_color:AppColors.heading_color),
+                    textStyle: const WidgetStatePropertyAll<TextStyle>(TextStyle(color: Colors.white)),
+                    hintStyle: WidgetStatePropertyAll<TextStyle>(
+                      TextStyle(color: isDarkMode ? AppColors.text_color : AppColors.heading_color),
                     ),
                   );
                 },
-                suggestionsBuilder:
-                  (BuildContext context, SearchController controller) {
-                    final query = controller.value.text.toLowerCase();
-                      final quoteController = Provider.of<SavedQouteController>(context,listen: false,);
-                      final filteredQuotes = quoteController.savedQuotes
-                        .where((quote) =>quote['quoteText']!.toLowerCase().contains(query,) ||
-                        quote['author']!.toLowerCase().contains(query),).toList();
-                      return List<ListTile>.generate(filteredQuotes.length, (int index,) {
-                        final quote = filteredQuotes[index];
-                      return ListTile(
-                        title: Text(
-                        quote['quoteText']!,
+                suggestionsBuilder: (BuildContext context, SearchController searchController) {
+                  final quoteController = Provider.of<SavedQouteController>(context, listen: false);
+                  final suggestions = quoteController.filteredQuotes;
+
+                  return List<ListTile>.generate(suggestions.length, (int index) {
+                    final quote = suggestions[index];
+                    final displayQuote = quote['description'] ?? '';
+                    return ListTile(
+                      title: Text(
+                        displayQuote,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text(quote['author']!),
+                      subtitle: Text(quote['author'] ?? ''),
                       onTap: () {
-                        controller.closeView(quote['quoteText']!);
+                        searchController.closeView(displayQuote);
+                        quoteController.updateSearchQuery(displayQuote);
                       },
                     );
                   });
@@ -101,7 +102,7 @@ class SavedQoutation extends StatelessWidget {
                   Consumer<SavedQouteController>(
                     builder: (context, controller, _) {
                       return Text(
-                        '${controller.savedQuotes.length} quotes saved',
+                        '${controller.filteredQuotes.length} quotes saved',
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.normal,
                           fontSize: 14.sp,
@@ -114,8 +115,7 @@ class SavedQoutation extends StatelessWidget {
                     text: "Share All",
                     onPressed: () {
                       final controller = Provider.of<SavedQouteController>(context, listen: false);
-                      controller.selectAllQuotes();
-                      controller.shareSelectedQuotes(context);
+                      controller.shareQuotesAsImage(_boundaryKey);
                     },
                     leadingIcon: SvgPicture.asset(
                       'assets/icons/share_filled.svg',
@@ -137,62 +137,53 @@ class SavedQoutation extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 20.h,),
-              Consumer<SavedQouteController>(
-                builder: (context, controller, _) {
-                  return Column(
-                    children: controller.savedQuotes.map((quote) {    
-                      debugPrint("Quote ID: ${quote['id']}");
+              
+              RepaintBoundary(
+                key: _boundaryKey,
+                child: Container(
+                  color: isDarkMode ? const Color(0xFF0F172A) : Colors.white,
+                  child: Consumer<SavedQouteController>(
+                    builder: (context, controller, _) {
                       return Column(
-                        children: [
-                          QuoteCardWidget(
-                            time: quote['time'] ?? '',
-                            quoteText: quote['description'] ?? '',
-                            author: quote['author'] ?? '',
-                            shareIconPath: 'assets/icons/share.svg',
-                            heartIconPath: 'assets/icons/heart.svg',
-                            heartFilledIconPath:'assets/icons/heart_filled.svg',
-                            bookmarkIconPath: 'assets/icons/bookmark.svg',
-                            bookmarkFilledIconPath:'assets/icons/bookmark_filled.svg',
-                            id: quote['id'] as int,
-                            onHeartTap: () {
-                              print("Heart clicked: ${quote['id']}");
-                            },
-                            onBookmarkTap: () {
-                              final int id = (quote['id'] as int?) ?? 0;
-                              controller.toggleQuoteSelection(id);                           
-                              print("Bookmark clicked: ${quote['id']}");
-                            },
-                          ),
-                          SizedBox(height: 10.h),
-                        ],
+                        children: controller.filteredQuotes.map((quote) {    
+                          debugPrint("Quote ID: ${quote['id']}");
+                          return Column(
+                            children: [
+                              QuoteCardWidget(
+                                time: quote['time'] ?? '',
+                                quoteText: quote['description'] ?? '',
+                                author: quote['author'] ?? '',
+                                shareIconPath: 'assets/icons/share.svg',
+                                heartIconPath: 'assets/icons/heart.svg',
+                                heartFilledIconPath:'assets/icons/heart_filled.svg',
+                                bookmarkIconPath: 'assets/icons/bookmark.svg',
+                                bookmarkFilledIconPath:'assets/icons/bookmark_filled.svg',
+                                id: quote['id'] as int,
+                                onHeartTap: () {
+                                  print("Heart clicked: ${quote['id']}");
+                                },
+                                onBookmarkTap: () {
+                                  final int id = (quote['id'] as int?) ?? 0;
+                                  controller.toggleQuoteSelection(id);                           
+                                  print("Bookmark clicked: ${quote['id']}");
+                                },
+                              ),
+                              SizedBox(height: 10.h),
+                            ],
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
-                  );
-                },
+                    },
+                  ),
+                ),
               ),
               SizedBox(height: 120.h),
-              // Center(
-              //   child: CustomButton(
-              //     text: "Add New Event",
-              //     onPressed: () {
-              //       //context.push('/signup');
-              //       context.push('/settings');
-              //     },
-              //     gradient: AppGradientColors.button_gradient,
-              //     textColor: AppColors.text_color,
-              //     fontFamily: 'outfit',
-              //     fontSize: 16.sp,
-              //     fontWeight: FontWeight.normal,
-              //     height: 51.h,
-              //     width: double.infinity,
-              //   ),
-              // ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar:Consumer<SavedQouteController>(
-        builder: (context, controller, _) => CustomBottomNavBar(),
+      bottomNavigationBar: Consumer<SavedQouteController>(
+        builder: (context, controller, _) => const CustomBottomNavBar(),
       ),
     );
   }
