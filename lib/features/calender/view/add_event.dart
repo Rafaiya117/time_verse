@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -353,11 +355,10 @@ class AddEventPage extends StatelessWidget {
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    // Triggers the accurate native dialog layout design matching your image example
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        String selectedOption = 'Don\'t repeat'; // Placeholder UI context variable 
+                        String selectedOption = 'Don\'t repeat'; 
                         return StatefulBuilder(
                           builder: (context, setModalState) {
                             Widget buildRadioRow(String label) {
@@ -521,13 +522,12 @@ class AddEventPage extends StatelessWidget {
                       return GestureDetector(
                         onTap: () => controller.selectCategory(category.name),
                         child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w,), 
                           decoration: BoxDecoration(
-                            // If selected, overlays opacity tint; otherwise switches background depending on isDarkMode
-                            // ignore: deprecated_member_use
-                            color: isSelected ? goldColor.withOpacity(0.15): (isDarkMode ? inputBgColor : Colors.white),
+                            color: isSelected? goldColor.withOpacity(0.15): (isDarkMode ? inputBgColor : Colors.white),
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
-                              color: isSelected? goldColor : Colors.grey.shade800,
+                              color: isSelected? goldColor: Colors.grey.shade800,
                               width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
@@ -542,11 +542,13 @@ class AddEventPage extends StatelessWidget {
                               SizedBox(height: 6.h),
                               Text(
                                 category.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.inter(
-                                  color: isDarkMode ? Colors.white: Colors.black, // Adjusts text contrast dynamically for screen visibility
-                                  fontSize: 16.sp,
-                                  fontWeight: isSelected
-                                  ? FontWeight.w700 : FontWeight.bold,
+                                  color: isDarkMode? Colors.white: Colors.black,
+                                  fontSize: 14.sp, 
+                                  fontWeight: isSelected? FontWeight.w700: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -557,9 +559,7 @@ class AddEventPage extends StatelessWidget {
                   );
                 },
               ),
-
               SizedBox(height: 28.h),
-
               // --- SAVE BUTTON ---
               CustomButton(
                 text: "Save",
@@ -568,8 +568,6 @@ class AddEventPage extends StatelessWidget {
                     context,
                     listen: false,
                   );
-
-                  // ✅ Single clean call to handle parsing, validation, loading, saving, and state resets
                   await addEventController.saveEvent(
                     context: context,
                     rawStart: timeController.formatTime(
@@ -581,9 +579,7 @@ class AddEventPage extends StatelessWidget {
                     rawAlarm: timeController.formatTime(
                       timeController.getTime('alarm'),
                     ),
-                    onSuccess: () {
-                      
-                    },
+                    onSuccess: () {},
                   );
                 },
                 gradient: AppGradientColors.button_gradient,
@@ -633,24 +629,52 @@ class AddEventPage extends StatelessWidget {
 }
 
   Widget _buildCategoryCardSkeleton() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.shade900),
-      ),
-      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-    );
-  }
+  return Container(
+    decoration: BoxDecoration(
+      color: const Color(0xFF0A192F),
+      borderRadius: BorderRadius.circular(12.r),
+      border: Border.all(color: Colors.grey.shade900),
+    ),
+    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+  );
+}
 
-  IconData _getCategoryIcon(String? name) {
-    switch (name?.toLowerCase()) {
-      case 'success stories': return Icons.emoji_events_outlined;
-      case 'daily motivation': return Icons.wb_sunny_outlined;
-      case 'personal growth': return Icons.trending_up;
-      case 'workout': return Icons.fitness_center;
-      default: return Icons.category_outlined;
-    }
+IconData _getCategoryIcon(String? name) {
+  switch (name?.toLowerCase().trim()) {
+    case 'success stories': 
+      return Icons.emoji_events_outlined; 
+    case 'daily motivation': 
+    case 'motivation': 
+      return Icons.wb_sunny_outlined; 
+    case 'self improvement': 
+      return Icons.trending_up_rounded; 
+    case 'career focused': 
+      return Icons.work_outline_rounded; 
+    case 'love & relationship': 
+      return Icons.favorite_border_rounded; 
+    case 'education': 
+      return Icons.school_outlined; 
+    case 'health': 
+      return Icons.health_and_safety_outlined;
+    case 'finance': 
+      return Icons.account_balance_wallet_outlined; 
+    case 'mindfulness': 
+      return Icons.spa_outlined; 
+    case 'productivity': 
+      return Icons.bolt_rounded; 
+    default: 
+      return Icons.category_outlined; 
   }
+}
+
+  // IconData _getCategoryIcon(String? name) {
+  //   switch (name?.toLowerCase()) {
+  //     case 'success stories': return Icons.emoji_events_outlined;
+  //     case 'daily motivation': return Icons.wb_sunny_outlined;
+  //     case 'personal growth': return Icons.trending_up;
+  //     case 'workout': return Icons.fitness_center;
+  //     default: return Icons.category_outlined;
+  //   }
+  // }
 }
 

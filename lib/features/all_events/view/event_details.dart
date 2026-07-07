@@ -189,7 +189,7 @@ class EventDetails extends StatelessWidget {
                                               '“ ${eventController.eventDetail?.description ?? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.'} ”',
                                               textAlign: TextAlign.center,
                                               style:GoogleFonts.inter(
-                                                fontSize: 32.sp,
+                                                fontSize: 24.sp,
                                                 fontWeight: FontWeight.w500,
                                                 color: isDarkMode? Colors.white : Colors.black,
                                                 height: 1.4,

@@ -178,9 +178,9 @@ class HomeView extends StatelessWidget {
                 Transform.translate(
                     offset: Offset(-45.w, 0),
                     child: Image.asset(
-                    isDarkMode? 'assets/images/logo.png': 'assets/images/logo_light.png',
-                    width: 120.w,
-                    height: 40.h,
+                      'assets/images/premium_logo.png',
+                    width: 150.w,
+                    height: 80.h,
                   ),
                 ),
                 Row(
@@ -800,14 +800,12 @@ class HomeView extends StatelessWidget {
               ),
               SizedBox(height: 30.h),
 
-Consumer<HomeController>(
+              Consumer<HomeController>(
                 builder: (context, homeController, child) {
                   final currentIdx = homeController.currentQuoteIndex;
-                  final currentQuote =
-                      homeController.inspirationalQuotes.isNotEmpty
-                      ? homeController.inspirationalQuotes[currentIdx %
-                            homeController.inspirationalQuotes.length]
-                      : null;
+                  final currentQuote = homeController.inspirationalQuotes.isNotEmpty
+                    ? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]
+                    : null;
 
                   return Container(
                     padding: EdgeInsets.all(24.w),
@@ -837,7 +835,7 @@ Consumer<HomeController>(
                               child: Text(
                                 'Inspirational Quote',
                                 maxLines: 1,
-                                overflow: TextOverflow.ellipsis, 
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20.sp,
@@ -845,19 +843,19 @@ Consumer<HomeController>(
                                 ),
                               ),
                             ),
-                            SizedBox(width: 8.w), 
+                            SizedBox(width: 8.w),
                             Container(
                               padding: EdgeInsets.symmetric(
                                 horizontal: 10.w,
                                 vertical: 4.h,
                               ),
                               decoration: BoxDecoration(
-                                color: isDarkMode ? Colors.black26 : const Color(0xFFFFFAEE),
+                                color: isDarkMode
+                                ? Colors.black26
+                                : const Color(0xFFFFFAEE),
                                 borderRadius: BorderRadius.circular(12.r),
                                 border: Border.all(
-                                  color: const Color(
-                                    0xFFFFB800,
-                                  ).withOpacity(0.4),
+                                  color: const Color(0xFFFFB800).withOpacity(0.4),
                                 ),
                               ),
                               child: Row(
@@ -870,7 +868,8 @@ Consumer<HomeController>(
                                   ),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    currentQuote?.name != null && currentQuote!.name.isNotEmpty? currentQuote.name: 'Motivation',
+                                    currentQuote?.name != null && currentQuote!.name.isNotEmpty
+                                    ? currentQuote.name: 'Motivation',
                                     style: GoogleFonts.outfit(
                                       color: const Color(0xFFE5A100),
                                       fontSize: 11.sp,
@@ -903,52 +902,52 @@ Consumer<HomeController>(
                               style: const TextStyle(
                                 color: Colors.white,
                                 height: 1.4,
-                                ),
-                                  child: homeController.inspirationalQuotes.isEmpty
-                                    ? const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFFFFA500),
-                                      ),
-                                    )
-                                  : PageView.builder(
-                                    key: ValueKey(
-                                      homeController.inspirationalQuotes.length,
-                                      ),
-                                      controller: homeController.pageController,
-                                      itemCount: homeController.inspirationalQuotes.length,
-                                      onPageChanged: (index) {
+                              ),
+                              child: homeController.inspirationalQuotes.isEmpty
+                                ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFFFFA500),
+                                  ),
+                                )
+                                : PageView.builder(
+                                  key: ValueKey(
+                                    homeController.inspirationalQuotes.length,
+                                    ),
+                                    controller: homeController.pageController,
+                                    itemCount: homeController.inspirationalQuotes.length,
+                                    onPageChanged: (index) {
                                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      if (context.mounted) {
-                                        homeController.updateQuoteIndex(index);
-                                      }
-                                    });
-                                  },
-                                  itemBuilder: (context, index) {
-                                    if (index >=homeController.inspirationalQuotes.length) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  final quote = homeController.inspirationalQuotes[index];
+                                    if (context.mounted) {
+                                      homeController.updateQuoteIndex(index,);
+                                    }
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  if (index >=homeController.inspirationalQuotes.length) {
+                                  return const SizedBox.shrink();
+                                }
+                                final quote = homeController.inspirationalQuotes[index];
 
-                                  return Column(
-                                    crossAxisAlignment:CrossAxisAlignment.start,
-                                    mainAxisAlignment:MainAxisAlignment.center,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          quote.quote,
-                                          textAlign: TextAlign.start,
+                                return Column(
+                                  crossAxisAlignment:CrossAxisAlignment.start,
+                                  mainAxisAlignment:MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        quote.quote,
+                                        textAlign: TextAlign.start,
                                         style: GoogleFonts.outfit(
                                           fontWeight: FontWeight.w400,
                                           fontSize: 14.5.sp,
                                           color: isDarkMode
-                                          ? AppColors.l_schedule_clr3
-                                          : Colors.black87,
-                                          fontStyle: FontStyle.italic,
+                                            ? AppColors.l_schedule_clr3
+                                            : Colors.black87,
+                                            fontStyle: FontStyle.italic,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 10.h),
-                                    Text(
+                                      SizedBox(height: 10.h),
+                                      Text(
                                       "— ${quote.reference}",
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w500,
@@ -963,6 +962,151 @@ Consumer<HomeController>(
                                 },
                               ),
                             ),
+                          ),
+                        ),
+
+                        // ================== ADDED ACTION BUTTONS BAR ==================
+                        SizedBox(height: 20.h),
+                        Container(
+                          padding: EdgeInsets.only(top: 14.h),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.08),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              // Favorite Button
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    final success = await homeController.saveQuoteToFavorite(eventId: 0);
+                                    if (success) {
+                                      await showMessageDialog(
+                                        context,
+                                        "Quote saved to favorites successfully!",
+                                        title: "Success",
+                                        icon: Icons.check_circle_outline,
+                                        iconColor: Colors.green,
+                                      );
+                                    }
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.favorite_border_rounded,
+                                        color: isDarkMode ? Colors.white : AppColors.fourth_color,
+                                        size: 22.sp,
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        'Favorite',
+                                        style: GoogleFonts.outfit(
+                                          color: isDarkMode
+                                          ? Colors.white
+                                          : AppColors.fourth_color,
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 24.h,
+                                width: 1,
+                                color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
+                              ),
+                              // Save Button
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    final success = await homeController.saveQuoteImageToGallery(_shareKey);
+                                    if (success) {
+                                      await showMessageDialog(
+                                        context,
+                                        "Quote image saved to gallery!",
+                                        title: "Success",
+                                        icon: Icons.check_circle_outline,
+                                        iconColor: Colors.green,
+                                      );
+                                    } else {
+                                      await showMessageDialog(
+                                        context,
+                                        "Failed to save image.",
+                                        title: "Error",
+                                        icon: Icons.error_outline,
+                                        iconColor: Colors.red,
+                                      );
+                                    }
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.bookmark_border_rounded,
+                                        color: isDarkMode
+                                        ? Colors.white
+                                        : AppColors.fourth_color,
+                                        size: 22.sp,
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        'Save',
+                                        style: GoogleFonts.outfit(
+                                          color: isDarkMode
+                                          ? Colors.white
+                                          : AppColors.fourth_color,
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 24.h,
+                                width: 1,
+                                color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
+                              ),
+                              // Share Button
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => homeController.shareQuoteAsImage(
+                                    context,
+                                    _shareKey,
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.share_outlined,
+                                        color: isDarkMode
+                                        ? Colors.white
+                                        : AppColors.fourth_color,
+                                        size: 22.sp,
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        'Share',
+                                        style: GoogleFonts.outfit(
+                                          color: isDarkMode
+                                          ? Colors.white: AppColors.fourth_color,
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

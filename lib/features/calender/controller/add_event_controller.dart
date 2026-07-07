@@ -65,9 +65,8 @@ class AddEventController extends ChangeNotifier {
       );
 
       if (response.statusCode == 200 && response.data is List) {
-        categories = (response.data as List)
-            .map((json) => EventCategory.fromJson(json))
-            .toList();
+        categories = (response.data as List).map((json) => EventCategory.fromJson(json)).toList();
+        debugPrint('Fetched ${response.data} categories successfully.');
       } else {
         debugPrint('Failed to load categories: ${response.statusCode}');
       }
