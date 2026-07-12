@@ -53,6 +53,8 @@ class HomeController extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   DateTime selectedDate = DateTime.now();
 
+  bool isReflectionFavorite = false;
+
   final Dio _dio =  Dio(BaseOptions(
     baseUrl: dotenv.env['BASE_URL'] ?? '',
     connectTimeout: const Duration(seconds: 10),
@@ -446,7 +448,6 @@ void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
 
       final response = await _dio.post(
         '$baseUrl/api/v1/event/$eventId/favorite', 
-        // 🛠️ FIX: Pass an empty map layout to prevent the backend from throwing a null payload exception
         data: {}, 
         options: Options(
           headers: {
@@ -486,6 +487,7 @@ void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
       if (response.statusCode == 200 && response.data != null) {
         currentReflection = EventReflectionResponse.fromJson(response.data);
         debugPrint('ai_reflection ${response.data}');
+        isReflectionFavorite = false;
         notifyListeners();
       }
     } on DioException catch (e) {

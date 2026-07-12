@@ -527,6 +527,9 @@ class HomeView extends StatelessWidget {
                                     if (homeController.currentReflection != null) {
                                       final success = await homeController.saveQuoteToFavorite(eventId: 0);
                                       if (success) {
+                                        homeController.isReflectionFavorite = !homeController.isReflectionFavorite;
+                                        homeController.notifyListeners();
+
                                         await showMessageDialog(
                                           context,
                                           "Reflection saved successfully!",
@@ -541,15 +544,18 @@ class HomeView extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        Icons.favorite_border_rounded,
-                                        color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                        homeController.isReflectionFavorite? Icons.favorite_rounded: Icons.favorite_border_rounded,
+                                        color:homeController.isReflectionFavorite? Colors.red: (isDarkMode
+                                        ? Colors.white: AppColors.fourth_color),
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Favorite',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                          color: isDarkMode
+                                          ? Colors.white
+                                          : AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),

@@ -491,71 +491,73 @@ class AddEventPage extends StatelessWidget {
               Consumer<AddEventController>(
                 builder: (context, controller, _) {
                   final categories = controller.categories;
-                  if (categories.isEmpty) {
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 2.1,
-                      ),
-                      itemCount: 4,
-                      itemBuilder: (context, index) => _buildCategoryCardSkeleton(),
-                    );
-                  }
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 2.1,
-                    ),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-                      final isSelected = controller.selectedCategory == category.name;
 
-                      return GestureDetector(
-                        onTap: () => controller.selectCategory(category.name),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w,), 
-                          decoration: BoxDecoration(
-                            color: isSelected? goldColor.withOpacity(0.15): (isDarkMode ? inputBgColor : Colors.white),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
-                              color: isSelected? goldColor: Colors.grey.shade800,
-                              width: isSelected ? 1.5 : 1.0,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _getCategoryIcon(category.name),
-                                color: goldColor,
-                                size: 24.sp,
-                              ),
-                              SizedBox(height: 6.h),
-                              Text(
-                                category.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(
-                                  color: isDarkMode? Colors.white: Colors.black,
-                                  fontSize: 14.sp, 
-                                  fontWeight: isSelected? FontWeight.w700: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                  if (categories.isEmpty) {
+                    return SizedBox(
+                      height: 80.h,
+                      child: ListView.builder(
+                        scrollDirection:Axis.horizontal, 
+                        itemCount: 4,
+                        itemBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.only(right: 12.w),
+                          child: SizedBox(
+                            width: 140.w, 
+                            child: _buildCategoryCardSkeleton(),
                           ),
                         ),
-                      );
-                    },
+                      ),
+                    );
+                  }
+
+                  return SizedBox(
+                    height: 80.h,
+                    child: ListView.builder(
+                      scrollDirection:Axis.horizontal, 
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        final isSelected = controller.selectedCategory == category.name;
+
+                        return GestureDetector(
+                          onTap: () => controller.selectCategory(category.name),
+                          child: Container(
+                            width: 140.w, 
+                            margin: EdgeInsets.only(right: 12.w), 
+                            padding: EdgeInsets.symmetric(horizontal: 8.w),
+                            decoration: BoxDecoration(
+                              color: isSelected? goldColor.withOpacity(0.15): (isDarkMode ? inputBgColor : Colors.white),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: isSelected? goldColor: Colors.grey.shade800,
+                                width: isSelected ? 1.5 : 1.0,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _getCategoryIcon(category.name),
+                                  color: goldColor,
+                                  size: 24.sp,
+                                ),
+                                SizedBox(height: 6.h),
+                                Text(
+                                  category.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.inter(
+                                    color: isDarkMode? Colors.white: Colors.black,
+                                    fontSize: 14.sp,
+                                    fontWeight: isSelected? FontWeight.w700: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
