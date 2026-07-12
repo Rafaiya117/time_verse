@@ -1,9 +1,12 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gal/gal.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,8 +17,53 @@ class EventController extends ChangeNotifier {
   String quoteText = '"Even the tallest tree\nstarts from a small seed. Your Contribution\nmatters."';
   
   final GlobalKey quoteShareKey = GlobalKey();
-   final Dio _dio = Dio();
-   EventModel? eventDetail;
+  final Dio _dio = Dio();
+  EventModel? eventDetail;
+
+  Future<void> shareQuoteToSocialMedia() async {
+  try {
+    final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) return;
+    final image = await boundary.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+    final tempDir = await getTemporaryDirectory();
+    final uniqueFileName = 'social_share_${DateTime.now().millisecondsSinceEpoch}.png';
+    final file = await File('${tempDir.path}/$uniqueFileName').create();
+    await file.writeAsBytes(pngBytes);
+
+    debugPrint('📸 Generated pure local share file path: ${file.path}');
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: '✨ Check out this inspiring insight:\n$quoteText',
+    );
+  } catch (e) {
+    debugPrint('⚠️ Local social media sharing failed: $e');
+  }
+}
+
+  // Future<void> shareQuoteAsImage() async {
+  //   try {
+  //     final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+  //     if (boundary == null) return;
+
+  //     final image = await boundary.toImage(pixelRatio: 3.0);
+  //     final byteData = await image.toByteData(format: ImageByteFormat.png);
+  //     final pngBytes = byteData!.buffer.asUint8List();
+
+  //     final tempDir = await getTemporaryDirectory();
+  //     final file = await File('${tempDir.path}/quote.png').create();
+  //     await file.writeAsBytes(pngBytes);
+
+  //     debugPrint('📸 Image successfully saved to path: ${file.path}');
+
+  //     // ignore: deprecated_member_use
+  //     await Share.shareXFiles([XFile(file.path)], text: '✨ $quoteText');
+  //   } catch (e) {
+  //     debugPrint('⚠️ Error sharing quote: $e');
+  //   }
+  // }
+
   Future<void> shareQuoteAsImage() async {
     try {
       final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
@@ -25,38 +73,35 @@ class EventController extends ChangeNotifier {
       final byteData = await image.toByteData(format: ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
-      final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/quote.png').create();
-      await file.writeAsBytes(pngBytes);
+      await Gal.putImageBytes(pngBytes, album: 'MyQuotes');
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles([XFile(file.path)], text: '✨ $quoteText');
+      debugPrint('📸 Image successfully saved directly to the device gallery!');
     } catch (e) {
-      debugPrint('⚠️ Error sharing quote: $e');
+      debugPrint('⚠️ Error saving quote to gallery: $e');
     }
   }
 
   Future<EventModel?> fetchEventDetailsById(int eventId) async {
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    final url = '${baseUrl}api/v1/event/details/?event_id=$eventId';
+    try {
+      final authService = AuthService();
+      final token = await authService.getToken();
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+      final url = '${baseUrl}api/v1/event/details/?event_id=$eventId';
 
-    final response = await _dio.get(
-      url,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      ),
-    );
+      final response = await _dio.get(
+        url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final data = response.data;
-      debugPrint('✅ Event details fetched: $data');
-      eventDetail = EventModel(
+      if (response.statusCode == 200) {
+        final data = response.data;
+        debugPrint('✅ Event details fetched: $data');
+        eventDetail = EventModel(
           id: data['id'] ?? 0,
           userName: "${data['user_first_name'] ?? ''} ${data['user_last_name'] ?? ''}".trim(),
           title: data['title']?.toString() ?? '',
@@ -75,16 +120,16 @@ class EventController extends ChangeNotifier {
         notifyListeners();
         return eventDetail;
       } else {
-      debugPrint('❌ Failed to fetch event details: ${response.statusCode}');
+        debugPrint('❌ Failed to fetch event details: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching event details: $e');
       return null;
     }
-  } catch (e) {
-    debugPrint('⚠️ Error fetching event details: $e');
-    return null;
   }
-}
 
-String formatTime(String timeString) {
+  String formatTime(String timeString) {
     final utc = DateTime.parse(timeString);
     final local = utc.toLocal();
     return DateFormat('hh:mm a').format(local);

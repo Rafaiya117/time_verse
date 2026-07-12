@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -52,177 +54,183 @@ class EventDetails extends StatelessWidget {
                     children: [
                       Stack(
                         children: [
-                          Container(
-                            width: 327.w,
-                            decoration: BoxDecoration(
-                              color: isDarkMode ? null : const Color(0xFFFFFFFF),
-                              gradient: isDarkMode
-                                ? const LinearGradient(
-                                  colors: [
-                                    Color(0xFF0A1128),
-                                    Color(0xFF1A1F3A),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                )
-                              : null,
-                              borderRadius: BorderRadius.circular(16.r),
-                              border: Border.all(
-                                color: const Color(0xFFFFB703).withOpacity(0.4),
-                                width: 1.w,
+                          // 🛠️ WRAPPED WITH REPAINTBOUNDARY TO ENABLE IMAGE CAPTURING
+                          RepaintBoundary(
+                            key: context.read<EventController>().quoteShareKey,
+                            child: Container(
+                              width: 327.w,
+                              decoration: BoxDecoration(
+                                color: isDarkMode
+                                    ? null
+                                    : const Color(0xFFFFFFFF),
+                                gradient: isDarkMode
+                                    ? const LinearGradient(
+                                        colors: [
+                                          Color(0xFF0A1128),
+                                          Color(0xFF1A1F3A),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      )
+                                    : null,
+                                borderRadius: BorderRadius.circular(16.r),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFFFFB703,
+                                  ).withOpacity(0.4),
+                                  width: 1.w,
+                                ),
                               ),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 30.h,
-                                horizontal: 24.w,
-                              ),
-                              child: Consumer<EventController>(
-                                builder: (context, eventController, _) {
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min, 
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      // 1. Category Icon
-                                      Container(
-                                        width: 64.w,
-                                        height: 64.h,
-                                        decoration: BoxDecoration(
-                                          // ignore: deprecated_member_use
-                                          //color: const Color(0xFF111827,).withOpacity(0.5),
-                                          borderRadius: BorderRadius.circular(12.r,),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 30.h,
+                                  horizontal: 24.w,
+                                ),
+                                child: Consumer<EventController>(
+                                  builder: (context, eventController, _) {
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        // 1. Category Icon
+                                        Container(
+                                          width: 64.w,
+                                          height: 64.h,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12.r),
+                                          ),
+                                          padding: EdgeInsets.all(8.w),
+                                          child: SvgPicture.asset(
+                                            isDarkMode? 'assets/icons/graduation_icon.svg': 'assets/icons/graduation_light.svg',
+                                            width: 70.w,
+                                            height: 70.h,
+                                          ),
                                         ),
-                                        padding: EdgeInsets.all(8.w),
-                                        child: SvgPicture.asset(
-                                          isDarkMode?'assets/icons/graduation_icon.svg':'assets/icons/graduation_light.svg',
-                                          width: 70.w,
-                                          height: 70.h,
+                                        SizedBox(height: 16.h),
+                                        // 2. Event Title Text
+                                        Text(
+                                          eventController.eventDetail?.title ??'Traveling to grandmother',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 27.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 16.h),
-                                      // 2. Event Title Text
-                                      Text(
-                                        eventController.eventDetail?.title ?? 'Traveling to grandmother',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 27.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDarkMode?Colors.white:Colors.black,
+                                        SizedBox(height: 6.h),
+                                        // 3. Date & Time Subtitle
+                                        Text(
+                                          'Today • ${eventController.eventDetail?.startTime ?? "2:00 PM"}',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: isDarkMode
+                                            ? const Color(0xFF9CA3AF)
+                                            : Colors.black,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      // 3. Date & Time Subtitle
-                                      Text(
-                                        'Today • ${eventController.eventDetail?.startTime ?? "2:00 PM"}',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: isDarkMode?const Color(0xFF9CA3AF): Colors.black,
-                                        ),
-                                      ),
-                                      SizedBox(height: 14.h),
-                                      // 4. Elegant Center Divider Line
-                                      Row(
-                                        mainAxisAlignment:MainAxisAlignment.center,
-                                        children: [
-                                          Expanded(
-                                            child: Container(
-                                              height: 1.h,
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.transparent,
-                                                    // ignore: deprecated_member_use
-                                                    const Color(0xFFFFB703,).withOpacity(0.5),
-                                                  ],
+                                        SizedBox(height: 14.h),
+                                        // 4. Elegant Center Divider Line
+                                        Row(
+                                          mainAxisAlignment:MainAxisAlignment.center,
+                                          children: [
+                                            Expanded(
+                                              child: Container(
+                                                height: 1.h,
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      Colors.transparent,
+                                                      const Color(
+                                                        0xFFFFB703,
+                                                      ).withOpacity(0.5),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 8.w,),
-                                            child: SvgPicture.asset(
-                                              'assets/icons/sparkle.svg',
-                                              width: 12.w,
-                                              height: 12.h,
-                                              colorFilter: const ColorFilter.mode(
-                                                Color(0xFFFFB703),
-                                                BlendMode.srcIn,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              height: 1.h,
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    // ignore: deprecated_member_use
-                                                    const Color(0xFFFFB703,).withOpacity(0.5),
-                                                    Colors.transparent,
-                                                  ],
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                              child: SvgPicture.asset(
+                                                'assets/icons/sparkle.svg',
+                                                width: 12.w,
+                                                height: 12.h,
+                                                colorFilter:
+                                                  const ColorFilter.mode(
+                                                    Color(0xFFFFB703),
+                                                    BlendMode.srcIn,
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 24.h),
-                                      // 5. Quote Description Text Area (No Flexible wrapper anymore)
-                                      Column(
-                                        mainAxisAlignment:MainAxisAlignment.center,
-                                        children: [
-                                          // Text(
-                                          //   '“',
-                                          //   style: GoogleFonts.playfairDisplay(
-                                          //     fontSize: 42.sp,
-                                          //     fontWeight: FontWeight.bold,
-                                          //     color: const Color(0xFFFFB703),
-                                          //     height: 0.8,
-                                          //   ),
-                                          // ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 8.w,),
-                                            child: Text(
-                                              '“ ${eventController.eventDetail?.description ?? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.'} ”',
-                                              textAlign: TextAlign.center,
-                                              style:GoogleFonts.inter(
-                                                fontSize: 24.sp,
-                                                fontWeight: FontWeight.w500,
-                                                color: isDarkMode? Colors.white : Colors.black,
-                                                height: 1.4,
+                                            Expanded(
+                                              child: Container(
+                                                height: 1.h,
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      const Color(0xFFFFB703).withOpacity(0.5),
+                                                      Colors.transparent,
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
                                             ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 24.h),
+                                        // 5. Quote Description Text Area
+                                        Column(
+                                          mainAxisAlignment:MainAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                              child: Text(
+                                                '“ ${eventController.eventDetail?.description ?? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.'} ”',
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 24.sp,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 24.h),
+                                        // 6. Author Name
+                                        Text(
+                                          '-${eventController.eventDetail?.userName ?? "pappu roy"}',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFFFFB703),
                                           ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 24.h),
-                                      // 6. Author Name
-                                      Text(
-                                        '-${eventController.eventDetail?.userName ?? "pappu roy"}',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFFFFB703),
                                         ),
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      // 7. Context Footer Text
-                                      Text(
-                                        'Inspired for your moment',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: const Color(0xFF4B5563),
+                                        SizedBox(height: 4.h),
+                                        // 7. Context Footer Text
+                                        Text(
+                                          'Inspired for your moment',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: const Color(0xFF4B5563),
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                },
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
@@ -271,7 +279,8 @@ class EventDetails extends StatelessWidget {
                           CustomButton(
                             text: "Share",
                             onPressed: () {
-                              context.read<EventController>().shareQuoteAsImage();
+                              debugPrint('button clicked');
+                              context.read<EventController>().shareQuoteToSocialMedia();
                             },
                             gradient: AppGradientColors.button_gradient,
                             textColor: AppColors.text_color,
