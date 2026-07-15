@@ -40,86 +40,93 @@ class CustomBottomNavBar extends StatelessWidget {
       navItems[4], // Settings
     ];
 
-    //final addItem = navItems.firstWhere((item) => item.label == 'Add');
-
     return Consumer<BottomNavController>(
       builder: (context, controller, _) {
         final selectedIndex = controller.selectedIndex;
+        final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
         return SizedBox(
-          height: 100.h,
+          height: 130.h,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.bottomCenter,
             children: [
-              Padding(
-                padding:EdgeInsets.only(bottom: 10.h),
-                child: Container(
-                    height: 64.h,
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.containers_bgd : Colors.white,
-                      border: Border(
-                        top: BorderSide(
-                          color: isDark
+              // Removed SafeArea wrapper to allow the container to sit at the absolute screen edge
+              Container(
+                height: 64.h + bottomPadding,
+                padding: EdgeInsets.only(
+                  top: 4.h,
+                  bottom: bottomPadding > 0 ? bottomPadding : 4.h, // Dynamic system offset
+                ),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.containers_bgd : Colors.white,
+                  border: Border(
+                    top: BorderSide(
+                      color: isDark
                           ? AppColors.text_color
                           : AppColors.heading_color,
-                          width: 0.4,
-                        ),
-                      ),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black12, blurRadius: 4),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(standardItems.length, (index) {
-                        final item = standardItems[index];
-                        final originalIndex = navItems.indexOf(item);
-                        final isSelected = originalIndex == selectedIndex;
-                
-                        return Expanded(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              debugPrint(
-                                'Tapped index: $originalIndex (${item.label})',
-                              );
-                              controller.navigateTo(originalIndex, context);
-                            },
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.asset(
-                                  item.iconPath,
-                                  width: 24.w,
-                                  height: 24.h,
-                                  colorFilter: ColorFilter.mode(
-                                    isSelected ? AppColors.fourth_color
-                                    : (isDark? Colors.white: const Color(0xFF636363)),
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  item.label,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10.2.sp,
-                                    fontWeight: FontWeight.normal,
-                                    color: isSelected
-                                    ? AppColors.fourth_color: (isDark? Colors.white: const Color(0xFF636363)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
+                      width: 0.4,
                     ),
                   ),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 4),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(4, (index) {
+                    final item = standardItems[index];
+                    final originalIndex = navItems.indexOf(item);
+                    final isSelected = originalIndex == selectedIndex;
+
+                    return Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          debugPrint(
+                            'Tapped index: $originalIndex (${item.label})',
+                          );
+                          controller.navigateTo(originalIndex, context);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              item.iconPath,
+                              width: 22.w,
+                              height: 22.h,
+                              colorFilter: ColorFilter.mode(
+                                isSelected
+                                    ? AppColors.fourth_color
+                                    : (isDark
+                                        ? Colors.white
+                                        : const Color(0xFF636363)),
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              item.label,
+                              style: GoogleFonts.inter(
+                                  fontSize: 10.2.sp,
+                                  fontWeight: FontWeight.normal,
+                                  color: isSelected
+                                      ? AppColors.fourth_color
+                                      : (isDark
+                                          ? Colors.white
+                                          : const Color(0xFF636363)),
+                                ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
               ),
               Positioned(
-                bottom: 65.h,
+                bottom: 64.h + bottomPadding + 5.h,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
