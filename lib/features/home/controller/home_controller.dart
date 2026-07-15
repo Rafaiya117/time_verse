@@ -421,14 +421,15 @@ void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
   // 🛠️ FIX 2: Pass the view's key as a parameter
   Future<bool> saveQuoteImageToGallery(GlobalKey key) async {
   try {
-    final status = await Permission.photos.request();
-    if (!status.isGranted) return false;
+    // 🛠️ Use Gal's built-in permission handler instead of Permission.photos
+    bool hasAccess = await Gal.hasAccess();
+    if (!hasAccess) {
+      hasAccess = await Gal.requestAccess();
+      if (!hasAccess) return false;
+    }
 
-    // 🛠️ Capture widget using the local parameter key safely
     final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-
     final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final pngBytes = byteData!.buffer.asUint8List();
 

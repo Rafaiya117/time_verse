@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:time_verse/core/utils/colors.dart';
 
@@ -57,7 +58,7 @@ import 'package:time_verse/core/utils/colors.dart';
 //     );
 //   }
 // }
-class CircularOtpField extends StatelessWidget {
+class CircularOtpField extends StatefulWidget {
   final int numberOfFields;
   final void Function(String) onSubmit;
   final TextEditingController? mainController;
@@ -70,56 +71,55 @@ class CircularOtpField extends StatelessWidget {
   });
 
   @override
+  State<CircularOtpField> createState() => _CircularOtpFieldState();
+}
+
+class _CircularOtpFieldState extends State<CircularOtpField> {
+  late List<TextEditingController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(widget.numberOfFields, (_) => TextEditingController());
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final controllers = List.generate(numberOfFields, (_) => TextEditingController());
-
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(numberOfFields, (index) {
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(widget.numberOfFields, (index) {
         return Container(
-          width: 72,
-          height: 55,
-          margin: const EdgeInsets.symmetric(horizontal: 6),
+          width: 70.w,
+          height: 56.h,
           decoration: BoxDecoration(
             color: isDarkMode
                 ? AppColors.containers_bgd
                 : AppColors.background_color,
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: AppColors.fourth_color.withOpacity(0.5), 
+              color: AppColors.fourth_color.withOpacity(0.6), 
               width: 1,
             ),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent, 
-                Colors.white.withOpacity(0.01),
-                Colors.white.withOpacity(0.07),
-                Colors.white.withOpacity(0.20),
-              ],
-              stops: const [0.0, 0.50, 0.82, 1.0], 
-            ),
-            boxShadow: [
-              BoxShadow(
-                // ignore: deprecated_member_use
-                color: Colors.white.withOpacity(0.01),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
           ),
           child: Center(
             child: TextFormField(
-              controller: controllers[index],
+              controller: _controllers[index],
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
               maxLength: 1,
               style: GoogleFonts.outfit(
-                fontSize: 24,
+                fontSize: 22.sp,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode
                     ? AppColors.text_color
                     : AppColors.heading_color,
@@ -129,13 +129,16 @@ class CircularOtpField extends StatelessWidget {
                 border: InputBorder.none,
               ),
               onChanged: (value) {
-                if (value.isNotEmpty && index < numberOfFields - 1) {
+                if (value.isNotEmpty && index < widget.numberOfFields - 1) {
                   FocusScope.of(context).nextFocus();
                 }
-                if (controllers.every((c) => c.text.isNotEmpty)) {
-                  final code = controllers.map((c) => c.text).join();
-                  if (mainController != null) mainController!.text = code;
-                  onSubmit(code);
+                if (value.isEmpty && index > 0) {
+                  FocusScope.of(context).previousFocus();
+                }
+                if (_controllers.every((c) => c.text.isNotEmpty)) {
+                  final code = _controllers.map((c) => c.text).join();
+                  if (widget.mainController != null) widget.mainController!.text = code;
+                  widget.onSubmit(code);
                 }
               },
             ),

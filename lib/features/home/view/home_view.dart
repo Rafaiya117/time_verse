@@ -313,7 +313,7 @@ class HomeView extends StatelessWidget {
                                 DateFormat('EEEE, MMMM d').format(DateTime.now()),
                                 style: GoogleFonts.outfit(
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 16.sp,
+                                  fontSize: 18.sp,
                                   color: isDarkMode
                                   ? Colors.white
                                   : Colors.black,
@@ -379,7 +379,7 @@ class HomeView extends StatelessWidget {
                                     Text(
                                       _getDayName(date.weekday),
                                       style: GoogleFonts.outfit(
-                                        fontSize: 13.sp,
+                                        fontSize: 15.sp,
                                         fontWeight: FontWeight.w400,
                                         color: isSelected ? const Color(0xFF060B13): (isDarkMode? const Color(0xFF7A8B9E): Colors.grey.shade600), // Dynamic unselected day color text
                                       ),
@@ -388,7 +388,7 @@ class HomeView extends StatelessWidget {
                                     Text(
                                       date.day.toString(),
                                       style: GoogleFonts.outfit(
-                                        fontSize: 18.sp,
+                                        fontSize: 24.sp,
                                         fontWeight: FontWeight.w600,
                                         color: isSelected ? const Color(0xFF060B13): (isDarkMode? Colors.white: Colors.black), // Dynamic unselected date number text
                                       ),
@@ -464,7 +464,7 @@ class HomeView extends StatelessWidget {
                                       'AI Reflections',
                                       style: GoogleFonts.outfit(
                                         color: const Color(0xFFFFA500),
-                                        fontSize: 12.sp,
+                                        fontSize: 15.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -686,7 +686,7 @@ class HomeView extends StatelessWidget {
                               'See all',
                               style: GoogleFonts.outfit(
                                 color: const Color(0xFFFFA500,), 
-                                fontSize: 14.sp,
+                                fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -776,8 +776,9 @@ class HomeView extends StatelessWidget {
                                       calculatedPeriod,
                                       style: GoogleFonts.playfairDisplay(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 18.sp,
+                                        fontSize: 25.sp,
                                         color: const Color(0xFFFFA500),
+                                        fontStyle: FontStyle.italic
                                       ),
                                     ),
                                   ),
@@ -878,7 +879,7 @@ class HomeView extends StatelessWidget {
                                     ? currentQuote.name: 'Motivation',
                                     style: GoogleFonts.outfit(
                                       color: const Color(0xFFE5A100),
-                                      fontSize: 11.sp,
+                                      fontSize: 13.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -944,7 +945,7 @@ class HomeView extends StatelessWidget {
                                         textAlign: TextAlign.start,
                                         style: GoogleFonts.outfit(
                                           fontWeight: FontWeight.w400,
-                                          fontSize: 14.5.sp,
+                                          fontSize: 29.sp,
                                           color: isDarkMode
                                             ? AppColors.l_schedule_clr3
                                             : Colors.black87,
@@ -957,7 +958,7 @@ class HomeView extends StatelessWidget {
                                       "— ${quote.reference}",
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 12.5.sp,
+                                        fontSize: 18.sp,
                                         color: isDarkMode
                                           ? Colors.white60
                                           : Colors.black54,
@@ -1507,7 +1508,7 @@ class HomeView extends StatelessWidget {
                                 category.isEmpty ? 'General' : category,
                                 style: GoogleFonts.outfit(
                                   color: const Color(0xFF7A8B9E),
-                                  fontSize: 11.sp,
+                                  fontSize: 13.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1516,7 +1517,7 @@ class HomeView extends StatelessWidget {
                               time,
                               style: GoogleFonts.outfit(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13.sp,
+                                fontSize: 15.sp,
                                 color: const Color(0xFFFFA500),
                               ),
                             ),
@@ -1527,7 +1528,7 @@ class HomeView extends StatelessWidget {
                           title,
                           style: GoogleFonts.outfit(
                             fontWeight: FontWeight.bold,
-                            fontSize: 20.sp,
+                            fontSize: 18.sp,
                             color: isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
