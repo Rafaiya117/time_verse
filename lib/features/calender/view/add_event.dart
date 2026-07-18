@@ -312,42 +312,63 @@ class AddEventPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 12.h),
-              _buildFormContainer(
-                context,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 2.h, right: 12.w),
-                      child: Text('🔔', style: TextStyle(fontSize: 18.sp)),
-                    ),
-                    // Text block layout
-                    Expanded(
-                      child: Column(
+              Consumer<TimePickerController>(
+                builder: (context, timeController, _) {
+                  final pickedAlarm = timeController.getTime('alarm');
+                  // Display the picked time or show a placeholder hint text string
+                  final displayTime = pickedAlarm != null
+                      ? timeController.formatTime(pickedAlarm)
+                      : 'Select reminder time';
+
+                  return GestureDetector(
+                    onTap: () => timeController.selectTime(context, 'alarm'),
+                    child: _buildFormContainer(
+                      context,
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Remind me',
-                            style: GoogleFonts.inter(
-                              color: isDarkMode ? Colors.white : Colors.black,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w500,
+                          Padding(
+                            padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                            child: Text(
+                              '🔔',
+                              style: TextStyle(fontSize: 18.sp),
                             ),
                           ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            '10 minutes before', 
-                            style: GoogleFonts.inter(
-                              color: isDarkMode? Colors.grey.shade500: Colors.grey.shade400,
-                              fontSize: 13.sp,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Remind me',
+                                  style: GoogleFonts.inter(
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  displayTime,
+                                  style: GoogleFonts.inter(
+                                    color: pickedAlarm != null
+                                        ? const Color(0xFFFFB703)
+                                        : (isDarkMode
+                                              ? Colors.grey.shade500
+                                              : Colors.grey.shade400),
+                                    fontSize: 13.sp,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
               SizedBox(height: 12.h),
               _buildFormContainer(

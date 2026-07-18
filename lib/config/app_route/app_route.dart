@@ -130,11 +130,18 @@ final GoRouter appRouter = GoRouter(
         child: AllEvents(), 
       ),
     ),
+    // GoRoute(
+    //   path: '/event_details',
+    //   builder: (context, state) => ThemedBackgroundWrapper(
+    //     child: EventDetails(), 
+    //   ),
+    // ),
     GoRoute(
       path: '/event_details',
-      builder: (context, state) => ThemedBackgroundWrapper(
-        child: EventDetails(), 
-      ),
+      builder: (context, state) {
+        final int eventId = state.extra as int;
+        return ThemedBackgroundWrapper(child: EventDetails(eventId: eventId));
+      },
     ),
     GoRoute(
       path: '/calender',

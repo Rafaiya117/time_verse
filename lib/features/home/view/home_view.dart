@@ -8,12 +8,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/config/services/user_session.dart';
-import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
-import 'package:time_verse/core/components/initial_name_widget.dart';
 import 'package:time_verse/core/theme/theme_provider.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/all_events/controller/event_details_controller.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
@@ -176,11 +176,11 @@ class HomeView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Transform.translate(
-                    offset: Offset(-45.w, 0),
-                    child: Image.asset(
-                      'assets/images/premium_logo.png',
+                  offset: Offset(-45.w, 0),
+                  child: Image.asset(
+                    'assets/images/A.png',
                     width: 150.w,
-                    height: 80.h,
+                    height: 50.h,
                   ),
                 ),
                 Row(
@@ -331,17 +331,28 @@ class HomeView extends StatelessWidget {
                     height: 80.h,
                     child: Consumer<HomeController>(
                       builder: (context, controller, _) {
+                        final now = DateTime.now();
+                        final daysInMonth = DateTime(now.year,now.month + 1,0,).day;
+                        final double itemWidth = 66.w;
+                        final int todayIndex = now.day - 1;
+                        final double initialOffset = (todayIndex - 2).clamp(0, daysInMonth) * itemWidth;
+                        final ScrollController statelessScrollController =
+                          ScrollController(
+                            initialScrollOffset: initialOffset,
+                          );
+
                         return ListView.builder(
+                          controller: statelessScrollController,
                           scrollDirection: Axis.horizontal,
-                          itemCount: 7,
+                          itemCount: daysInMonth,
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
                           itemBuilder: (context, index) {
-                            final now = DateTime.now();
-                            final date = now.add(Duration(days: index - 3));
-                            final isSelected =
-                            date.day == controller.selectedDate.day &&
-                            date.month == controller.selectedDate.month &&
-                            date.year == controller.selectedDate.year;
+                            final date = DateTime(now.year,now.month,index + 1,);
+
+                            final isSelected = date.day == controller.selectedDate.day &&
+                              date.month == controller.selectedDate.month &&
+                              date.year == controller.selectedDate.year;
+
                             return GestureDetector(
                               onTap: () {
                                 controller.selectDate(date, profileController);
@@ -351,16 +362,18 @@ class HomeView extends StatelessWidget {
                                 margin: EdgeInsets.symmetric(horizontal: 6.w),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                  ? const Color(0xFFF1A80A): (isDarkMode ? const Color(0xFF070F1A): Colors.white),
+                                  ? const Color(0xFFF1A80A): (isDarkMode
+                                  ? const Color(0xFF070F1A): Colors.white),
                                   borderRadius: BorderRadius.circular(24.r),
                                   border: Border.all(
-                                    color: !isSelected ? (isDarkMode ? Colors.white: Colors.grey.shade300) : Colors.transparent,
+                                    color: !isSelected
+                                    ? (isDarkMode ? Colors.white: Colors.grey.shade300): Colors.transparent,
                                     width: 0.2.sp,
                                   ),
                                   boxShadow: [
                                     if (!isSelected) ...[
                                       BoxShadow(
-                                        color: isDarkMode ? Colors.white.withOpacity(0.3): Colors.black.withOpacity(0.05),
+                                        color: isDarkMode? Colors.white.withOpacity(0.3): Colors.black.withOpacity(0.05),
                                         blurRadius: 4,
                                         spreadRadius: 0,
                                       ),
@@ -381,7 +394,9 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.w400,
-                                        color: isSelected ? const Color(0xFF060B13): (isDarkMode? const Color(0xFF7A8B9E): Colors.grey.shade600), // Dynamic unselected day color text
+                                        color: isSelected
+                                        ? const Color(0xFF060B13)
+                                        : (isDarkMode ? const Color(0xFF7A8B9E): Colors.grey.shade600),
                                       ),
                                     ),
                                     SizedBox(height: 6.h),
@@ -390,7 +405,8 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 24.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: isSelected ? const Color(0xFF060B13): (isDarkMode? Colors.white: Colors.black), // Dynamic unselected date number text
+                                        color: isSelected
+                                        ? const Color(0xFF060B13): (isDarkMode ? Colors.white: Colors.black),
                                       ),
                                     ),
                                   ],
@@ -405,9 +421,8 @@ class HomeView extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 30.h),
-              Container(
+             Container(
                 width: 360.w,
-                height: 421.h,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(16.r),
@@ -427,14 +442,11 @@ class HomeView extends StatelessWidget {
                     final aiReflectionText = homeController.currentReflection?.aiReflection.isNotEmpty == true
                     ? homeController.currentReflection!.aiReflection : 'Today feels centered around connection, gratitude and emotionally meaningful movement.';
                     return Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // Top Bar Header
                         Padding(
-                          padding: EdgeInsets.only(
-                            left: 16.w,
-                            right: 16.w,
-                            top: 16.h,
-                          ),
+                          padding: EdgeInsets.only(left: 16.w,right: 16.w,top: 16.h,),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -444,7 +456,7 @@ class HomeView extends StatelessWidget {
                                   vertical: 6.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isDarkMode ? Colors.black.withOpacity(0.3) : const Color(0xFFFFF7E5),
+                                  color: isDarkMode ? Colors.black.withOpacity(0.3): const Color(0xFFFFF7E5),
                                   borderRadius: BorderRadius.circular(20.r),
                                   border: Border.all(
                                     color: const Color(0xFFC5A880).withOpacity(0.4),
@@ -480,25 +492,22 @@ class HomeView extends StatelessWidget {
                           width: 19.w,
                           height: 20.h,
                         ),
-                        // Reflection Body Content
-                        Expanded(
-                          child: RepaintBoundary(
-                            key: _shareKey,
-                            child: Container(
-                              color: isDarkMode? const Color(0xFF051123).withOpacity(0.2): Colors.transparent,
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
-                              alignment: Alignment.center,
-                              child: SingleChildScrollView(
-                                child: Text(
-                                  aiReflectionText,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 22.sp,
-                                    color: isDarkMode? Colors.white: Colors.black,
-                                    height: 1.3,
-                                  ),
-                                ),
+                        RepaintBoundary(
+                          key: _shareKey,
+                          child: Container(
+                            color: isDarkMode ? const Color(0xFF051123).withOpacity(0.2): Colors.transparent,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24.w,
+                              vertical: 16.h,
+                            ), // Added vertical padding for spacing stability
+                            alignment: Alignment.center,
+                            child: Text(
+                              aiReflectionText,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.playfairDisplay(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 22.sp,
+                                color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
                           ),
@@ -506,7 +515,7 @@ class HomeView extends StatelessWidget {
                         SizedBox(height: 10.h),
                         Container(
                           decoration: BoxDecoration(
-                            color: isDarkMode? Colors.black.withOpacity(0.35): Colors.white,
+                            color: isDarkMode ? Colors.black.withOpacity(0.35): Colors.white,
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(12.r),
                               bottomRight: Radius.circular(12.r),
@@ -544,18 +553,15 @@ class HomeView extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        homeController.isReflectionFavorite? Icons.favorite_rounded: Icons.favorite_border_rounded,
-                                        color:homeController.isReflectionFavorite? Colors.red: (isDarkMode
-                                        ? Colors.white: AppColors.fourth_color),
+                                        homeController.isReflectionFavorite ? Icons.favorite_rounded: Icons.favorite_border_rounded,
+                                        color:homeController.isReflectionFavorite ? Colors.red: (isDarkMode? Colors.white: AppColors.fourth_color),
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Favorite',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode
-                                          ? Colors.white
-                                          : AppColors.fourth_color,
+                                          color: isDarkMode ? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -604,7 +610,7 @@ class HomeView extends StatelessWidget {
                                       Text(
                                         'Save',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode ? Colors.white: AppColors.fourth_color,
+                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -637,7 +643,7 @@ class HomeView extends StatelessWidget {
                                       Text(
                                         'Share',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode? Colors.white : AppColors.fourth_color,
+                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -1407,31 +1413,26 @@ class HomeView extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Left custom tracker track spine framework matching design target visuals
           SizedBox(
             width: 24.w,
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
-                // Continuous vertical alignment connecting background path pillar line segment
                 if (!isLastItem)
                   Positioned(
                     top: 6.h,
                     bottom: 0,
                     child: Container(
                       width: 1.5.w,
-                      // ignore: deprecated_member_use
                       color: const Color(0xFFC5A880).withOpacity(0.35),
                     ),
                   ),
-                // Horizontal cross-connecting node offset row segment
                 Positioned(
                   top: 6.h,
                   left: 6.w,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Outer structural glowing circular core badge node accent
                       Container(
                         width: 12.w,
                         height: 12.h,
@@ -1447,7 +1448,6 @@ class HomeView extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Linking line projecting outward into matching edge of target cell block frame container
                       Container(
                         width: 6.w,
                         height: 1.5.h,
@@ -1460,12 +1460,12 @@ class HomeView extends StatelessWidget {
             ),
           ),
 
-          // Right Content Dynamic Textured Panel Card Container Frame
           Expanded(
             child: Column(
               children: [
                 GestureDetector(
                   onTap: () {
+                    // Create and bundle the complete parameters into a direct model instance
                     context.push('/event_details', extra: id);
                   },
                   child: Container(
@@ -1532,7 +1532,7 @@ class HomeView extends StatelessWidget {
                             color: isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
-                        if (location.isNotEmpty) ...[
+                        if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
                           SizedBox(height: 8.h),
                           Row(
                             children: [

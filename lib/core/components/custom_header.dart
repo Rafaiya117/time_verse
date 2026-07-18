@@ -14,6 +14,7 @@ class CustomHeaderBar extends StatelessWidget {
   final double rightSpacing;
   final bool showLeftLine;
   final bool showRightLine;
+  final VoidCallback? onBackPressed; 
 
   const CustomHeaderBar({
     super.key,
@@ -22,6 +23,7 @@ class CustomHeaderBar extends StatelessWidget {
     required this.rightSpacing,
     this.showLeftLine = true,
     this.showRightLine = true,
+    this.onBackPressed, 
   });
 
   @override
@@ -36,12 +38,14 @@ class CustomHeaderBar extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                context.pop();
+                if (onBackPressed != null) {
+                  onBackPressed!();
+                } else {
+                  context.pop();
+                }
               },
               icon: SvgPicture.asset(
-                isDarkMode
-                    ? 'assets/icons/arrow_back.svg'
-                    : 'assets/icons/arrow_back_light.svg',
+                isDarkMode ? 'assets/icons/arrow_back.svg' : 'assets/icons/arrow_back_light.svg',
                 width: 37.w,
                 height: 37.h,
               ),
@@ -53,8 +57,8 @@ class CustomHeaderBar extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 17.sp,
                 color: isDarkMode
-                    ? AppColors.text_color
-                    : AppColors.heading_color,
+                ? AppColors.text_color
+                : AppColors.heading_color,
               ),
             ),
             SizedBox(width: rightSpacing),
@@ -64,8 +68,8 @@ class CustomHeaderBar extends StatelessWidget {
               },
               icon: SvgPicture.asset(
                 isDarkMode
-                    ? 'assets/icons/theme_dark.svg'
-                    : 'assets/icons/light_theme.svg',
+                ? 'assets/icons/theme_dark.svg'
+                : 'assets/icons/light_theme.svg',
                 width: 37.w,
                 height: 37.h,
               ),
@@ -82,13 +86,13 @@ class CustomHeaderBar extends StatelessWidget {
                   margin: EdgeInsets.only(right: 12.w),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors:Theme.of(context).brightness == Brightness.light
-                    ? [
-                      const Color(0xFF878787).withOpacity(0.0),
-                      const Color(0xFFD9D9D9),
+                      colors: Theme.of(context).brightness == Brightness.light
+                      ? [
+                        const Color(0xFF878787).withOpacity(0.0),
+                        const Color(0xFFD9D9D9),
                       ]
                       : [
-                       Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.0),
                         Colors.white.withOpacity(0.65),
                       ],
                       begin: Alignment.centerLeft,
@@ -109,21 +113,21 @@ class CustomHeaderBar extends StatelessWidget {
                   margin: EdgeInsets.only(left: 12.w),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors:Theme.of(context).brightness == Brightness.light
-                  ? [
-                    const Color(0xFFD9D9D9),
-                    const Color(0xFF878787).withOpacity(0.0),
-                  ]
-                  : [
-                    Colors.white.withOpacity(0.65),
-                    Colors.white.withOpacity(0.0),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                      colors: Theme.of(context).brightness == Brightness.light
+                      ? [
+                        const Color(0xFFD9D9D9),
+                        const Color(0xFF878787).withOpacity(0.0),
+                      ]
+                      : [
+                        Colors.white.withOpacity(0.65),
+                        Colors.white.withOpacity(0.0),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ],

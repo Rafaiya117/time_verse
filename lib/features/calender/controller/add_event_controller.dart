@@ -245,20 +245,24 @@ class AddEventController extends ChangeNotifier {
     required BuildContext context,
     required String rawStart,
     required String rawEnd,
-    required String rawAlarm, // Can be left as empty string from UI now
+    required String rawAlarm, 
     required VoidCallback onSuccess,
   }) async {
     final start = _cleanTimeStr(rawStart);
     final end = _cleanTimeStr(rawEnd);
+    final alarmClean = _cleanTimeStr(rawAlarm);
     
-    // 🛠️ FIX: Parse event start time and automatically subtract 10 minutes
-    String alarm = start;
-    try {
-      final parsedStart = DateFormat("HH:mm").parse(start);
-      final reminderTime = parsedStart.subtract(const Duration(minutes: 10));
-      alarm = DateFormat("HH:mm").format(reminderTime);
-    } catch (e) {
-      debugPrint("⚠️ Failed calculating 10-minute fallback offset: $e");
+    // 🛠️ FIX: Use picked alarm time if available; otherwise calculate the 10-minute subtraction fallback
+    String alarm = alarmClean;
+    if (alarm.isEmpty) {
+      alarm = start;
+      try {
+        final parsedStart = DateFormat("HH:mm").parse(start);
+        final reminderTime = parsedStart.subtract(const Duration(minutes: 10));
+        alarm = DateFormat("HH:mm").format(reminderTime);
+      } catch (e) {
+        debugPrint("⚠️ Failed calculating 10-minute fallback offset: $e");
+      }
     }
 
     final validationError = validateFields(
@@ -266,7 +270,6 @@ class AddEventController extends ChangeNotifier {
       date: dateController.text,
       startTime: start,
       endTime: end,
-      //note: noteController.text,
     );
 
     if (validationError != null) {
