@@ -106,7 +106,7 @@ class AddEventController extends ChangeNotifier {
   }) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final accessToken = await _authService.getToken();
-    final url = "$baseUrl/api/v1/event/create/";
+    final url = "${baseUrl}api/v1/event/create/";
 
     final Map<String, dynamic> body = {
       "title": title,

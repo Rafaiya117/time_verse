@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -406,8 +408,26 @@ Future<void> fetchEvents() async {
 void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
     final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary != null) {
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      // 1. Capture the transparent text snapshot layer
+      final textImage = await boundary.toImage(pixelRatio: 3.0);
+      
+      // 2. Initialize a dynamic high-fidelity canvas frame backing
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+
+      // 3. 🛠️ FIX: Replaced gradient shader with a clean, solid soft grey color fill pass
+      final paint = Paint()
+        ..color = const Color.fromARGB(255, 117, 117, 117); 
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+
+      // 4. Overlap the recorded transparent text frame directly over your canvas paint layout
+      canvas.drawImage(textImage, Offset.zero, Paint());
+
+      // 5. Compile into a solid graphic object configuration asset
+      final finalPicture = recorder.endRecording();
+      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+      final byteData = await finalImage.toByteData(format: ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
       final tempDir = await getTemporaryDirectory();
@@ -418,29 +438,40 @@ void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
     }
   }
 
-  // 🛠️ FIX 2: Pass the view's key as a parameter
   Future<bool> saveQuoteImageToGallery(GlobalKey key) async {
-  try {
-    // 🛠️ Use Gal's built-in permission handler instead of Permission.photos
-    bool hasAccess = await Gal.hasAccess();
-    if (!hasAccess) {
-      hasAccess = await Gal.requestAccess();
-      if (!hasAccess) return false;
+    try {
+      bool hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        hasAccess = await Gal.requestAccess();
+        if (!hasAccess) return false;
+      }
+
+      final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final textImage = await boundary.toImage(pixelRatio: 3.0);
+      
+      // 🛠️ Dynamic Canvas composition mapping rules duplicate exactly to maintain parity across share/save passes
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+
+      // 🛠️ FIX: Replaced gradient shader with a clean, solid soft grey color fill pass
+      final paint = Paint()
+        ..color = const Color.fromARGB(255, 61, 60, 60);
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+      canvas.drawImage(textImage, Offset.zero, Paint());
+
+      final finalPicture = recorder.endRecording();
+      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+      final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      await Gal.putImageBytes(pngBytes);
+      return true;
+    } catch (e) {
+      debugPrint("Save error: $e");
+      return false;
     }
-
-    final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
-
-    await Gal.putImageBytes(pngBytes);
-
-    return true;
-  } catch (e) {
-    debugPrint("Save error: $e");
-    return false;
   }
-}
 
   Future<bool> saveQuoteToFavorite({required int eventId}) async {
     try {

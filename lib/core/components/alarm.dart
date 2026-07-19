@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
+import 'package:time_verse/core/utils/colors.dart';
 
 // class ExampleAlarmRingScreen extends StatefulWidget {
 //   const ExampleAlarmRingScreen({required this.alarmSettings, super.key});
@@ -120,13 +121,12 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
     final notification = widget.alarmSettings.notificationSettings;
     final String formattedTime = DateFormat('HH:mm').format(widget.alarmSettings.dateTime);
     final String formattedDateStr = DateFormat('EEE d MMMM').format(widget.alarmSettings.dateTime);
-
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Stack(
         children: [
-          // Foreground content interface structure matching exactly image
           SafeArea(
-            child: SingleChildScrollView( // 🛠️ FIXED: Wrapped layout to fully contain 30px screen overflow pressures
+            child: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
                 child: Column(
@@ -156,7 +156,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       notification.title ?? 'Alarm Ringing',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.playfairDisplay(
-                        color: Colors.white,
+                        color: isDarkMode?AppColors.button_color:Colors.white,
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -207,7 +207,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF041124).withOpacity(0.85),
+                        color:  isDarkMode?Colors.white:Color(0xFF041124).withOpacity(0.85),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -304,7 +304,10 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                                 appRouter.go('/home');
                               },
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Colors.white30, width: 1.5),
+                                side: BorderSide(
+                                  color: isDarkMode ? Colors.white30 : const Color(0xFFFFB800),
+                                  width: 1.5,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
@@ -312,11 +315,15 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('😴 ', style: TextStyle(fontSize: 14.sp)),
+                                  Text(
+                                    '😴 ',
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
                                   Text(
                                     'Snooze',
                                     style: GoogleFonts.inter(
-                                      color: Colors.white,
+                                      // 🛠️ FIX 2: Set text color to golden when it is not dark mode
+                                      color: isDarkMode ? Colors.white: const Color(0xFFFFB800),
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.w700,
                                     ),

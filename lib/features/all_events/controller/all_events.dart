@@ -178,7 +178,7 @@ class AllEventsController extends ChangeNotifier {
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
       final response = await _dio.delete(
-        '$baseUrl/api/v1/evenet/delete/$eventId/',
+        '${baseUrl}api/v1/evenet/delete/$eventId/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -208,10 +208,7 @@ class AllEventsController extends ChangeNotifier {
     return false;
   }
 
-  Future<T?> runWithLoaderAndTimer<T>({
-  required BuildContext context,
-  required Future<T> Function() task,
-}) async {
+  Future<T?> runWithLoaderAndTimer<T>({required BuildContext context,required Future<T> Function() task,}) async {
   final startTime = DateTime.now();
 
   showDialog(
@@ -221,7 +218,6 @@ class AllEventsController extends ChangeNotifier {
       return StatefulBuilder(
         builder: (context, setState) {
           Duration elapsed = DateTime.now().difference(startTime);
-
           // update every second
           Future.delayed(const Duration(seconds: 1), () {
             if (context.mounted) setState(() {});
@@ -254,9 +250,9 @@ class AllEventsController extends ChangeNotifier {
 
   try {
     final result = await task();
-    return result;
-  } finally {
-    if (context.mounted) Navigator.pop(context); // close loader
+      return result;
+    } finally {
+      if (context.mounted) Navigator.pop(context); 
+    }
   }
-}
 }

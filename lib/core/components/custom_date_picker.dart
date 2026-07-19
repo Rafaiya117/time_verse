@@ -82,8 +82,12 @@ class _CustomDatePickerDialogState extends State<CustomDatePickerDialog> {
           Padding(
             padding: EdgeInsets.all(12.w),
             child: TableCalendar(
-              // 🛠️ FIX: Sets the earliest selectable date to today, blocking all past dates
-              firstDay: DateTime.now().subtract(const Duration(minutes: 1)), 
+              // 🛠️ FIX: Strips hour/minute parameters out so focusedDay can never fall behind firstDay
+              firstDay: DateTime(
+                DateTime.now().year,
+                DateTime.now().month,
+                DateTime.now().day,
+              ),
               lastDay: DateTime.utc(2100, 12, 31),
               focusedDay: _temporaryFocusedDay,
               headerVisible: true,

@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,57 +21,62 @@ class EventController extends ChangeNotifier {
   final Dio _dio = Dio();
   EventModel? eventDetail;
 
-  Future<void> shareQuoteToSocialMedia() async {
-  try {
-    final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) return;
-    final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
-    final tempDir = await getTemporaryDirectory();
-    final uniqueFileName = 'social_share_${DateTime.now().millisecondsSinceEpoch}.png';
-    final file = await File('${tempDir.path}/$uniqueFileName').create();
-    await file.writeAsBytes(pngBytes);
+  Future<void> shareQuoteToSocialMedia([String? explicitText]) async {
+    try {
+      final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+      final textImage = await boundary.toImage(pixelRatio: 3.0);
+      
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
 
-    debugPrint('📸 Generated pure local share file path: ${file.path}');
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      text: '✨ Check out this inspiring insight:\n$quoteText',
-    );
-  } catch (e) {
-    debugPrint('⚠️ Local social media sharing failed: $e');
+      // 🛠️ Draws explicit soft grey layer profile
+      final paint = Paint()..color = const Color.fromARGB(255, 112, 98, 98);
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+      canvas.drawImage(textImage, Offset.zero, Paint());
+
+      final finalPicture = recorder.endRecording();
+      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+      final byteData = await finalImage.toByteData(format: ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+      
+      final tempDir = await getTemporaryDirectory();
+      final uniqueFileName = 'social_share_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = await File('${tempDir.path}/$uniqueFileName').create();
+      await file.writeAsBytes(pngBytes);
+
+      final sharedContent = explicitText ?? quoteText;
+
+      debugPrint('📸 Generated pure local share file path: ${file.path}');
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: '✨ Check out this inspiring insight:\n“ $sharedContent ”',
+      );
+    } catch (e) {
+      debugPrint('⚠️ Local social media sharing failed: $e');
+    }
   }
-}
 
-  // Future<void> shareQuoteAsImage() async {
-  //   try {
-  //     final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-  //     if (boundary == null) return;
-
-  //     final image = await boundary.toImage(pixelRatio: 3.0);
-  //     final byteData = await image.toByteData(format: ImageByteFormat.png);
-  //     final pngBytes = byteData!.buffer.asUint8List();
-
-  //     final tempDir = await getTemporaryDirectory();
-  //     final file = await File('${tempDir.path}/quote.png').create();
-  //     await file.writeAsBytes(pngBytes);
-
-  //     debugPrint('📸 Image successfully saved to path: ${file.path}');
-
-  //     // ignore: deprecated_member_use
-  //     await Share.shareXFiles([XFile(file.path)], text: '✨ $quoteText');
-  //   } catch (e) {
-  //     debugPrint('⚠️ Error sharing quote: $e');
-  //   }
-  // }
-
-  Future<void> shareQuoteAsImage() async {
+  Future<void> shareQuoteAsImage([String? explicitText]) async {
     try {
       final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
 
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      final textImage = await boundary.toImage(pixelRatio: 3.0);
+      
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+
+      // 🛠️ Draws explicit soft grey layer profile
+      final paint = Paint()..color = const Color.fromARGB(255, 117, 90, 90);
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+      canvas.drawImage(textImage, Offset.zero, Paint());
+
+      final finalPicture = recorder.endRecording();
+      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+      final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
       await Gal.putImageBytes(pngBytes, album: 'MyQuotes');

@@ -104,7 +104,6 @@ class CalenderView extends StatelessWidget {
                   if (controller.events.isEmpty) {
                     return const SizedBox.shrink();
                   }
-                  
                   return ListView.builder(
                     shrinkWrap: true, 
                     physics: const NeverScrollableScrollPhysics(),  

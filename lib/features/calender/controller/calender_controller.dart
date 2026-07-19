@@ -95,69 +95,6 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
-  // ------------------ Fetch events from API ------------------ //
-  //  Future<void> fetchUpcomingEvents() async {
-  //   try {
-  //     final authService = AuthService();
-  //     final token = await authService.getToken();
-  //     debugPrint('🚀 Token fetched: $token');
-
-  //     final baseUrl = dotenv.env['BASE_URL'] ?? '';
-  //     debugPrint('Base URL: $baseUrl');
-
-  //     final response = await _dio.get(
-  //       '${baseUrl}api/v1/up-comming/events/',
-  //       options: Options(
-  //         headers: {
-  //           'Authorization': 'Bearer $token',
-  //           'Content-Type': 'application/json',
-  //         },
-  //       ),
-  //     );
-
-  //     debugPrint('📦 API Response Status: ${response.statusCode}');
-  //     debugPrint('📄 Response data: ${response.data}');
-
-  //     if (response.statusCode == 200) {
-  //       final List data = response.data;
-  //       debugPrint('✅ Number of events fetched: ${data.length}');
-
-  //       _events
-  //         ..clear()
-  //         ..addAll(
-  //           data.map((json) {
-  //             final formattedDate = formatEventDate(json['date'] ?? '');
-  //             debugPrint('💬 Event parsed: ${json['title']} - $formattedDate');
-
-  //             return EventModel(
-  //               id: json['id'] ?? 0,
-  //               userName: json['user_name']?.toString() ?? '',
-  //               title: json['title']?.toString() ?? '',
-  //               description: json['description']?.toString() ?? '',
-  //               date: formattedDate,
-  //               startTime: json['start_time']?.toString() ?? '',
-  //               endTime: json['end_time']?.toString() ?? '',
-  //               location: json['location']?.toString() ?? '',
-  //               alarmTime: json['alarm_time']?.toString() ?? '',
-  //               isCompleted: json['is_completed'] ?? false,
-  //               createdAt: json['created_at']?.toString() ?? '',
-  //               user: json['user'] ?? 0,
-  //               category: json['category']?.toString(),
-  //               isFavorite: json['is_favorite'] ?? false,
-  //             );
-  //           }).toList(),
-  //         );
-  //       notifyListeners();
-  //       debugPrint('🎉 Events added to controller: ${_events.length}');
-  //     }
-  //     else {
-  //       debugPrint('❌ Failed to load events: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     debugPrint('⚠️ Error fetching events: $e');
-  //   }
-  // }
-
   Future<void> fetchUpcomingEvents({DateTime? date}) async {
   try {
     final authService = AuthService();
@@ -204,7 +141,7 @@ class CalendarController extends ChangeNotifier {
           isFavorite: json['is_favorite'] ?? false,
         );
       }).toList());
-      
+      debugPrint('!--------Upcoming events-----------${data.length}');
       notifyListeners();
     }
   } catch (e) {
@@ -219,7 +156,7 @@ class CalendarController extends ChangeNotifier {
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
       final response = await _dio.delete(
-        '$baseUrl/api/v1/evenet/delete/$eventId/',
+        '${baseUrl}api/v1/evenet/delete/$eventId/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',

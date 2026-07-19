@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart' hide DatePickerDialog;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +27,13 @@ class AddEventPage extends StatelessWidget {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       addEventController.fetchCategories();
-    });
+      final state = GoRouterState.of(context);
+      final passingDate = state.uri.queryParameters['selectedDate'];
+    
+    if (passingDate != null && passingDate.isNotEmpty) {
+      addEventController.dateController.text = passingDate;
+    }
+  });
 
     const goldColor = Color(0xFFFFA500); 
     const inputBgColor = Color(0xFF0A192F); // Dark input card backgrounds
@@ -165,8 +172,7 @@ class AddEventPage extends StatelessWidget {
                     final DateTime? pickedDate = await showDialog<DateTime>(
                       context: context,
                       builder: (BuildContext context) => CustomDatePickerDialog(
-                        initialDate:Provider.of<CalendarController>(context,listen: false,).selectedDay ??
-                         DateTime.now(),
+                        initialDate:Provider.of<CalendarController>(context,listen: false,).selectedDay ?? DateTime.now(),
                         isDarkMode: isDarkMode,
                       ),
                     );
@@ -207,7 +213,7 @@ class AddEventPage extends StatelessWidget {
                                 return Text(
                                   value.text.isEmpty? "Select Date": value.text,
                                   style: GoogleFonts.inter(
-                                    color: isDarkMode ? Colors.white : Colors.black,
+                                    color: isDarkMode? Colors.white: Colors.black,
                                     fontSize: 13.sp,
                                   ),
                                 );

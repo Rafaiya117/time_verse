@@ -51,6 +51,11 @@ class EventDetails extends StatelessWidget {
 
             final eventDetail = eventController.eventDetail!;
 
+            // ✅ Compute exact rendered string once to maintain parity across share/save triggers
+            final currentQuoteText = eventDetail.description.isEmpty 
+                ? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.' 
+                : eventDetail.description;
+
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 40.0.h),
               child: Column(
@@ -76,12 +81,12 @@ class EventDetails extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: isDarkMode ? null : const Color(0xFFFFFFFF),
                               gradient: isDarkMode
-                                  ? const LinearGradient(
-                                      colors: [Color(0xFF0A1128), Color(0xFF1A1F3A)],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    )
-                                  : null,
+                              ? const LinearGradient(
+                                colors: [Color(0xFF0A1128), Color(0xFF1A1F3A)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                              : null,
                               borderRadius: BorderRadius.circular(16.r),
                               border: Border.all(
                                 color: const Color(0xFFFFB703).withOpacity(0.4),
@@ -101,9 +106,7 @@ class EventDetails extends StatelessWidget {
                                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
                                     padding: EdgeInsets.all(8.w),
                                     child: SvgPicture.asset(
-                                      isDarkMode
-                                          ? 'assets/icons/graduation_icon.svg'
-                                          : 'assets/icons/graduation_light.svg',
+                                      isDarkMode? 'assets/icons/graduation_icon.svg': 'assets/icons/graduation_light.svg',
                                       width: 70.w,
                                       height: 70.h,
                                     ),
@@ -174,7 +177,7 @@ class EventDetails extends StatelessWidget {
                                           child: Container(
                                             color: isDarkMode ? Colors.transparent : Colors.white,
                                             child: Text(
-                                              '“ ${eventDetail.description.isEmpty ? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.' : eventDetail.description} ”',
+                                              '“ $currentQuoteText ”',
                                               textAlign: TextAlign.center,
                                               style: GoogleFonts.inter(
                                                 fontSize: 24.sp,
@@ -221,7 +224,7 @@ class EventDetails extends StatelessWidget {
                           CustomButton(
                             text: "Save",
                             onPressed: () async {
-                              await eventController.shareQuoteAsImage();
+                              await eventController.shareQuoteAsImage(currentQuoteText);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Quote saved as image!')),
                               );
@@ -246,7 +249,8 @@ class EventDetails extends StatelessWidget {
                             text: "Share",
                             onPressed: () {
                               debugPrint('button clicked');
-                              eventController.shareQuoteToSocialMedia();
+                              // ✅ FIX: Pass the parsed runtime quote text downstream
+                              eventController.shareQuoteToSocialMedia(currentQuoteText);
                             },
                             gradient: AppGradientColors.button_gradient,
                             textColor: AppColors.text_color,
