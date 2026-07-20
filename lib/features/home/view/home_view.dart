@@ -171,13 +171,25 @@ class HomeView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Transform.translate(
-                    offset: Offset(-45.w, 0),
-                    child: Image.asset(
-                      'assets/images/A.png',
-                      width: 150.w,
-                      height: 50.h,
-                    ),
+                  Consumer<ProfileController>(
+                    builder: (context, profileController, _) {
+                      final username = profileController.currentUser?.name ?? UserSession().formattedUsername;
+                      final firstLetter = (username.isNotEmpty ? username[0] : 'a').toLowerCase();
+                      return Transform.translate(
+                        offset: Offset(-65.w, 0),
+                        child: Image.asset(
+                          'assets/alphabet/$firstLetter.png',
+                          width: 150.w,
+                          height: 100.h,
+                          errorBuilder: (context, error, stackTrace) =>
+                          Image.asset(
+                            'assets/alphabet/a.png',
+                            width: 150.w,
+                            height: 100.h,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   Row(
                     children: [
@@ -211,8 +223,11 @@ class HomeView extends StatelessWidget {
                               child: Selector<ProfileController, String?>(
                                 selector: (_, controller) => controller.currentUser?.profilePicture,
                                 builder: (_, profilePicture, __) {
-                                  final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)? NetworkImage(profilePicture) as ImageProvider<Object>
-                                  : const AssetImage('assets/images/profile_img.png')as ImageProvider<Object>;
+                                  final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
+                                  ? NetworkImage(profilePicture) as ImageProvider<Object>
+                                  : const AssetImage(
+                                    'assets/images/profile_img.png',
+                                  ) as ImageProvider<Object>;
                                   return Image(
                                     image: imageProvider,
                                     fit: BoxFit.cover,
@@ -497,7 +512,7 @@ class HomeView extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.playfairDisplay(
                                 fontWeight: FontWeight.normal,
-                                fontSize: 22.sp,
+                                fontSize: 20.sp,
                                 color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
@@ -742,12 +757,19 @@ class HomeView extends StatelessWidget {
                             try {
                               final startHourStr = (event.startTime).split(':').first.trim();
                               final int hourValue = int.parse(startHourStr);
-                              if (hourValue >= 12) {
+                              if (hourValue == 12) {
+                                calculatedPeriod = "Noon";
+                              } else if (hourValue > 12 && hourValue <= 16) {
                                 calculatedPeriod = "Afternoon";
+                              } else if (hourValue >= 17 && hourValue <= 20) {
+                                calculatedPeriod = "Evening";
+                              } else if (hourValue >= 21) {
+                                calculatedPeriod = "Night";
                               }
                             } catch (_) {
                               calculatedPeriod = "Morning";
                             }
+
                             bool showHeaderLabel = false;
                             if (index == 0) {
                               showHeaderLabel = true;
@@ -756,8 +778,16 @@ class HomeView extends StatelessWidget {
                               String priorPeriod = "Morning";
                               try {
                                 final priorHourStr = (priorEvent.startTime).split(':').first.trim();
-                                if (int.parse(priorHourStr) >= 12)
+                                final int priorHourValue = int.parse(priorHourStr);
+                                if (priorHourValue == 12) {
+                                  priorPeriod = "Noon";
+                                } else if (priorHourValue > 12 && priorHourValue <= 16) {
                                   priorPeriod = "Afternoon";
+                                } else if (priorHourValue >= 17 && priorHourValue <= 20) {
+                                  priorPeriod = "Evening";
+                                } else if (priorHourValue >= 21) {
+                                  priorPeriod = "Night";
+                                }
                               } catch (_) {}
                               if (calculatedPeriod != priorPeriod) {
                                 showHeaderLabel = true;
@@ -776,7 +806,7 @@ class HomeView extends StatelessWidget {
                                       calculatedPeriod,
                                       style: GoogleFonts.playfairDisplay(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 25.sp,
+                                        fontSize: 20.sp,
                                         color: const Color(0xFFFFA500),
                                         fontStyle: FontStyle.italic,
                                       ),
@@ -918,7 +948,7 @@ class HomeView extends StatelessWidget {
                                 : PageView.builder(
                                   key: ValueKey(
                                     homeController.inspirationalQuotes.length,
-                                      ),
+                                    ),
                                       controller: homeController.pageController,
                                       itemCount: homeController.inspirationalQuotes.length,
                                       onPageChanged: (index) {
@@ -950,7 +980,7 @@ class HomeView extends StatelessWidget {
                                                     textAlign: TextAlign.start,
                                                     style: GoogleFonts.outfit(
                                                       fontWeight:FontWeight.w400,
-                                                      fontSize: 21.sp,
+                                                      fontSize: 18.sp,
                                                       color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87,
                                                       fontStyle:FontStyle.italic,
                                                     ),
