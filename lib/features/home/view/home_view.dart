@@ -242,7 +242,7 @@ class HomeView extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 30.h),
+              //SizedBox(height: 10.h),
               Text(
                 'Welcome',
                 style: GoogleFonts.playfairDisplay(
@@ -946,63 +946,61 @@ class HomeView extends StatelessWidget {
                                   ),
                                 )
                                 : PageView.builder(
-                                  key: ValueKey(
-                                    homeController.inspirationalQuotes.length,
-                                    ),
-                                      controller: homeController.pageController,
-                                      itemCount: homeController.inspirationalQuotes.length,
-                                      onPageChanged: (index) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          if (context.mounted) {
-                                            homeController.updateQuoteIndex(
-                                            index,
-                                            );
-                                          }
-                                        });
-                                      },
-                                      itemBuilder: (context, index) {
-                                        if (index >=homeController.inspirationalQuotes.length) {
-                                          return const SizedBox.shrink();
-                                        }
-                                        final quote = homeController.inspirationalQuotes[index];
-                                        return Column(
-                                          crossAxisAlignment:CrossAxisAlignment.start,
-                                          mainAxisAlignment:MainAxisAlignment.center,
-                                          children: [
-                                            Flexible(
-                                              child: RepaintBoundary(
-                                                key: _inspirationQuoteKey,
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 6.w),
-                                                  decoration: BoxDecoration(),
-                                                  child: Text(
-                                                    quote.quote,
-                                                    textAlign: TextAlign.start,
-                                                    style: GoogleFonts.outfit(
-                                                      fontWeight:FontWeight.w400,
-                                                      fontSize: 18.sp,
-                                                      color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87,
-                                                      fontStyle:FontStyle.italic,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(height: 10.h),
-                                            Text(
-                                              "— ${quote.reference}",
+                                key: ValueKey(
+                                  homeController.inspirationalQuotes.length,
+                                ),
+                                controller: homeController.pageController,
+                                itemCount: homeController.inspirationalQuotes.length,
+                                onPageChanged: (index) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    if (context.mounted) {
+                                      homeController.updateQuoteIndex(index,);
+                                    }
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  if (index >=homeController.inspirationalQuotes.length) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  final quote = homeController.inspirationalQuotes[index];
+                                  return Column(
+                                    crossAxisAlignment:CrossAxisAlignment.start,
+                                    mainAxisAlignment:MainAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: RepaintBoundary(
+                                          key: _inspirationQuoteKey,
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 6.w),
+                                            decoration: BoxDecoration(),
+                                            child: Text(
+                                              quote.quote,
+                                              textAlign: TextAlign.start,
                                               style: GoogleFonts.outfit(
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight:FontWeight.w400,
                                                 fontSize: 18.sp,
-                                                color: isDarkMode
-                                                ? Colors.white60
-                                                : Colors.black54,
+                                                color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87,
+                                                fontStyle:FontStyle.italic,
                                               ),
                                             ),
-                                          ],
-                                        );
-                                      },
-                                    ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 10.h),
+                                      Text(
+                                        "— ${quote.reference}",
+                                        style: GoogleFonts.outfit(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18.sp,
+                                          color: isDarkMode
+                                          ? Colors.white60
+                                          : Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
@@ -1058,9 +1056,7 @@ class HomeView extends StatelessWidget {
                               Container(
                                 height: 24.h,
                                 width: 1,
-                                color:
-                                    (isDarkMode ? Colors.white : Colors.black)
-                                        .withOpacity(0.12),
+                                color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
                               ),
                               // Save Button
                               Expanded(
@@ -1090,18 +1086,14 @@ class HomeView extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.bookmark_border_rounded,
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : AppColors.fourth_color,
+                                        color: isDarkMode? Colors.white: AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Save',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : AppColors.fourth_color,
+                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -1113,9 +1105,7 @@ class HomeView extends StatelessWidget {
                               Container(
                                 height: 24.h,
                                 width: 1,
-                                color:
-                                    (isDarkMode ? Colors.white : Colors.black)
-                                        .withOpacity(0.12),
+                                color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
                               ),
                               // Share Button
                               Expanded(
@@ -1129,18 +1119,14 @@ class HomeView extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.share_outlined,
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : AppColors.fourth_color,
+                                        color: isDarkMode ? Colors.white : AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Share',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : AppColors.fourth_color,
+                                          color: isDarkMode ? Colors.white : AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -1166,9 +1152,7 @@ class HomeView extends StatelessWidget {
                     style: GoogleFonts.playfairDisplay(
                       fontWeight: FontWeight.w600,
                       fontSize: 20.sp,
-                      color: isDarkMode
-                          ? AppColors.l_schedule_clr3
-                          : Colors.black,
+                      color: isDarkMode ? AppColors.l_schedule_clr3: Colors.black,
                     ),
                   ),
                   GestureDetector(
@@ -1181,9 +1165,7 @@ class HomeView extends StatelessWidget {
                       width: 32.w,
                       height: 32.h,
                       decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.white.withOpacity(0.1)
-                            : AppColors.button_color.withOpacity(0.2),
+                        color: isDarkMode ? Colors.white.withOpacity(0.1): AppColors.button_color.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
                           color: AppColors.fourth_color.withOpacity(0.2),
@@ -1195,117 +1177,16 @@ class HomeView extends StatelessWidget {
                   ),
                 ],
               ),
-              //SizedBox(height: 16.h),
-              // Consumer<HomeController>(
-              //   builder: (context, controller, _) {
-              //     if (controller.reviews.isEmpty) {
-              //       return Center(
-              //         child: Text(
-              //           'No reviews available.',
-              //           style: GoogleFonts.outfit(
-              //             color: isDarkMode ? Colors.white : Colors.black,
-              //             fontSize: 14.sp,
-              //           ),
-              //         ),
-              //       );
-              //     }
-              //     return Column(
-              //       children: List.generate(controller.reviews.length, (index) {
-              //         final review = controller.reviews[index];
-              //         return Container(
-              //           width: double.infinity,
-              //           margin: EdgeInsets.only(bottom: 12.h),
-              //           padding: EdgeInsets.all(16.w),
-              //           decoration: BoxDecoration(
-              //             color: isDarkMode
-              //             ? AppColors.containers_bgd
-              //             : Colors.white,
-              //             borderRadius: BorderRadius.circular(12.r),
-              //             border: Border.all(
-              //               color: isDarkMode
-              //               ? const Color(0xFFFFB800).withOpacity(0.3)
-              //               : Colors.grey.withOpacity(0.2),
-              //             ),
-              //           ),
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //               Row(
-              //                 children: [
-              //                   Container(
-              //                     width: 40.w,
-              //                     height: 40.h,
-              //                     decoration: BoxDecoration(
-              //                       color: Colors.grey.withOpacity(0.3),
-              //                       borderRadius: BorderRadius.circular(20.r),
-              //                     ),
-              //                     child: Icon(
-              //                       Icons.person,
-              //                       color: Colors.grey,
-              //                       size: 20.sp,
-              //                     ),
-              //                   ),
-              //                   SizedBox(width: 12.w),
-              //                   Column(
-              //                     crossAxisAlignment: CrossAxisAlignment.start,
-              //                     children: [
-              //                       Text(
-              //                         review.userName,
-              //                         style: GoogleFonts.outfit(
-              //                           fontWeight: FontWeight.w600,
-              //                           fontSize: 14.sp,
-              //                           color: isDarkMode
-              //                           ? Colors.white
-              //                           : Colors.black,
-              //                         ),
-              //                       ),
-              //                       Row(
-              //                         children: List.generate(
-              //                           review.rating,
-              //                           (index) => Icon(
-              //                             Icons.star,
-              //                             color: const Color(0xFFFFB800),
-              //                             size: 12.sp,
-              //                           ),
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 ],
-              //               ),
-              //               SizedBox(height: 12.h),
-              //               Text(
-              //                 '"${review.comments}"',
-              //                 style: GoogleFonts.outfit(
-              //                   fontWeight: FontWeight.w400,
-              //                   fontSize: 14.sp,
-              //                   color: isDarkMode
-              //                   ? Colors.white.withOpacity(0.8)
-              //                   : Colors.black.withOpacity(0.8),
-              //                   height: 1.4,
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //         );
-              //       }),
-              //     );
-              //   },
-              // ),
               SizedBox(height: 30.h),
               // Unlock More Blessings section
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? const Color(0xFF051123)
-                      : const Color(0xFFFFFFFF),
+                  color: isDarkMode ? const Color(0xFF051123): const Color(0xFFFFFFFF),
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
-                    color: isDarkMode
-                        ? const Color(0xFFC5A880).withOpacity(0.35)
-                        : Colors.transparent,
+                    color: isDarkMode ? const Color(0xFFC5A880).withOpacity(0.35): Colors.transparent,
                   ),
                 ),
                 child: Column(
@@ -1363,74 +1244,6 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  // Widget _buildScheduleEvent(
-  //   BuildContext context,
-  //   int id,
-  //   String title,
-  //   String time,
-  //   Color indicatorColor,
-  //   bool isDarkMode, {
-  //   Color? lightModeBackgroundColor,
-  // }) {
-  //   return GestureDetector(
-  //     onTap: (){
-  //       context.push('/event_details', extra: id);
-  //     },
-  //     child:Container(
-  //     width: double.infinity,
-  //     padding: EdgeInsets.all(16.w),
-  //     decoration: BoxDecoration(
-  //       color: isDarkMode
-  //         ? AppColors.containers_bgd
-  //         : (lightModeBackgroundColor ?? Colors.white),
-  //       borderRadius: BorderRadius.circular(12.r),
-  //       border: Border.all(
-  //         // ignore: deprecated_member_use
-  //         color: isDarkMode ? const Color(0xFFFFB800).withOpacity(0.3) : Colors.grey.withOpacity(0.2),
-  //       ),
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           width: 8.w,
-  //           height: 8.h,
-  //           decoration: BoxDecoration(
-  //             color: indicatorColor,
-  //             borderRadius: BorderRadius.circular(4.r),
-  //           ),
-  //         ),
-  //         SizedBox(width: 16.w),
-  //         Flexible(
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 title,
-  //                 style: GoogleFonts.outfit(
-  //                   fontWeight: FontWeight.w600,
-  //                   fontSize: 16.sp,
-  //                   color: isDarkMode ? Colors.white : Colors.black,
-  //                 ),
-  //               ),
-  //               SizedBox(height: 4.h),
-  //               Text(
-  //                 time,
-  //                 style: GoogleFonts.outfit(
-  //                   fontWeight: FontWeight.w400,
-  //                   fontSize: 14.sp,
-  //                   // ignore: deprecated_member_use
-  //                   color: isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     )
-  //   );
-  // }
-
   Widget _buildScheduleEvent(
     BuildContext context,
     int id,
@@ -1460,8 +1273,8 @@ class HomeView extends StatelessWidget {
                     child: Container(
                       width: 1.5.w,
                       color: const Color(0xFFC5A880).withOpacity(0.35),
-                    ),
                   ),
+                ),
                 Positioned(
                   top: 6.h,
                   left: 6.w,
@@ -1500,25 +1313,20 @@ class HomeView extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    // Create and bundle the complete parameters into a direct model instance
                     context.push('/event_details', extra: id);
                   },
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? const Color(0xFF09121F)
-                          : Colors.grey.withOpacity(0.05),
+                      color: isDarkMode? const Color(0xFF09121F): Colors.grey.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(16.r),
                       border: Border.all(
                         color: const Color(0xFFC5A880).withOpacity(0.2),
                       ),
                       image: DecorationImage(
                         image: AssetImage(
-                          isDarkMode
-                              ? 'assets/images/container_bgm.jpg'
-                              : 'assets/images/container_bgm_light.png',
+                          isDarkMode? 'assets/images/container_bgm.jpg': 'assets/images/container_bgm_light.png',
                         ),
                         fit: BoxFit.cover,
                       ),
@@ -1569,8 +1377,7 @@ class HomeView extends StatelessWidget {
                             color: isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
-                        if (location.isNotEmpty &&
-                            location.toLowerCase() != 'unknown') ...[
+                        if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
                           SizedBox(height: 8.h),
                           Row(
                             children: [
@@ -1584,9 +1391,7 @@ class HomeView extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontWeight: FontWeight.w400,
                                     fontSize: 14.sp,
-                                    color: isDarkMode
-                                        ? Colors.white70
-                                        : Colors.black,
+                                    color: isDarkMode? Colors.white70: Colors.black,
                                   ),
                                 ),
                               ),
@@ -1611,9 +1416,7 @@ class HomeView extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontWeight: FontWeight.w400,
                                     fontSize: 14.sp,
-                                    color: isDarkMode
-                                        ? Colors.white60
-                                        : Colors.black54,
+                                    color: isDarkMode? Colors.white60: Colors.black54,
                                   ),
                                 ),
                               ),
