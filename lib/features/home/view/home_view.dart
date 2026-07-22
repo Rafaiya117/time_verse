@@ -510,7 +510,7 @@ class HomeView extends StatelessWidget {
                             child: Text(
                               aiReflectionText,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.playfairDisplay(
+                              style: GoogleFonts.cormorant(
                                 fontWeight: FontWeight.normal,
                                 fontSize: 20.sp,
                                 color: isDarkMode ? Colors.white : Colors.black,
@@ -979,7 +979,7 @@ class HomeView extends StatelessWidget {
                                               style: GoogleFonts.outfit(
                                                 fontWeight:FontWeight.w400,
                                                 fontSize: 18.sp,
-                                                color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87,
+                                                color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87.withOpacity(0.6),
                                                 fontStyle:FontStyle.italic,
                                               ),
                                             ),
@@ -1004,7 +1004,6 @@ class HomeView extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         SizedBox(height: 20.h),
                         Container(
                           padding: EdgeInsets.only(top: 14.h),

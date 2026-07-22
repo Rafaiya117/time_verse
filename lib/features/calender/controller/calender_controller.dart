@@ -24,39 +24,7 @@ class CalendarController extends ChangeNotifier {
       fetchUpcomingEvents(date: selectedDay);
     notifyListeners();
   }
-  final List<EventModel> _events = [
-    EventModel(
-      title: 'Soccer Practice & Fun',
-      date: 'Today',
-      startTime: '4.00 PM',
-      location: 'City Sports Complex', 
-      id:0, 
-      userName: '', 
-      description: '', 
-      endTime: '', 
-      alarmTime: '', 
-      isCompleted: false, 
-      createdAt: '', 
-      user: 0, 
-      isFavorite: false,
-    ),
-    EventModel(
-      title: 'Emma\'s 10th Birthday Party',
-      date: 'Saturday, Sep 19,2025',
-      startTime: '3.00 - 6:00 PM',
-      location: '123 Oak Street, Springfield', 
-      id: 0, 
-      userName: '', 
-      description: '', 
-      endTime: '', 
-      alarmTime: '', 
-      isCompleted: false, 
-      createdAt: '', 
-      user: 0, 
-      isFavorite: false,
-    ),
-  ];
-
+  final List<EventModel> _events = [];
   List<EventModel> get events => List.unmodifiable(_events);
 
   void removeEvent(int index) {

@@ -115,9 +115,9 @@ class EventDetails extends StatelessWidget {
                                   Text(
                                     eventDetail.title.isEmpty ? 'Traveling to grandmother' : eventDetail.title,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.playfair(
                                       fontSize: 27.sp,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w600,
                                       color: isDarkMode ? Colors.white : Colors.black,
                                     ),
                                   ),
@@ -125,9 +125,9 @@ class EventDetails extends StatelessWidget {
                                   Text(
                                     'Today • ${eventDetail.startTime.isEmpty ? "2:00 PM" : eventDetail.startTime}',
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.outfit(
+                                    style: GoogleFonts.manrope(
                                       fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
+                                      fontWeight: FontWeight.w600,
                                       color: isDarkMode ? const Color(0xFF9CA3AF) : Colors.black,
                                     ),
                                   ),
@@ -179,7 +179,7 @@ class EventDetails extends StatelessWidget {
                                             child: Text(
                                               '“ $currentQuoteText ”',
                                               textAlign: TextAlign.center,
-                                              style: GoogleFonts.inter(
+                                              style: GoogleFonts.cormorant(
                                                 fontSize: 24.sp,
                                                 fontWeight: FontWeight.w500,
                                                 color: isDarkMode ? Colors.white : Colors.black,
