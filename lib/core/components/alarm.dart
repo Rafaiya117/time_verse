@@ -143,7 +143,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                     // Subtitle Title Text Layer
                     Text(
                       'ALARM RINGING FOR',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.cormorant(
                         color: const Color(0xFFFFB703),
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
@@ -207,7 +207,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
                       decoration: BoxDecoration(
-                        color:  isDarkMode?Colors.white:Color(0xFF041124).withOpacity(0.85),
+                        color:  isDarkMode?Color(0xFF041124):Colors.white.withOpacity(0.85),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -216,7 +216,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                         children: [
                           Text(
                             '“',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.cormorant(
                               color: const Color(0xFFFFB703),
                               fontSize: 32.sp,
                               fontWeight: FontWeight.w900,
@@ -225,7 +225,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                           Text(
                             notification.body ?? 'Every journey leads ahead, stepping into the potential trapped beneath your dreams.',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.cormorant(
                               color: Colors.white.withOpacity(0.9),
                               fontSize: 23.sp,
                               height: 1.5,
