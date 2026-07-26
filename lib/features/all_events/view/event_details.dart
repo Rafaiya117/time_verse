@@ -192,16 +192,16 @@ class EventDetails extends StatelessWidget {
                                     ],
                                   ),
                                   SizedBox(height: 24.h),
-                                  Text(
-                                    '-${eventDetail.userName.isEmpty ? "pappu roy" : eventDetail.userName}',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFFFFB703),
-                                    ),
-                                  ),
-                                  SizedBox(height: 4.h),
+                                  // Text(
+                                  //   '-${eventDetail.userName.isEmpty ? "pappu roy" : eventDetail.userName}',
+                                  //   textAlign: TextAlign.center,
+                                  //   style: GoogleFonts.outfit(
+                                  //     fontSize: 14.sp,
+                                  //     fontWeight: FontWeight.bold,
+                                  //     color: const Color(0xFFFFB703),
+                                  //   ),
+                                  // ),
+                                  // SizedBox(height: 4.h),
                                   Text(
                                     'Inspired by InfiniQoute',
                                     textAlign: TextAlign.center,

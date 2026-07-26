@@ -155,6 +155,7 @@ class HomeView extends StatelessWidget {
         homeController.initOnce(profileController);
         homeController.fetchAIMooodReflection();
         homeController.updateIndexFromRoute(currentRouteUri);
+        homeController.todaysfetchEvents(profileController);
       });
     }
 
@@ -342,8 +343,9 @@ class HomeView extends StatelessWidget {
                         final daysInMonth = DateTime(now.year,now.month + 1,0,).day;
                         final double itemWidth = 66.w;
                         final int todayIndex = now.day - 1;
-                        final double initialOffset =(todayIndex - 2).clamp(0, daysInMonth) * itemWidth;
-                        final ScrollController statelessScrollController = ScrollController(initialScrollOffset: initialOffset);
+                        final double initialOffset = (todayIndex - 2).clamp(0, daysInMonth) * itemWidth;
+                        final ScrollController statelessScrollController =
+                        ScrollController(initialScrollOffset: initialOffset,);
 
                         return ListView.builder(
                           controller: statelessScrollController,
@@ -356,6 +358,9 @@ class HomeView extends StatelessWidget {
 
                             return GestureDetector(
                               onTap: () {
+                                controller.selectDate(date, profileController);
+                              },
+                              onDoubleTap: () {
                                 controller.selectDate(date, profileController);
                                 final todayStart = DateTime(now.year,now.month,now.day,);
                                 final targetDateStart = DateTime(date.year,date.month,date.day,);
@@ -371,7 +376,7 @@ class HomeView extends StatelessWidget {
                                   color: isSelected ? const Color(0xFFF1A80A): (isDarkMode? const Color(0xFF070F1A): Colors.white),
                                   borderRadius: BorderRadius.circular(24.r),
                                   border: Border.all(
-                                    color: !isSelected ? (isDarkMode ? Colors.white: Colors.grey.shade300): Colors.transparent,
+                                    color: !isSelected ? (isDarkMode ? Colors.white : Colors.grey.shade300): Colors.transparent,
                                     width: 0.2.sp,
                                   ),
                                   boxShadow: [
@@ -398,7 +403,7 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.w400,
-                                        color: isSelected ? const Color(0xFF060B13): (isDarkMode ? const Color(0xFF7A8B9E): Colors.grey.shade600),
+                                        color: isSelected ? const Color(0xFF060B13): (isDarkMode ? const Color(0xFF7A8B9E) : Colors.grey.shade600),
                                       ),
                                     ),
                                     SizedBox(height: 6.h),
@@ -407,7 +412,7 @@ class HomeView extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 24.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: isSelected? const Color(0xFF060B13): (isDarkMode? Colors.white: Colors.black),
+                                        color: isSelected? const Color(0xFF060B13): (isDarkMode? Colors.white : Colors.black),
                                       ),
                                     ),
                                   ],
@@ -726,11 +731,11 @@ class HomeView extends StatelessWidget {
                   final events = controller.todaysEvents;
                   if (events.isEmpty) {
                     return Text(
-                      'No review yet',
+                      'No Event yet',
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w400,
                         fontSize: 14.sp,
-                        color: isDarkMode? AppColors.fourth_color: AppColors.heading_color,
+                        color: isDarkMode ? AppColors.fourth_color: AppColors.heading_color,
                       ),
                     );
                   }
@@ -778,12 +783,16 @@ class HomeView extends StatelessWidget {
                               String priorPeriod = "Morning";
                               try {
                                 final priorHourStr = (priorEvent.startTime).split(':').first.trim();
-                                final int priorHourValue = int.parse(priorHourStr);
+                                final int priorHourValue = int.parse(
+                                  priorHourStr,
+                                );
                                 if (priorHourValue == 12) {
                                   priorPeriod = "Noon";
-                                } else if (priorHourValue > 12 && priorHourValue <= 16) {
+                                } else if (priorHourValue > 12 &&
+                                    priorHourValue <= 16) {
                                   priorPeriod = "Afternoon";
-                                } else if (priorHourValue >= 17 && priorHourValue <= 20) {
+                                } else if (priorHourValue >= 17 &&
+                                    priorHourValue <= 20) {
                                   priorPeriod = "Evening";
                                 } else if (priorHourValue >= 21) {
                                   priorPeriod = "Night";
@@ -794,6 +803,7 @@ class HomeView extends StatelessWidget {
                               }
                             }
                             return Column(
+                              key: ValueKey(event.id),
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (showHeaderLabel) ...[
@@ -918,10 +928,6 @@ class HomeView extends StatelessWidget {
                         SizedBox(height: 18.h),
 
                         GestureDetector(
-                          onPanStart: (_) => homeController.stopAutoSlide(),
-                          onPanEnd: (_) => homeController.startAutoSlide(),
-                          onTapDown: (_) => homeController.stopAutoSlide(),
-                          onTapUp: (_) => homeController.startAutoSlide(),
                           child: Container(
                             constraints: BoxConstraints(maxHeight: 180.h),
                             decoration: BoxDecoration(
@@ -976,7 +982,7 @@ class HomeView extends StatelessWidget {
                                             child: Text(
                                               quote.quote,
                                               textAlign: TextAlign.start,
-                                              style: GoogleFonts.outfit(
+                                              style: GoogleFonts.cormorant(
                                                 fontWeight:FontWeight.w400,
                                                 fontSize: 18.sp,
                                                 color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87.withOpacity(0.6),
@@ -989,12 +995,13 @@ class HomeView extends StatelessWidget {
                                       SizedBox(height: 10.h),
                                       Text(
                                         "— ${quote.reference}",
-                                        style: GoogleFonts.outfit(
+                                        style: GoogleFonts.playfair(
                                           fontWeight: FontWeight.w500,
-                                          fontSize: 18.sp,
+                                          fontSize: 16.sp,
                                           color: isDarkMode
                                           ? Colors.white60
                                           : Colors.black54,
+                                          fontStyle: FontStyle.italic
                                         ),
                                       ),
                                     ],
@@ -1148,9 +1155,9 @@ class HomeView extends StatelessWidget {
                 children: [
                   Text(
                     'Leave us a feedback',
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.playfair(
                       fontWeight: FontWeight.w600,
-                      fontSize: 20.sp,
+                      fontSize: 22.sp,
                       color: isDarkMode ? AppColors.l_schedule_clr3: Colors.black,
                     ),
                   ),
@@ -1193,7 +1200,7 @@ class HomeView extends StatelessWidget {
                   children: [
                     Text(
                       'Unlock More Blessings',
-                      style: GoogleFonts.playfairDisplay(
+                      style: GoogleFonts.cormorant(
                         fontWeight: FontWeight.bold,
                         fontSize: 22.sp,
                         color: const Color(0xFFFFA500),
@@ -1244,99 +1251,101 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildScheduleEvent(
-    BuildContext context,
-    int id,
-    String title,
-    String time,
-    String category,
-    String location,
-    String subtitle,
-    Color indicatorColor,
-    bool isDarkMode, {
-    Color? lightModeBackgroundColor,
-    bool isLastItem = false,
-  }) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 24.w,
-            child: Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                if (!isLastItem)
-                  Positioned(
-                    top: 6.h,
-                    bottom: 0,
-                    child: Container(
-                      width: 1.5.w,
-                      color: const Color(0xFFC5A880).withOpacity(0.35),
-                  ),
-                ),
+  BuildContext context,
+  int id,
+  String title,
+  String time,
+  String category,
+  String location,
+  String subtitle,
+  Color indicatorColor,
+  bool isDarkMode, {
+  Color? lightModeBackgroundColor,
+  bool isLastItem = false,
+}) {
+  return IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: 24.w,
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              if (!isLastItem)
                 Positioned(
                   top: 6.h,
-                  left: 6.w,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 12.w,
-                        height: 12.h,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFA500),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFFFA500).withOpacity(0.4),
-                              blurRadius: 6.r,
-                              spreadRadius: 1.r,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        width: 6.w,
-                        height: 1.5.h,
-                        color: const Color(0xFFC5A880).withOpacity(0.35),
-                      ),
-                    ],
+                  bottom: 0,
+                  child: Container(
+                    width: 1.5.w,
+                    color: const Color(0xFFC5A880).withOpacity(0.35),
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    context.push('/event_details', extra: id);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: isDarkMode? const Color(0xFF09121F): Colors.grey.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
-                        color: const Color(0xFFC5A880).withOpacity(0.2),
-                      ),
-                      image: DecorationImage(
-                        image: AssetImage(
-                          isDarkMode? 'assets/images/container_bgm.jpg': 'assets/images/container_bgm_light.png',
-                        ),
-                        fit: BoxFit.cover,
+              Positioned(
+                top: 6.h,
+                left: 6.w,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 12.w,
+                      height: 12.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFA500),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFA500).withOpacity(0.4),
+                            blurRadius: 6.r,
+                            spreadRadius: 1.r,
+                          ),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
+                    Container(
+                      width: 6.w,
+                      height: 1.5.h,
+                      color: const Color(0xFFC5A880).withOpacity(0.35),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Expanded(
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  context.push('/event_details', extra: id);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? const Color(0xFF09121F) : Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: const Color(0xFFC5A880).withOpacity(0.2),
+                    ),
+                    image: DecorationImage(
+                      image: AssetImage(
+                        isDarkMode ? 'assets/images/container_bgm.jpg' : 'assets/images/container_bgm_light.png',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // 🛠️ FIX: Wrapped category badge in Flexible to prevent right overflow
+                          Flexible(
+                            child: Container(
                               padding: EdgeInsets.symmetric(
                                 horizontal: 12.w,
                                 vertical: 4.h,
@@ -1350,6 +1359,8 @@ class HomeView extends StatelessWidget {
                               ),
                               child: Text(
                                 category.isEmpty ? 'General' : category,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.outfit(
                                   color: const Color(0xFF7A8B9E),
                                   fontSize: 13.sp,
@@ -1357,83 +1368,85 @@ class HomeView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Text(
-                              time,
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15.sp,
-                                color: const Color(0xFFFFA500),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            time,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15.sp,
+                              color: const Color(0xFFFFA500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        title,
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.sp,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
+                        SizedBox(height: 8.h),
+                        Row(
+                          children: [
+                            Text('📍', style: TextStyle(fontSize: 14.sp)),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                location,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14.sp,
+                                  color: isDarkMode ? Colors.white70 : Colors.black,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          title,
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
-                            color: isDarkMode ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
-                          SizedBox(height: 8.h),
-                          Row(
-                            children: [
-                              Text('📍', style: TextStyle(fontSize: 14.sp)),
-                              SizedBox(width: 6.w),
-                              Expanded(
-                                child: Text(
-                                  location,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 14.sp,
-                                    color: isDarkMode? Colors.white70: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (subtitle.isNotEmpty) ...[
-                          SizedBox(height: 4.h),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.description_outlined,
-                                color: const Color(0xFF7A8B9E),
-                                size: 14.sp,
-                              ),
-                              SizedBox(width: 6.w),
-                              Expanded(
-                                child: Text(
-                                  subtitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 14.sp,
-                                    color: isDarkMode? Colors.white60: Colors.black54,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ],
-                    ),
+                      if (subtitle.isNotEmpty) ...[
+                        SizedBox(height: 4.h),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.description_outlined,
+                              color: const Color(0xFF7A8B9E),
+                              size: 14.sp,
+                            ),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14.sp,
+                                  color: isDarkMode ? Colors.white60 : Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                SizedBox(height: isLastItem ? 0 : 16.h),
-              ],
-            ),
+              ),
+              SizedBox(height: isLastItem ? 0 : 16.h),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   String _getDayName(int weekday) {
     switch (weekday) {

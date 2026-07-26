@@ -40,14 +40,15 @@ class AllEvents extends StatelessWidget {
             //SizedBox(height: 20.h,),
             Consumer<AllEventsController>(
               builder: (context, controller, _) {
+                final todayEvents = controller.events.where((e) => e.date == 'Today').toList();
                 return Expanded(
                   child: ListView.builder(
-                    itemCount: controller.events.length,
+                    itemCount: todayEvents.length,
                     itemBuilder: (context, index) {
-                      final EventModel event = controller.events[index];
+                      final EventModel event = todayEvents[index];
 
                       return Dismissible(
-                        key: ValueKey(event.id), // 🔹 required for animation
+                        key: ValueKey(event.id),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           alignment: Alignment.centerRight,
@@ -62,8 +63,7 @@ class AllEvents extends StatelessWidget {
                             onConfirm: () async {
                               final success = await controller.runWithLoaderAndTimer(
                                 context: context,
-                                task: () => controller.removeEventFromList(event.id),
-                              );
+                                task: () => controller.removeEventFromList(event.id,),);
                               if (success != true) {
                                 debugPrint('❌ Failed to delete event');
                               }
@@ -78,7 +78,7 @@ class AllEvents extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 20.0),
                           child: EventCard(
                             title: event.title,
-                            sub_title: event.description ?? "",
+                            sub_title: event.description,
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
                             location: event.location,
@@ -89,8 +89,7 @@ class AllEvents extends StatelessWidget {
                                 onConfirm: () async {
                                   final success = await controller.runWithLoaderAndTimer(
                                     context: context,
-                                    task: () => controller.removeEventFromList(event.id),
-                                      );
+                                    task: () => controller.removeEventFromList(event.id),);
                                   if (success != true) {
                                     debugPrint('❌ Failed to delete event');
                                   }

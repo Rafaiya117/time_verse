@@ -35,7 +35,6 @@ class EventCard extends StatelessWidget {
       },
       child: Container(
         width: double.infinity,
-        height: 200.h,
         decoration: BoxDecoration(
           color: isDarkMode ? AppColors.containers_bgd : Colors.white,
           borderRadius: BorderRadius.circular(12.r),
@@ -43,109 +42,102 @@ class EventCard extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            physics:const NeverScrollableScrollPhysics(), 
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment:CrossAxisAlignment.start, 
-                        children: [
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/icons/tittle_icon.svg',
-                                height: 23.sp,
-                                width: 23.sp,
-                              ),
-                              Text(
-                                title,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16.sp,
-                                  color: isDarkMode
-                                    ? AppColors.text_color
-                                    : const Color(0xFF353535),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.h),
-                          Text(
-                            sub_title,
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.sp,
-                              color: isDarkMode
-                              ? AppColors.text_color
-                              : const Color(0xFF353535),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/tittle_icon.svg',
+                              height: 23.sp,
+                              width: 23.sp,
                             ),
-                            overflow: TextOverflow.ellipsis, 
-                            maxLines: 1,
+                            Text(
+                              title,
+                              style: GoogleFonts.cormorant(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16.sp,
+                                color: isDarkMode ? AppColors.text_color: const Color(0xFF353535),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.h),
+                        Text(
+                          sub_title,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.sp,
+                            color: isDarkMode
+                            ? AppColors.text_color: const Color(0xFF353535),
                           ),
-                        ],
-                      ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8), // optional spacing
-                    GestureDetector(
-                      onTap: onDelete,
-                      child: SvgPicture.asset(
-                        'assets/icons/delete_icon.svg',
-                        width: 30.w,
-                        height: 30.h,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: SvgPicture.asset(
+                      'assets/icons/delete_icon.svg',
+                      width: 30.w,
+                      height: 30.h,
                     ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/today.svg',
-                      width: 15.w,
-                      height: 15.h,
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/today.svg',
+                    width: 15.w,
+                    height: 15.h,
+                  ),
+                  SizedBox(width: 10.w),
+                  Text(
+                    date,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12.sp,
+                      color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
                     ),
-                    SizedBox(width: 10.w),
-                    Text(
-                      date,
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12.sp,
-                        color: isDarkMode
-                          ? AppColors.text_color
-                          : const Color(0xFF373F4B),
-                      ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 15.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/clock_icon.svg',
+                    width: 15.w,
+                    height: 15.h,
+                  ),
+                  SizedBox(width: 15.w),
+                  Text(
+                    time,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12.sp,
+                      color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
                     ),
-                  ],
-                ),
-                SizedBox(height: 15.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/clock_icon.svg',
-                      width: 15.w,
-                      height: 15.h,
-                    ),
-                    SizedBox(width: 15.w),
-                    Text(
-                      time,
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12.sp,
-                        color: isDarkMode
-                          ? AppColors.text_color
-                          : const Color(0xFF373F4B),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
                 SizedBox(height: 15.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -161,15 +153,14 @@ class EventCard extends StatelessWidget {
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w500,
                         fontSize: 12.sp,
-                        color: isDarkMode
-                          ? AppColors.text_color
-                          : const Color(0xFF373F4B),
+                        color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
                       ),
                     ),
                   ],
                 ),
               ],
-            ),
+              SizedBox(height: 10.h,),
+            ],
           ),
         ),
       ),

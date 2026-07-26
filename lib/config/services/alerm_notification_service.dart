@@ -30,11 +30,54 @@ class NotificationService {
     }
   }
 
+  // static Future<void> scheduleNotification({
+  //   required int id,
+  //   required String title,
+  //   required String body,
+  //   required DateTime alarmTime, required payload,
+  // }) async {
+  //   await requestExactAlarmPermission();
+
+  //   final tz.TZDateTime scheduledDate = tz.TZDateTime.from(alarmTime, tz.local);
+
+  //   if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+  //     debugPrint('⛔ Skipped past notification: $scheduledDate');
+  //     return;
+  //   }
+
+  //   await _notifications.zonedSchedule(
+  //     id,
+  //     title,
+  //     body,
+  //     scheduledDate,
+  //     NotificationDetails(
+  //       android: AndroidNotificationDetails(
+  //         _channelId,
+  //         'Event Reminders',
+  //         channelDescription: 'Event notifications',
+  //         importance: Importance.max,
+  //         priority: Priority.max,
+  //         playSound: true,
+  //         fullScreenIntent: true,
+  //         enableVibration: true,
+  //       ),
+  //       iOS: const DarwinNotificationDetails(
+  //         presentAlert: true,
+  //         presentSound: true,
+  //       ),
+  //     ),
+  //     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  //   );
+
+  //   debugPrint('⏰ Notification scheduled for $scheduledDate');
+  // }
+
   static Future<void> scheduleNotification({
     required int id,
     required String title,
     required String body,
-    required DateTime alarmTime, required payload,
+    required DateTime alarmTime, 
+    required payload,
   }) async {
     await requestExactAlarmPermission();
 
@@ -60,6 +103,13 @@ class NotificationService {
           playSound: true,
           fullScreenIntent: true,
           enableVibration: true,
+          // 🛠️ EXPANDABLE TEXT: Allows the notification tray to expand and show full body text
+          styleInformation: BigTextStyleInformation(
+            body,
+            contentTitle: title,
+            htmlFormatBigText: true,
+            htmlFormatContentTitle: true,
+          ),
         ),
         iOS: const DarwinNotificationDetails(
           presentAlert: true,

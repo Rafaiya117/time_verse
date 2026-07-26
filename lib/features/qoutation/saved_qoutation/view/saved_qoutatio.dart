@@ -141,7 +141,7 @@ class SavedQoutation extends StatelessWidget {
               RepaintBoundary(
                 key: _boundaryKey,
                 child: Container(
-                  color: isDarkMode ? const Color(0xFF0F172A) : Colors.white,
+                  color: Colors.transparent,
                   child: Consumer<SavedQouteController>(
                     builder: (context, controller, _) {
                       return Column(

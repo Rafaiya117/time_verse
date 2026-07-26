@@ -88,7 +88,7 @@ class GoogleServices {
     try {
       final dio = Dio();
       final baseurl = dotenv.env['BASE_URL'];
-      final String url = '$baseurl/api/v1/auth/login/idtoken/';
+      final String url = '${baseurl}api/v1/auth/login/idtoken/';
 
       final response = await dio.post(
         url,

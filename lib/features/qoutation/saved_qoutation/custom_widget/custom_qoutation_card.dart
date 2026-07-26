@@ -85,14 +85,12 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                             () {
                               try {
                                 DateTime parsedDate = DateTime.parse(widget.time,).toLocal();
-                                return DateFormat(
-                                "MMM d, yyyy '•' h:mm a",
-                                ).format(parsedDate);
+                                return DateFormat("MMM d, yyyy '•' h:mm a",).format(parsedDate);
                               } catch (e) {
                                 return widget.time; // Fallback to raw string if parsing fails
                               }
                             }(),
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.playfair(
                               color: const Color(0xFFFFB703),
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -118,7 +116,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Text(
                           widget.quoteText,
-                          style: GoogleFonts.playfairDisplay(
+                          style: GoogleFonts.cormorant(
                             color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
                             fontSize: 22,
                             fontWeight: FontWeight.w500,

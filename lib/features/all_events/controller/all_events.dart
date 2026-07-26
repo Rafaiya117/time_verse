@@ -32,68 +32,7 @@ class AllEventsController extends ChangeNotifier {
     context.push(appRoutes[index]);
   }
   
-  final List<EventModel> _events = [
-  //  EventModel(
-  //     title: 'Soccer Practice & Fun',
-  //     date: 'Today',
-  //     startTime: '4.00 PM',
-  //     location: 'City Sports Complex', 
-  //     id:0, 
-  //     userName: '', 
-  //     description: '', 
-  //     endTime: '', 
-  //     alarmTime: '', 
-  //     isCompleted: false, 
-  //     createdAt: '', 
-  //     user: 0, 
-  //     isFavorite: false,
-  //   ),
-  //   EventModel(
-  //     title: 'Emma\'s 10th Birthday Party',
-  //     date: 'Saturday, Sep 19,2025',
-  //     startTime: '3.00 - 6:00 PM',
-  //     location: '123 Oak Street, Springfield', 
-  //     id: 0, 
-  //     userName: '', 
-  //     description: '', 
-  //     endTime: '', 
-  //     alarmTime: '', 
-  //     isCompleted: false, 
-  //     createdAt: '', 
-  //     user: 0, 
-  //     isFavorite: false,
-  //   ),
-  //   EventModel(
-  //     title: 'Soccer Practice & Fun',
-  //     date: 'Today',
-  //     startTime: '4.00 PM',
-  //     location: 'City Sports Complex', 
-  //     id:0, 
-  //     userName: '', 
-  //     description: '', 
-  //     endTime: '', 
-  //     alarmTime: '', 
-  //     isCompleted: false, 
-  //     createdAt: '', 
-  //     user: 0, 
-  //     isFavorite: false,
-  //   ),
-  //   EventModel(
-  //     title: 'Emma\'s 10th Birthday Party',
-  //     date: 'Saturday, Sep 19,2025',
-  //     startTime: '3.00 - 6:00 PM',
-  //     location: '123 Oak Street, Springfield', 
-  //     id: 0, 
-  //     userName: '', 
-  //     description: '', 
-  //     endTime: '', 
-  //     alarmTime: '', 
-  //     isCompleted: false, 
-  //     createdAt: '', 
-  //     user: 0, 
-  //     isFavorite: false,
-  //   ),
-  ];
+  final List<EventModel> _events = [];
 
   List<EventModel> get events => List.unmodifiable(_events);
 
@@ -158,7 +97,7 @@ class AllEventsController extends ChangeNotifier {
             );
           }).toList(),
         );
-
+      debugPrint('All event data-----------$data');
       notifyListeners();
       await Alarm.stopAll();
       for (final event in _events) {
