@@ -3,35 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
-import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
-import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:time_verse/features/calender/repository/add_event_repository.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 
 class AddEventController extends ChangeNotifier {
-  final Dio _dio = Dio();
-  final AuthService _authService = AuthService();
-  
+  final AddEventRepository _repository;
+
+  AddEventController({AddEventRepository? repository})
+      : _repository = repository ?? AddEventRepository();
+
   List<EventCategory> categories = [];
   bool isLoading = false;
   String? selectedCategory;
 
-  // Grouped Text Editing Controllers
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController startTimeController = TextEditingController();
-  final TextEditingController endTimeController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController alarmTimeController = TextEditingController();
-  final TextEditingController noteController = TextEditingController();
+  // Text Controllers
+  final titleController = TextEditingController();
+  final dateController = TextEditingController();
+  final startTimeController = TextEditingController();
+  final endTimeController = TextEditingController();
+  final locationController = TextEditingController();
+  final alarmTimeController = TextEditingController();
+  final noteController = TextEditingController();
 
-  // Optimized Date Formats List (Declared static final to avoid re-allocation on every save)
+  List<TextEditingController> get _allControllers => [titleController,dateController,startTimeController,endTimeController,locationController,alarmTimeController,noteController,];
+
   static final List<DateFormat> _dateFormats = [
     DateFormat("yyyy-MM-dd"),
     DateFormat("dd/MM/yyyy"),
@@ -43,33 +43,11 @@ class AddEventController extends ChangeNotifier {
     DateFormat("d MMMM yyyy"),
   ];
 
-  Future<Options> _authorizedHeader() async {
-    final token = await _authService.getToken();
-    return Options(
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-  }
-
   Future<void> fetchCategories() async {
     try {
       isLoading = true;
       notifyListeners();
-      
-      final options = await _authorizedHeader();
-      final response = await _dio.get(
-        '${dotenv.env['BASE_URL']}api/v1/categories/',
-        options: options,
-      );
-
-      if (response.statusCode == 200 && response.data is List) {
-        categories = (response.data as List).map((json) => EventCategory.fromJson(json)).toList();
-        debugPrint('Fetched ${response.data} categories successfully.');
-      } else {
-        debugPrint('Failed to load categories: ${response.statusCode}');
-      }
+      categories = await _repository.fetchCategories();
     } catch (e) {
       debugPrint('Error fetching categories: $e');
     } finally {
@@ -83,119 +61,117 @@ class AddEventController extends ChangeNotifier {
     required String date,
     required String startTime,
     required String endTime,
-    //required String note,
   }) {
     if (title.trim().isEmpty) return "Event title is required";
     if (date.trim().isEmpty) return "Event date is required";
     if (startTime.trim().isEmpty) return "Start time is required";
     if (endTime.trim().isEmpty) return "End time is required";
-    //if (note.trim().isEmpty) return "Note/description is required";
-    return null; 
-  }
-
-  Future<Map<String, dynamic>?> createTask({
-    required String title,
-    required String date,
-    required String startTime,
-    required String endTime,
-    String? location,
-    required String alarmTime,
-    String? categoryName,
-    bool isCompleted = false,
-    String? note,
-  }) async {
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-    final accessToken = await _authService.getToken();
-    final url = "${baseUrl}api/v1/event/create/";
-
-    final Map<String, dynamic> body = {
-      "title": title,
-      "date": date,
-      "start_time": startTime,
-      "end_time": endTime,
-      "alarm_time": _formatAlarmTime(date, alarmTime),
-      "is_completed": isCompleted,
-      // ❌ REMOVED: "type_event_description": note ?? "",
-    };
-
-    if (location != null && location.trim().isNotEmpty) {
-      body["location"] = location.trim();
-    }
-    if (categoryName != null && categoryName.trim().isNotEmpty) {
-      body["category_name"] = categoryName.trim();
-    }
-    
-    // 🛠️ FIX: Only attach description if a note actually exists and contains text
-    if (note != null && note.trim().isNotEmpty) {
-      body["type_event_description"] = note.trim();
-    }
-
-    try {
-      final response = await _dio.post(
-        url,
-        data: body,
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": "Bearer $accessToken",
-          },
-        ),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        debugPrint("✅ Backend Event Created");
-
-        if (await AppPrefs.isGoogleLogin()) {
-          final googleService = GoogleServices();
-          if (googleService.accessToken == null) {
-            await googleService.signIn();
-          }
-
-          if (googleService.accessToken != null) {
-            await googleService.createGoogleCalendarEvent(
-              accessToken: googleService.accessToken!,
-              title: title,
-              date: date,
-              startTime: startTime,
-              endTime: endTime,
-              description: note,
-              location: location,
-            );
-          }
-        }
-        return response.data;
-      }
-    } on DioException catch (e) {
-      debugPrint("================= DIO ERROR DETECTED =================");
-      debugPrint("URL called: $url");
-      debugPrint("Payload sent: $body");
-      debugPrint("Response Status Code: ${e.response?.statusCode}");
-      debugPrint("RAW Backend Error Data: ${e.response?.data}");
-      debugPrint("======================================================");
-      rethrow;
-    } catch (e) {
-      debugPrint("❌ Non-Dio Exception: $e");
-      rethrow;
-    }
     return null;
   }
 
-  /// ✅ Cleaned and optimized Date / Time parsing chain
+  Future<void> saveEvent({
+    required BuildContext context,
+    required String rawStart,
+    required String rawEnd,
+    required String rawAlarm,
+    required VoidCallback onSuccess,
+  }) async {
+    final start = _cleanTimeStr(rawStart);
+    final end = _cleanTimeStr(rawEnd);
+    final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
+    final formattedAlarmISO = _formatAlarmTime(dateController.text, calculatedAlarmTime);
+
+    final validationError = validateFields(
+      title: titleController.text,
+      date: dateController.text,
+      startTime: start,
+      endTime: end,
+    );
+
+    if (validationError != null) {
+      await showMessageDialog(
+        context, validationError,
+        title: 'Validation Error',
+        icon: Icons.warning_amber_outlined,
+        iconColor: Colors.orange,
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final result = await _repository.createTask(
+        title: titleController.text.trim(),
+        date: _parseBackendDate(dateController.text.trim()),
+        startTime: start,
+        endTime: end,
+        location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
+        alarmTime: formattedAlarmISO,
+        categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
+        note: noteController.text.trim(),
+      );
+
+      if (context.mounted) Navigator.pop(context);
+
+      if (result != null) {
+        await AlarmHelper.scheduleEventAlarm(EventModel.fromMap(result));
+
+        try {
+          final alarmTime = DateTime.tryParse(result['alarm_time'] ?? '');
+          if (alarmTime != null) {
+            await NotificationService.scheduleNotification(
+              id: result['id'],
+              title: result['title'],
+              body: result['description'],
+              alarmTime: alarmTime,
+              payload: result['id'],
+            );
+          }
+        } catch (e) {
+          debugPrint("⚠️ Notification error: $e");
+        }
+
+        clearFields();
+        onSuccess();
+
+        if (context.mounted) {
+          await showMessageDialog(
+            context, 'Saved successfully',
+            title: 'Success',
+            icon: Icons.check_circle_outline,
+            iconColor: Colors.green,
+          );
+          await context.read<HomeController>().fetchEvents();
+          context.push('/event_details', extra: result['id'] as int);
+        }
+      }
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) {
+        await showMessageDialog(
+          context, 'Failed to save event:\n${_formatErrorMessage(e)}',
+          title: 'Error',
+          icon: Icons.error_outline,
+          iconColor: Colors.red,
+        );
+      }
+    }
+  }
+
+  // --- Helper Formatters ---
   String _formatAlarmTime(String date, String time) {
     final cleanDate = date.trim();
     final cleanTime = time.trim();
 
-    if (cleanTime.isEmpty) {
-      return "${cleanDate}T00:00:00${_localTimeZoneOffset()}";
-    }
+    if (cleanTime.isEmpty) return "${cleanDate}T00:00:00${_localTimeZoneOffset()}";
 
     try {
-      final DateFormat timeFormatter = cleanTime.split(':').length == 3 
-          ? DateFormat("HH:mm:ss") 
-          : DateFormat("HH:mm");
-
-      // Cleaner linear fallback check for parsing date strings
+      final timeFormatter = cleanTime.split(':').length == 3 ? DateFormat("HH:mm:ss") : DateFormat("HH:mm");
       DateTime? parsedDate;
       for (final format in _dateFormats) {
         try {
@@ -212,8 +188,7 @@ class AddEventController extends ChangeNotifier {
       );
 
       return "${DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined)}${_localTimeZoneOffset()}";
-    } catch (e) {
-      debugPrint("⚠️ Critical failure within formatAlarmTime generation: $e");
+    } catch (_) {
       return "${date}T00:00:00${_localTimeZoneOffset()}";
     }
   }
@@ -240,153 +215,61 @@ class AddEventController extends ChangeNotifier {
     return clean;
   }
 
-  /// ✅ Cleaner execution context flow inside `saveEvent`
-  Future<void> saveEvent({
-    required BuildContext context,
-    required String rawStart,
-    required String rawEnd,
-    required String rawAlarm, 
-    required VoidCallback onSuccess,
-  }) async {
-    final start = _cleanTimeStr(rawStart);
-    final end = _cleanTimeStr(rawEnd);
-    final alarmClean = _cleanTimeStr(rawAlarm);
-    
-    // 🛠️ FIX: Use picked alarm time if available; otherwise calculate the 10-minute subtraction fallback
-    String alarm = alarmClean;
-    if (alarm.isEmpty) {
-      alarm = start;
-      try {
-        final parsedStart = DateFormat("HH:mm").parse(start);
-        final reminderTime = parsedStart.subtract(const Duration(minutes: 10));
-        alarm = DateFormat("HH:mm").format(reminderTime);
-      } catch (e) {
-        debugPrint("⚠️ Failed calculating 10-minute fallback offset: $e");
-      }
-    }
-
-    final validationError = validateFields(
-      title: titleController.text,
-      date: dateController.text,
-      startTime: start,
-      endTime: end,
-    );
-
-    if (validationError != null) {
-      await showMessageDialog(context, validationError, title: 'Validation Error', icon: Icons.warning_amber_outlined, iconColor: Colors.orange);
-      return;
-    }
-
-    // Unify multi-format testing loop smoothly
-    String formattedBackendDate = "";
-    final rawDateText = dateController.text.trim();
-    
-    for (final format in _dateFormats) {
-      try {
-        formattedBackendDate = DateFormat("yyyy-MM-dd").format(format.parse(rawDateText));
-        break;
-      } catch (_) {}
-    }
-
-    if (formattedBackendDate.isEmpty) {
-      try {
-        formattedBackendDate = DateFormat("yyyy-MM-dd").format(DateTime.parse(rawDateText));
-      } catch (_) {
-        formattedBackendDate = rawDateText;
-        debugPrint("⚠️ Date parsing failed entirely. Sent raw UI text: $rawDateText");
-      }
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-
+  String _calculateAlarmOffset(String start, String alarmClean) {
+    if (alarmClean.isEmpty || start.isEmpty) return start;
     try {
-      final result = await createTask(
-        title: titleController.text.trim(),
-        date: formattedBackendDate,
-        startTime: start,
-        endTime: end,
-        location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
-        alarmTime: alarm,
-        categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
-        note: noteController.text.trim(),
-      );
+      final parsedStart = DateFormat("HH:mm").parse(start);
+      Duration offset = const Duration(minutes: 10);
 
-      if (context.mounted) Navigator.pop(context); // Remove loading spinner safely
+      if (alarmClean.contains('5 min')) offset = const Duration(minutes: 5);
+      else if (alarmClean.contains('10 min')) offset = const Duration(minutes: 10);
+      else if (alarmClean.contains('30 min')) offset = const Duration(minutes: 30);
+      else if (alarmClean.contains('1 hr') || alarmClean.contains('60 min')) offset = const Duration(hours: 1);
 
-      if (result != null) {
-        await AlarmHelper.scheduleEventAlarm(EventModel.fromMap(result));
-
-        try {
-          final alarmTime = DateTime.tryParse(result['alarm_time'] ?? '');
-          if (alarmTime != null) {
-            await NotificationService.scheduleNotification(
-              id: result['id'],
-              title: result['title'],
-              body: result['description'],
-              alarmTime: alarmTime,
-              payload: result['id'],
-            );
-          }
-        } catch (e) {
-          debugPrint("⚠️ Alarm time scheduling error: $e");
-        }
-
-        clearFields();
-        onSuccess();
-
-        if (context.mounted) {
-          await showMessageDialog(context, 'Saved successfully', title: 'Success', icon: Icons.check_circle_outline, iconColor: Colors.green);
-          await context.read<HomeController>().fetchEvents();
-          context.push('/event_details', extra: result['id'] as int);
-        }
-      }
-    } catch (e) {
-      if (context.mounted) Navigator.pop(context); // Remove loading spinner safely
-
-      String displayErrorMessage = "Unknown server error";
-      if (e is DioException && e.response?.data is Map) {
-        final List<String> parsedErrors = [];
-        (e.response!.data as Map).forEach((key, value) {
-          parsedErrors.add("$key: ${value.toString().replaceAll('[', '').replaceAll(']', '')}");
-        });
-        displayErrorMessage = parsedErrors.join("\n");
-      } else if (e is DioException) {
-        displayErrorMessage = e.response?.data?.toString() ?? e.message ?? displayErrorMessage;
-      } else {
-        displayErrorMessage = e.toString();
-      }
-
-      if (context.mounted) {
-        await showMessageDialog(context, 'Failed to save event:\n$displayErrorMessage', title: 'Error', icon: Icons.error_outline, iconColor: Colors.red);
-      }
+      return DateFormat("HH:mm").format(parsedStart.subtract(offset));
+    } catch (_) {
+      return start;
     }
   }
 
+  String _parseBackendDate(String rawDateText) {
+    for (final format in _dateFormats) {
+      try {
+        return DateFormat("yyyy-MM-dd").format(format.parse(rawDateText));
+      } catch (_) {}
+    }
+    try {
+      return DateFormat("yyyy-MM-dd").format(DateTime.parse(rawDateText));
+    } catch (_) {
+      return rawDateText;
+    }
+  }
+
+  String _formatErrorMessage(dynamic e) {
+    if (e is DioException && e.response?.data is Map) {
+      return (e.response!.data as Map)
+          .entries
+          .map((entry) => "${entry.key}: ${entry.value.toString().replaceAll('[', '').replaceAll(']', '')}")
+          .join("\n");
+    } else if (e is DioException) {
+      return e.response?.data?.toString() ?? e.message ?? "Unknown server error";
+    }
+    return e.toString();
+  }
+
   void clearFields() {
-    titleController.clear();
-    dateController.clear();
-    startTimeController.clear();
-    endTimeController.clear();
-    locationController.clear();
-    alarmTimeController.clear();
-    noteController.clear();
+    for (var controller in _allControllers) {
+      controller.clear();
+    }
     selectedCategory = null;
     notifyListeners();
   }
 
   @override
   void dispose() {
-    titleController.dispose();
-    dateController.dispose();
-    startTimeController.dispose();
-    endTimeController.dispose();
-    locationController.dispose();
-    alarmTimeController.dispose();
-    noteController.dispose();
+    for (var controller in _allControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 }

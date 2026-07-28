@@ -13,6 +13,7 @@ class EventCard extends StatelessWidget {
   final String time;
   final String location;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
   final bool isDarkMode;
 
   const EventCard({
@@ -24,6 +25,7 @@ class EventCard extends StatelessWidget {
     required this.time,
     required this.location,
     required this.onDelete,
+    required this.onEdit,
     required this.isDarkMode,
   });
 
@@ -87,6 +89,15 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: onEdit,
+                    child: Icon(
+                      Icons.edit_outlined,
+                      size: 22.sp,
+                      color: isDarkMode ? AppColors.text_color : const Color(0xFF353535),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
                   GestureDetector(
                     onTap: onDelete,
                     child: SvgPicture.asset(
@@ -159,7 +170,7 @@ class EventCard extends StatelessWidget {
                   ],
                 ),
               ],
-              SizedBox(height: 10.h,),
+              SizedBox(height: 10.h),
             ],
           ),
         ),

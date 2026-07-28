@@ -66,9 +66,10 @@ class CalenderView extends StatelessWidget {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
+                        // ignore: deprecated_member_use
                         color: Color(0xFFFFA500).withOpacity(0.1),
                         border: Border.all(
-                          color: const Color(0xFFFFA500), // Subtle dark outline border decoration
+                          color: const Color(0xFFFFA500), 
                           width: 0.7,
                         ),
                         borderRadius: BorderRadius.circular(10.r),
@@ -81,14 +82,14 @@ class CalenderView extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w400,
-                              color: const Color(0xFFFFA500), // Matching premium gold theme tone
+                              color: const Color(0xFFFFA500), 
                             ),
                           ),
                           SizedBox(width: 4.w),
                           Icon(
                             Icons.arrow_forward,
                             size: 12.sp,
-                            color: const Color(0xFFFFA500), // Tiny arrow asset matching layout spec
+                            color: const Color(0xFFFFA500), 
                           ),
                         ],
                       ),
@@ -120,6 +121,9 @@ class CalenderView extends StatelessWidget {
                           time: '${event.startTime}-${event.endTime}',
                           location: event.location,
                           isDarkMode: isDarkMode,
+                          onEdit: () {
+                            context.push('/edit_event', extra: event);
+                          },
                           onDelete: () async {
                             showRemoveEventDialog(
                                 context,

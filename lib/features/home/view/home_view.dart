@@ -246,7 +246,7 @@ class HomeView extends StatelessWidget {
               //SizedBox(height: 10.h),
               Text(
                 'Welcome',
-                style: GoogleFonts.playfairDisplay(
+                style: GoogleFonts.cormorant(
                   fontWeight: FontWeight.w700,
                   fontSize: 34.sp,
                   color: isDarkMode ? AppColors.fourth_color : Color(0xFF403D3B),
@@ -258,7 +258,7 @@ class HomeView extends StatelessWidget {
                   final username = controller.currentUser?.name ?? UserSession().formattedUsername;
                   return Text(
                     username,
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.cormorant(
                       fontWeight: FontWeight.w700,
                       fontSize: 34.sp,
                       color: AppColors.fourth_color,
@@ -544,19 +544,33 @@ class HomeView extends StatelessWidget {
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
-                                    if (homeController.currentReflection !=null) {
+                                    if (homeController.currentReflection != null) {
+                                      homeController.isReflectionFavorite = !homeController.isReflectionFavorite;
+                                      homeController.notifyListeners();
                                       final success = await homeController.saveQuoteToFavorite(eventId: 0);
                                       if (success) {
+                                        if (context.mounted) {
+                                          await showMessageDialog(
+                                            context,
+                                            "Reflection saved successfully!",
+                                            title: "Success",
+                                            icon: Icons.check_circle_outline,
+                                            iconColor: Colors.green,
+                                          );
+                                        }
+                                      } else {
                                         homeController.isReflectionFavorite =!homeController.isReflectionFavorite;
                                         homeController.notifyListeners();
 
-                                        await showMessageDialog(
-                                          context,
-                                          "Reflection saved successfully!",
-                                          title: "Success",
-                                          icon: Icons.check_circle_outline,
-                                          iconColor: Colors.green,
-                                        );
+                                        if (context.mounted) {
+                                          await showMessageDialog(
+                                            context,
+                                            "Failed to save reflection. Please try again.",
+                                            title: "Error",
+                                            icon: Icons.error_outline,
+                                            iconColor: Colors.red,
+                                          );
+                                        }
                                       }
                                     }
                                   },
@@ -1027,6 +1041,7 @@ class HomeView extends StatelessWidget {
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
+                                    homeController.toggleFavorite();
                                     final success = await homeController.saveQuoteToFavorite(eventId: 0);
                                     if (success) {
                                       await showMessageDialog(
@@ -1042,15 +1057,15 @@ class HomeView extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        Icons.favorite_border_rounded,
-                                        color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                        homeController.isFavorite ? Icons.favorite_rounded: Icons.favorite_border_rounded,
+                                        color: homeController.isFavorite? Colors.red: (isDarkMode ? Colors.white: AppColors.fourth_color),
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Favorite',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                          color: isDarkMode ? Colors.white : AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),

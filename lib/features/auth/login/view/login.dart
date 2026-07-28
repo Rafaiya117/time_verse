@@ -183,11 +183,14 @@ class LoginPage extends StatelessWidget {
                         await AppPrefs.setFirstLaunch(false);
                         await context.read<ProfileController>().loadUserProfile();
                         if (context.mounted) {
-                          if (loginController.rememberMe) {
+                          final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
+                          if (loginController.rememberMe && shouldShowMood) {
+                            await AppPrefs.markMoodTrackerShownToday();
+                            if (!context.mounted) return;
+
                             showDialog(
                               context: context,
                               barrierDismissible: false,
-                              // ignore: deprecated_member_use
                               barrierColor: Colors.black.withOpacity(0.5),
                               builder: (dialogContext) => const MoodTrackerPopup(),
                             ).then((_) {

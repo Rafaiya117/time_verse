@@ -24,15 +24,15 @@ class EventRepository {
     ),
   );
 
-  Future<Options> _getAuthOptions() async {
-    final token = await AuthService().getToken();
-    return Options(
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-  }
+  // Future<Options> _getAuthOptions() async {
+  //   final token = await AuthService().getToken();
+  //   return Options(
+  //     headers: {
+  //       'Authorization': 'Bearer $token',
+  //       'Content-Type': 'application/json',
+  //     },
+  //   );
+  // }
 
   /// Fetch events for a specific date and user ID
   Future<List<EventModel>> fetchTodaysEvents(String userId, {DateTime? date}) async {

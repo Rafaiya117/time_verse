@@ -42,6 +42,12 @@ class HomeController extends ChangeNotifier {
   DateTime selectedDate = DateTime.now();
 
   bool isReflectionFavorite = false;
+  bool isFavorite = false;
+
+  void toggleFavorite() {
+    isFavorite = !isFavorite;
+    notifyListeners();
+  }
 
   // Daily Inspiration Quotes
   final List<QuoteData> _inspirationalQuotes = [

@@ -83,6 +83,9 @@ class AllEvents extends StatelessWidget {
                             time: '${event.startTime}-${event.endTime}',
                             location: event.location,
                             isDarkMode: isDarkMode,
+                            onEdit: () {
+                              context.push('/edit_event', extra: event);
+                            },
                             onDelete: () async {
                               showRemoveEventDialog(
                                 context,

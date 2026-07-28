@@ -2,6 +2,7 @@ import 'package:alarm/model/alarm_settings.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/core/components/alarm.dart';
 import 'package:time_verse/core/theme/theme_background_wrapper.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/all_events/view/all_events.dart';
 import 'package:time_verse/features/all_events/view/event_details.dart';
 import 'package:time_verse/features/auth/forgot_passowrd/view/forgot_password.dart';
@@ -11,6 +12,7 @@ import 'package:time_verse/features/auth/reset_password/view/reset_password.dart
 import 'package:time_verse/features/auth/signup/view/signup.dart';
 import 'package:time_verse/features/calender/view/add_event.dart';
 import 'package:time_verse/features/calender/view/calender_view.dart';
+import 'package:time_verse/features/edit_event/view/edit_event_view.dart';
 import 'package:time_verse/features/home/view/home_view.dart';
 import 'package:time_verse/features/lending/view/lending.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/view/saved_qoutatio.dart';
@@ -160,6 +162,15 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => ThemedBackgroundWrapper(
         child: AddEventPage(), 
       ),
+    ),
+    GoRoute(
+      path: '/edit_event',
+      builder: (context, state) {
+        final extra = state.extra;
+        final String eventId = extra is EventModel ? extra.id.toString(): (extra?.toString() ?? '');
+
+        return ThemedBackgroundWrapper(child: EditEventPage(eventId: eventId));
+      },
     ),
     GoRoute(
       path: '/alarm',

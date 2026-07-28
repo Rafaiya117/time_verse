@@ -36,20 +36,25 @@ class _SplashScreenState extends State<SplashScreen> {
       context.push('/landing');
     } else if (isLoggedIn && !shouldForceLogin) {
       final isRememberMe = await AppPrefs.isRememberMeEnabled();
+      final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
 
       if (!mounted) return;
 
-      if (isRememberMe) {
+      if (isRememberMe && shouldShowMood) {
+        await AppPrefs.markMoodTrackerShownToday();
+        if (!mounted) return;
+
         showDialog(
           context: context,
           barrierDismissible: false,
+          // ignore: deprecated_member_use
           barrierColor: Colors.black.withOpacity(0.5),
           builder: (dialogContext) => const MoodTrackerPopup(),
         ).then((_) {
           if (context.mounted) context.push('/home');
         });
       } else {
-        context.push('/home'); 
+        context.push('/home');
       }
     } else {
       await AppPrefs.setGoogleLogin(false);

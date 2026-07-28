@@ -30,6 +30,7 @@ import 'package:time_verse/features/auth/signup/controller/signup_controller.dar
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
+import 'package:time_verse/features/edit_event/controller/edit_event_controller.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
 import 'package:time_verse/features/qoutation/saved_qoutation/controller/saved_qoute_controller.dart';
 import 'package:time_verse/features/settings/change_password/controller/changepassowrd_controller.dart';
@@ -191,6 +192,7 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider(create: (_) => PrivacyController()),
             ChangeNotifierProvider(create: (_) => DeleteAcController()),
             ChangeNotifierProvider(create: (_)=> MoodController()),
+            ChangeNotifierProvider(create: (_)=> EditEventController()),
           ],
           child: Builder(
             builder: (context) {

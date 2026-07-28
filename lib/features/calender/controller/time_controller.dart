@@ -4,6 +4,18 @@ import 'package:intl/intl.dart';
 class TimePickerController extends ChangeNotifier {
   final Map<String, TimeOfDay?> _selectedTimes = {};
 
+  // 🛠️ ADDED: Store reminder option selection (e.g. "10 min before")
+  String _selectedReminderOption = '10 min before';
+
+  // 🛠️ ADDED: Getter for selectedReminderOption
+  String get selectedReminderOption => _selectedReminderOption;
+
+  // 🛠️ ADDED: Method to update the selected option
+  void setReminderOption(String option) {
+    _selectedReminderOption = option;
+    notifyListeners();
+  }
+
   TimeOfDay? getTime(String fieldKey) => _selectedTimes[fieldKey];
 
   void setTime(String key, TimeOfDay time) {

@@ -320,14 +320,43 @@ class AddEventPage extends StatelessWidget {
               SizedBox(height: 12.h),
               Consumer<TimePickerController>(
                 builder: (context, timeController, _) {
-                  final pickedAlarm = timeController.getTime('alarm');
-                  // Display the picked time or show a placeholder hint text string
-                  final displayTime = pickedAlarm != null
-                      ? timeController.formatTime(pickedAlarm)
-                      : 'Select reminder time';
+                  final selectedReminderOption = timeController.selectedReminderOption;
+                  final options = ['5 min before','10 min before','30 min before','1 hr before',];
 
-                  return GestureDetector(
-                    onTap: () => timeController.selectTime(context, 'alarm'),
+                  return PopupMenuButton<String>(
+                    onSelected: (option) {
+                      timeController.setReminderOption(option);
+                    },
+                    color: isDarkMode ? const Color(0xFF131B26) : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    offset: Offset(0, 50.h),
+                    itemBuilder: (context) => options.map((option) {
+                      final isSelected = option == selectedReminderOption;
+                      return PopupMenuItem<String>(
+                        value: option,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              option,
+                              style: GoogleFonts.inter(
+                                color: isSelected? const Color(0xFFFFB703): (isDarkMode ? Colors.white : Colors.black),
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                Icons.check_rounded,
+                                color: const Color(0xFFFFB703),
+                                size: 18.sp,
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                     child: _buildFormContainer(
                       context,
                       child: Row(
@@ -348,22 +377,16 @@ class AddEventPage extends StatelessWidget {
                                 Text(
                                   'Remind me',
                                   style: GoogleFonts.inter(
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
+                                    color: isDarkMode ? Colors.white : Colors.black,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 SizedBox(height: 4.h),
                                 Text(
-                                  displayTime,
+                                  selectedReminderOption,
                                   style: GoogleFonts.inter(
-                                    color: pickedAlarm != null
-                                        ? const Color(0xFFFFB703)
-                                        : (isDarkMode
-                                              ? Colors.grey.shade500
-                                              : Colors.grey.shade400),
+                                    color: const Color(0xFFFFB703),
                                     fontSize: 13.sp,
                                   ),
                                 ),
@@ -695,15 +718,5 @@ IconData _getCategoryIcon(String? name) {
       return Icons.category_outlined; 
   }
 }
-
-  // IconData _getCategoryIcon(String? name) {
-  //   switch (name?.toLowerCase()) {
-  //     case 'success stories': return Icons.emoji_events_outlined;
-  //     case 'daily motivation': return Icons.wb_sunny_outlined;
-  //     case 'personal growth': return Icons.trending_up;
-  //     case 'workout': return Icons.fitness_center;
-  //     default: return Icons.category_outlined;
-  //   }
-  // }
 }
 
