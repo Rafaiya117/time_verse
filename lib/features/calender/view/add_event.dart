@@ -405,10 +405,10 @@ class AddEventPage extends StatelessWidget {
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
+                    String selectedOption = 'Don\'t repeat';
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        String selectedOption = 'Don\'t repeat'; 
                         return StatefulBuilder(
                           builder: (context, setModalState) {
                             Widget buildRadioRow(String label) {

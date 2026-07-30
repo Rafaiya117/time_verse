@@ -33,11 +33,11 @@ class EditEventController extends ChangeNotifier {
   ];
 
   final List<String> repeatOptions = [
-    'Never',
-    'Daily',
-    'Weekly',
-    'Monthly',
-    'Yearly',
+    "Don't repeat",
+    'Every 1 day',
+    'Every 1 week',
+    'Every 1 month',
+    'Every 1 year',
   ];
 
   Future<void> initEditPage(String eventId) async {
@@ -57,14 +57,15 @@ class EditEventController extends ChangeNotifier {
             : '';
         startTimeController.text = eventDetails.startTime ?? '';
         endTimeController.text = eventDetails.endTime ?? '';
-        selectedCategory = eventDetails.category;
-        
-        // Ensure values exist in options lists or fall back to defaults
-        selectedRepeat = repeatOptions.contains(eventDetails.repeat)
+
+        // ONLY set category from network if not already selected from the view
+        selectedCategory ??= eventDetails.category?.toString();
+
+        selectedRepeat ??= repeatOptions.contains(eventDetails.repeat)
             ? eventDetails.repeat
             : repeatOptions.first;
 
-        selectedReminder = reminderOptions.contains(eventDetails.reminder)
+        selectedReminder ??= reminderOptions.contains(eventDetails.reminder)
             ? eventDetails.reminder
             : reminderOptions.first;
       }
@@ -74,14 +75,20 @@ class EditEventController extends ChangeNotifier {
     }
   }
 
-  void selectCategory(String categoryName) {
-    selectedCategory = categoryName;
+  // Updated to update selectedCategory and notify listeners properly
+  void selectCategory(dynamic category) {
+    selectedCategory = category?.toString();
     notifyListeners();
   }
+
 
   void selectRepeat(String repeat) {
     selectedRepeat = repeat;
     notifyListeners();
+  }
+
+  void setSelectedRepeat(String repeat) {
+    selectRepeat(repeat);
   }
 
   void selectReminder(String reminder) {
@@ -89,22 +96,53 @@ class EditEventController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> updateEvent(String eventId) async {
+  Future<bool> updateEvent({
+    required BuildContext context,
+    required String eventId,
+    String? rawStart,
+    String? rawEnd,
+    String? rawAlarm,
+    VoidCallback? onSuccess,
+  }) async {
+    int? categoryId;
+    try {
+      final catObj = categories.firstWhere(
+        (c) => c.name.toLowerCase() == selectedCategory?.toLowerCase(),
+      );
+      categoryId = int.tryParse(catObj.id.toString());
+    } catch (_) {
+      categoryId = int.tryParse(selectedCategory ?? '');
+    }
+
+    DateTime? parsedDate;
+    if (dateController.text.isNotEmpty) {
+      try {
+        parsedDate = DateFormat('MMMM d, yyyy').parse(dateController.text);
+      } catch (_) {
+        parsedDate = DateTime.tryParse(dateController.text);
+      }
+    }
+
     final updatedData = EditEventModel(
       id: eventId,
-      title: titleController.text,
-      note: noteController.text,
-      location: locationController.text,
-      startTime: startTimeController.text,
-      endTime: endTimeController.text,
-      category: selectedCategory,
+      title: titleController.text.trim(),
+      note: noteController.text.trim(),
+      location: locationController.text.trim(),
+      date: parsedDate,
+      startTime: rawStart ?? startTimeController.text.trim(),
+      endTime: rawEnd ?? endTimeController.text.trim(),
+      category: categoryId,
       repeat: selectedRepeat,
-      reminder: selectedReminder,
+      reminder: rawAlarm ?? selectedReminder,
     );
 
-    return await _repository.updateEvent(eventId, updatedData);
-  }
-
+    final isSuccess = await _repository.updateEvent(eventId, updatedData);
+    if (isSuccess && onSuccess != null) {
+      onSuccess();
+    }
+    return isSuccess;
+  } 
+  
   @override
   void dispose() {
     titleController.dispose();

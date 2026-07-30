@@ -67,7 +67,7 @@ class EditEventRepository {
         return EditEventModel(
           id: data['id']?.toString() ?? eventId,
           title: data['title']?.toString(),
-          note: data['note']?.toString(),
+          note: data['type_event_description']?.toString(),
           location: data['location']?.toString(),
           date: data['date'] != null ? DateTime.tryParse(data['date'].toString()) : null,
           startTime: data['start_time']?.toString(),
@@ -92,15 +92,23 @@ class EditEventRepository {
   /// Update event via API
   Future<bool> updateEvent(String eventId, EditEventModel eventData) async {
     try {
-      final parsedId = int.tryParse(eventId) ?? eventId;
+      final int? id = int.tryParse(eventId);
+      if (id == null) {
+        debugPrint('⚠️ Invalid event ID: $eventId');
+        return false;
+      }
+
       final authService = AuthService();
       final token = await authService.getToken();
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
-      final url = '${baseUrl}api/v1/event/update/$parsedId/';
 
-      final response = await _dio.put(
+      final url = '${baseUrl}api/v1/event/create/?id=$id';
+      final payload = eventData.toJson();
+      debugPrint('📤 Sending PATCH Event Payload for ID ($id): $payload');
+
+      final response = await _dio.patch(
         url,
-        data: eventData.toJson(),
+        data: payload,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -109,10 +117,18 @@ class EditEventRepository {
         ),
       );
 
+      debugPrint(
+        '✅ Event updated successfully with status: ${response.statusCode}',
+      );
       return response.statusCode == 200 || response.statusCode == 204;
+    } on DioException catch (e) {
+      debugPrint(
+        '❌ Dio Error updating event: ${e.response?.statusCode} - ${e.response?.data}',
+      );
+      return false;
     } catch (e) {
-      debugPrint('⚠️ Error updating event: $e');
-      rethrow;
+      debugPrint('⚠️ Error updating event in repo: $e');
+      return false;
     }
   }
 }

@@ -14,12 +14,12 @@ import 'package:time_verse/features/home/controller/home_controller.dart';
 class AddEventController extends ChangeNotifier {
   final AddEventRepository _repository;
 
-  AddEventController({AddEventRepository? repository})
-      : _repository = repository ?? AddEventRepository();
+  AddEventController({AddEventRepository? repository}) : _repository = repository ?? AddEventRepository();
 
   List<EventCategory> categories = [];
   bool isLoading = false;
   String? selectedCategory;
+  String? selectedRepeat;
 
   // Text Controllers
   final titleController = TextEditingController();
@@ -70,98 +70,99 @@ class AddEventController extends ChangeNotifier {
   }
 
   Future<void> saveEvent({
-    required BuildContext context,
-    required String rawStart,
-    required String rawEnd,
-    required String rawAlarm,
-    required VoidCallback onSuccess,
-  }) async {
-    final start = _cleanTimeStr(rawStart);
-    final end = _cleanTimeStr(rawEnd);
-    final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
-    final formattedAlarmISO = _formatAlarmTime(dateController.text, calculatedAlarmTime);
+  required BuildContext context,
+  required String rawStart,
+  required String rawEnd,
+  required String rawAlarm,
+  required VoidCallback onSuccess,
+}) async {
+  final start = _cleanTimeStr(rawStart);
+  final end = _cleanTimeStr(rawEnd);
+  final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
+  final formattedAlarmISO = _formatAlarmTime(dateController.text, calculatedAlarmTime);
 
-    final validationError = validateFields(
-      title: titleController.text,
-      date: dateController.text,
+  final validationError = validateFields(
+    title: titleController.text,
+    date: dateController.text,
+    startTime: start,
+    endTime: end,
+  );
+
+  if (validationError != null) {
+    await showMessageDialog(
+      context, validationError,
+      title: 'Validation Error',
+      icon: Icons.warning_amber_outlined,
+      iconColor: Colors.orange,
+    );
+    return;
+  }
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final result = await _repository.createTask(
+      title: titleController.text.trim(),
+      date: _parseBackendDate(dateController.text.trim()),
       startTime: start,
       endTime: end,
+      location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
+      alarmTime: formattedAlarmISO,
+      categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
+      note: noteController.text.trim(),
+      repeat: selectedRepeat, 
     );
 
-    if (validationError != null) {
-      await showMessageDialog(
-        context, validationError,
-        title: 'Validation Error',
-        icon: Icons.warning_amber_outlined,
-        iconColor: Colors.orange,
-      );
-      return;
-    }
+    if (context.mounted) Navigator.pop(context);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    if (result != null) {
+      await AlarmHelper.scheduleEventAlarm(EventModel.fromMap(result));
 
-    try {
-      final result = await _repository.createTask(
-        title: titleController.text.trim(),
-        date: _parseBackendDate(dateController.text.trim()),
-        startTime: start,
-        endTime: end,
-        location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
-        alarmTime: formattedAlarmISO,
-        categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
-        note: noteController.text.trim(),
-      );
-
-      if (context.mounted) Navigator.pop(context);
-
-      if (result != null) {
-        await AlarmHelper.scheduleEventAlarm(EventModel.fromMap(result));
-
-        try {
-          final alarmTime = DateTime.tryParse(result['alarm_time'] ?? '');
-          if (alarmTime != null) {
-            await NotificationService.scheduleNotification(
-              id: result['id'],
-              title: result['title'],
-              body: result['description'],
-              alarmTime: alarmTime,
-              payload: result['id'],
-            );
-          }
-        } catch (e) {
-          debugPrint("⚠️ Notification error: $e");
-        }
-
-        clearFields();
-        onSuccess();
-
-        if (context.mounted) {
-          await showMessageDialog(
-            context, 'Saved successfully',
-            title: 'Success',
-            icon: Icons.check_circle_outline,
-            iconColor: Colors.green,
+      try {
+        final alarmTime = DateTime.tryParse(result['alarm_time'] ?? '');
+        if (alarmTime != null) {
+          await NotificationService.scheduleNotification(
+            id: result['id'],
+            title: result['title'],
+            body: result['description'],
+            alarmTime: alarmTime,
+            payload: result['id'],
           );
-          await context.read<HomeController>().fetchEvents();
-          context.push('/event_details', extra: result['id'] as int);
         }
+      } catch (e) {
+        debugPrint("⚠️ Notification error: $e");
       }
-    } catch (e) {
-      if (context.mounted) Navigator.pop(context);
+
+      clearFields();
+      onSuccess();
+
       if (context.mounted) {
         await showMessageDialog(
-          context, 'Failed to save event:\n${_formatErrorMessage(e)}',
-          title: 'Error',
-          icon: Icons.error_outline,
-          iconColor: Colors.red,
+          context, 'Saved successfully',
+          title: 'Success',
+          icon: Icons.check_circle_outline,
+          iconColor: Colors.green,
         );
+        await context.read<HomeController>().fetchEvents();
+        context.push('/event_details', extra: result['id'] as int);
       }
     }
+  } catch (e) {
+    if (context.mounted) Navigator.pop(context);
+    if (context.mounted) {
+      await showMessageDialog(
+        context, 'Failed to save event:\n${_formatErrorMessage(e)}',
+        title: 'Error',
+        icon: Icons.error_outline,
+        iconColor: Colors.red,
+      );
+    }
   }
+}
 
   // --- Helper Formatters ---
   String _formatAlarmTime(String date, String time) {
@@ -202,6 +203,11 @@ class AddEventController extends ChangeNotifier {
 
   void selectCategory(String categoryName) {
     selectedCategory = categoryName;
+    notifyListeners();
+  }
+
+  void selectRepeat(String? repeat) {
+    selectedRepeat = repeat;
     notifyListeners();
   }
 
@@ -247,10 +253,7 @@ class AddEventController extends ChangeNotifier {
 
   String _formatErrorMessage(dynamic e) {
     if (e is DioException && e.response?.data is Map) {
-      return (e.response!.data as Map)
-          .entries
-          .map((entry) => "${entry.key}: ${entry.value.toString().replaceAll('[', '').replaceAll(']', '')}")
-          .join("\n");
+      return (e.response!.data as Map).entries.map((entry) => "${entry.key}: ${entry.value.toString().replaceAll('[', '').replaceAll(']', '')}").join("\n");
     } else if (e is DioException) {
       return e.response?.data?.toString() ?? e.message ?? "Unknown server error";
     }
@@ -262,6 +265,7 @@ class AddEventController extends ChangeNotifier {
       controller.clear();
     }
     selectedCategory = null;
+    selectedRepeat = null;
     notifyListeners();
   }
 

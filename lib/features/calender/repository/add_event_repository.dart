@@ -46,9 +46,27 @@ class AddEventRepository {
     String? categoryName,
     bool isCompleted = false,
     String? note,
+    String? repeat, // <-- Added parameter
   }) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final url = "${baseUrl}api/v1/event/create/";
+
+    // Map UI label to backend format
+    String formattedRepeat = "1 day";
+    if (repeat != null) {
+      final lower = repeat.toLowerCase();
+      if (lower.contains("week")) {
+        formattedRepeat = "1 week";
+      } else if (lower.contains("month")) {
+        formattedRepeat = "1 month";
+      } else if (lower.contains("year")) {
+        formattedRepeat = "1 year";
+      } else if (lower.contains("day")) {
+        formattedRepeat = "1 day";
+      } else {
+        formattedRepeat = repeat;
+      }
+    }
 
     final Map<String, dynamic> body = {
       "title": title,
@@ -56,10 +74,13 @@ class AddEventRepository {
       "start_time": startTime,
       "end_time": endTime,
       "alarm_time": alarmTime,
+      "repeat": formattedRepeat, // <-- Added to body
       "is_completed": isCompleted,
       if (location?.trim().isNotEmpty ?? false) "location": location!.trim(),
-      if (categoryName?.trim().isNotEmpty ?? false) "category_name": categoryName!.trim(),
-      if (note?.trim().isNotEmpty ?? false) "type_event_description": note!.trim(),
+      if (categoryName?.trim().isNotEmpty ?? false)
+        "category_name": categoryName!.trim(),
+      if (note?.trim().isNotEmpty ?? false)
+        "type_event_description": note!.trim(),
     };
 
     final response = await _dio.post(
@@ -76,14 +97,17 @@ class AddEventRepository {
         }
 
         if (googleService.accessToken != null) {
+          // The GoogleServices.createGoogleCalendarEvent signature does not
+          // accept a `parsedDate` named parameter. Remove it and ensure
+          // we pass compatible parameters only.
           await googleService.createGoogleCalendarEvent(
             accessToken: googleService.accessToken!,
             title: title,
-            date: date,
             startTime: startTime,
             endTime: endTime,
             description: note,
-            location: location,
+            location: location, 
+            date: date,
           );
         }
       }
