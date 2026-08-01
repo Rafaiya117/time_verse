@@ -88,6 +88,11 @@ class EventController extends ChangeNotifier {
   }
 
   Future<EventModel?> fetchEventDetailsById(int eventId) async {
+    // 1. If eventDetail is already loaded (e.g. passed from Google Calendar), use it directly
+    if (eventDetail != null && eventDetail!.id == eventId) {
+      return eventDetail;
+    }
+
     try {
       final authService = AuthService();
       final token = await authService.getToken();
@@ -123,12 +128,21 @@ class EventController extends ChangeNotifier {
           user: data['user'] ?? 0,
           category: data['category']?.toString(),
         );
+        debugPrint('📌 Event details stored in controller: $eventDetail');
         notifyListeners();
         return eventDetail;
       } else {
         debugPrint('❌ Failed to fetch event details: ${response.statusCode}');
         return null;
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        debugPrint('ℹ️ Event ID $eventId not found on server (likely a Google Calendar event).');
+        // If eventDetail was set prior to navigation, return it instead of failing
+        return eventDetail;
+      }
+      debugPrint('⚠️ DioError fetching event details: $e');
+      return null;
     } catch (e) {
       debugPrint('⚠️ Error fetching event details: $e');
       return null;

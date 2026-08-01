@@ -105,7 +105,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool hasConnection = true;
   StreamSubscription<AlarmSet>? _ringSubscription;
-  final bool _isAlarmLaunch = false;
   @override
   void initState() {
     super.initState();

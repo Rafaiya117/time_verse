@@ -10,11 +10,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
+import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/home/model/ai_refelction_model.dart';
@@ -178,6 +180,49 @@ class HomeController extends ChangeNotifier {
   }
 
   /// -------------------- Events & Quotes API Operations -------------------- ///
+  Future<List<EventModel>> _fetchGoogleCalendarEventsForHome({DateTime? date}) async {
+    final accessToken = GoogleServices().accessToken;
+    if (accessToken == null || accessToken.isEmpty) return [];
+
+    final targetDate = date ?? DateTime.now();
+    final dayStart = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final dayEnd = dayStart.add(const Duration(days: 1));
+
+    final gEventsData = await GoogleServices().getGoogleCalendarEvents(
+      accessToken: accessToken,
+      timeMin: dayStart,
+      timeMax: dayEnd,
+    );
+
+    return gEventsData.map((json) {
+      final rawStart = json['startTime'] ?? '';
+      final rawEnd = json['endTime'] ?? '';
+
+      String extractTime(String isoString) {
+        final dt = DateTime.tryParse(isoString);
+        return dt != null ? DateFormat('HH:mm').format(dt) : '';
+      }
+
+      return EventModel(
+        id: json['id'].hashCode,
+        userName: UserSession().username ?? 'Google Calendar',
+        title: json['title'] ?? '',
+        description: json['description'] ?? '',
+        date: DateFormat('EEEE, MMM d, yyyy').format(targetDate),
+        startTime: extractTime(rawStart),
+        endTime: extractTime(rawEnd),
+        location: json['location'] ?? '',
+        alarmTime: '',
+        isCompleted: false,
+        createdAt: DateTime.now().toIso8601String(),
+        user: int.tryParse(UserSession().userId ?? '0') ?? 0,
+        category: 'Google Calendar',
+        isFavorite: false,
+      );
+    }).toList();
+  }
+
+  /// -------------------- Events & Quotes API Operations -------------------- ///
   Future<void> todaysfetchEvents(
     ProfileController profileController, {
     DateTime? selectedDate,
@@ -193,9 +238,13 @@ class HomeController extends ChangeNotifier {
       date: selectedDate,
     );
 
+    // Fetch Google Calendar events ONLY if user signed in with Google
+    final googleEvents = await _fetchGoogleCalendarEventsForHome(date: selectedDate);
+
     todaysEvents
       ..clear()
-      ..addAll(fetchedEvents);
+      ..addAll(fetchedEvents)
+      ..addAll(googleEvents);
 
     debugPrint("✅ TODAYS EVENTS LENGTH: ${todaysEvents.length}");
     notifyListeners();

@@ -43,22 +43,28 @@ class GoogleServices {
     _currentUser = user;
 
     if (_currentUser != null) {
-      // 1. Get the ID Token (for your backend API)
-      final idToken = (await _currentUser!.authentication).idToken;
+      final authentication = await _currentUser!.authentication;
+      final idToken = authentication.idToken;
       debugPrint("🆔 ID TOKEN: $idToken");
 
-      // 2. Get the Access Token (for Google Calendar)
-      final auth = await _currentUser!.authorizationClient.authorizationForScopes(scopes);
-      _accessToken = auth?.accessToken;
+      // Request Access Token for local Google API calls
+      final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
+      _accessToken = auth.accessToken;
       debugPrint("🔑 ACCESS TOKEN: $_accessToken");
 
-      // Update Session
+      // Get serverAuthCode for backend
+      final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
+      final String? serverAuthCode = serverAuth?.serverAuthCode;
+      debugPrint("🎟️ AUTH CODE: $serverAuthCode");
+
       UserSession().username = _currentUser!.displayName;
       UserSession().profileImageUrl = _currentUser!.photoUrl;
-      
-      // If you need to send the ID Token to your server immediately
-      if (idToken != null) {
-        await sendTokensToApi(idToken);
+
+      if (idToken != null && serverAuthCode != null) {
+        await sendTokensToApi(
+          idToken: idToken,
+          serverAuthCode: serverAuthCode,
+        );
       }
 
       debugPrint("✅ Google Sign-In Success for: ${_currentUser!.displayName}");
@@ -71,54 +77,43 @@ class GoogleServices {
   }
 }
 
-  Future<void> signOut() async {
-    await _googleSignIn.disconnect();
-    _currentUser = null;
-    _accessToken = null; // ✅ clear token
+Future<void> sendTokensToApi({required String idToken,required String serverAuthCode,}) async {
+  try {
+    final dio = Dio();
+    final baseurl = dotenv.env['BASE_URL'];
+    final String url = '${baseurl}api/v1/auth/login/idtoken/';
 
-    await AuthService().clearToken();
-    await AppPrefs.setLoggedIn(false);
-    await AppPrefs.setGoogleLogin(false);
-    await AppPrefs.clearGoogleToken();
-    print("Signed out");
-  }
+    final response = await dio.post(
+      url,
+      data: {
+        'id_token': idToken,
+        'auth_code': serverAuthCode,
+      },
+      options: Options(headers: {'Content-Type': 'application/json'}),
+    );
 
+    if (response.statusCode == 200) {
+      final data = response.data;
 
-  Future<void> sendTokensToApi(String idToken) async {
-    try {
-      final dio = Dio();
-      final baseurl = dotenv.env['BASE_URL'];
-      final String url = '${baseurl}api/v1/auth/login/idtoken/';
+      final backendAccessToken = data['access_token'];
+      if (backendAccessToken != null) {
+        await AuthService().saveToken(backendAccessToken);
+        await AppPrefs.setLoggedIn(true);
+        await AppPrefs.setGoogleLogin(true);
+        await AppPrefs.saveGoogleToken(backendAccessToken);
 
-      final response = await dio.post(
-        url,
-        data: {'id_token': idToken},
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-
-        final accessToken = data['access_token'];
-        if (accessToken != null) {
-          await AuthService().saveToken(accessToken);
-          await AppPrefs.setLoggedIn(true);
-          await AppPrefs.setGoogleLogin(true);
-          await AppPrefs.saveGoogleToken(accessToken);
-
-          // ✅ Save user info in UserSession
-          UserSession().username = data['name'] ?? UserSession().username;
-          UserSession().profileImageUrl = data['picture'] ?? UserSession().profileImageUrl;
-        }
-
-        debugPrint('✅ Google login successful $response');
-      } else {
-        debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
+        UserSession().username = data['name'] ?? UserSession().username;
+        UserSession().profileImageUrl = data['picture'] ?? UserSession().profileImageUrl;
       }
-    } on DioException catch (e) {
-      debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
+
+      debugPrint('✅ Google login successful $response');
+    } else {
+      debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
     }
+  } on DioException catch (e) {
+    debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
   }
+}
 
   Future<void> createGoogleCalendarEvent({
     required String accessToken,
@@ -161,6 +156,65 @@ class GoogleServices {
       }
     } catch (e) {
       debugPrint("❌ Google Calendar Exception: $e");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({
+    required String accessToken,
+    DateTime? timeMin,
+    DateTime? timeMax,
+  }) async {
+    final dio = Dio();
+
+    final startStr = (timeMin ?? DateTime.now()).toUtc().toIso8601String();
+
+    Map<String, dynamic> queryParameters = {
+      'timeMin': startStr,
+      'singleEvents':true, 
+      'orderBy': 'startTime',
+    };
+
+    if (timeMax != null) {
+      queryParameters['timeMax'] = timeMax.toUtc().toIso8601String();
+    }
+
+    try {
+      final response = await dio.get(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        queryParameters: queryParameters,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List items = response.data['items'] ?? [];
+        debugPrint("✅ Fetched ${items.length} events from Google Calendar");
+
+        // Transform response into structured event list
+        return items.map((event) {
+          final start = event['start']?['dateTime'] ?? event['start']?['date'];
+          final end = event['end']?['dateTime'] ?? event['end']?['date'];
+
+          return {
+            'id': event['id'],
+            'title': event['summary'] ?? 'No Title',
+            'description': event['description'] ?? '',
+            'location': event['location'] ?? '',
+            'startTime': start,
+            'endTime': end,
+          };
+        }).toList();
+      } else {
+        debugPrint("⚠️ Google Calendar fetch error: ${response.data}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("❌ Google Calendar Fetch Exception: $e");
+      return [];
     }
   }
 }

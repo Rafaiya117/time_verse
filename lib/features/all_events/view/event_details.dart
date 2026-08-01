@@ -26,6 +26,11 @@ class EventDetails extends StatelessWidget {
 
     // ✅ Fire execution outside layout pass context window to prevent tree cross-talk
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 🛠️ UPDATE: Skip network fetch if eventDetail is already loaded (e.g., Google Calendar)
+      if (controller.eventDetail != null && controller.eventDetail!.id == eventId) {
+        return;
+      }
+
       final freshData = await controller.fetchEventDetailsById(eventId);
       if (freshData != null) {
         controller.eventDetail = freshData;
@@ -192,16 +197,6 @@ class EventDetails extends StatelessWidget {
                                     ],
                                   ),
                                   SizedBox(height: 24.h),
-                                  // Text(
-                                  //   '-${eventDetail.userName.isEmpty ? "pappu roy" : eventDetail.userName}',
-                                  //   textAlign: TextAlign.center,
-                                  //   style: GoogleFonts.outfit(
-                                  //     fontSize: 14.sp,
-                                  //     fontWeight: FontWeight.bold,
-                                  //     color: const Color(0xFFFFB703),
-                                  //   ),
-                                  // ),
-                                  // SizedBox(height: 4.h),
                                   Text(
                                     'Inspired by InfiniQoute',
                                     textAlign: TextAlign.center,
@@ -225,9 +220,12 @@ class EventDetails extends StatelessWidget {
                             text: "Save",
                             onPressed: () async {
                               await eventController.shareQuoteAsImage(currentQuoteText);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Quote saved as image!')),
-                              );
+                              // 🛠️ UPDATE: Safe check before showing SnackBar
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Quote saved as image!')),
+                                );
+                              }
                             },
                             borderGradient: AppGradientColors.button_gradient,
                             solidColor: isDarkMode ? AppColors.containers_bgd : AppColors.background_color,

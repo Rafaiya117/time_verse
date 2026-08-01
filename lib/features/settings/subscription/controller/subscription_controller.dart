@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -36,9 +38,7 @@ class SubscriptionController extends ChangeNotifier {
       purchaseStatus = null;
       notifyListeners();
 
-      final purchaseResult =
-          await Purchases.purchasePackage(package);
-
+      final purchaseResult = await Purchases.purchasePackage(package);
       final customerInfo = purchaseResult.customerInfo;
 
       // ✅ SUCCESS

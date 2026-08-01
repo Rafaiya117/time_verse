@@ -97,9 +97,6 @@ class AddEventRepository {
         }
 
         if (googleService.accessToken != null) {
-          // The GoogleServices.createGoogleCalendarEvent signature does not
-          // accept a `parsedDate` named parameter. Remove it and ensure
-          // we pass compatible parameters only.
           await googleService.createGoogleCalendarEvent(
             accessToken: googleService.accessToken!,
             title: title,

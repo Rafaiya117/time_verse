@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
 import 'package:time_verse/config/services/alerm_service.dart';
+import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -14,8 +15,8 @@ class AllEventsController extends ChangeNotifier {
   int selectedIndex = 0;
   final Dio _dio = Dio();
 
-   AllEventsController() {
-    fetchAllEvents(); 
+  AllEventsController() {
+    fetchAllEvents();
   }
 
   void updateIndexFromRoute(String location) {
@@ -31,9 +32,8 @@ class AllEventsController extends ChangeNotifier {
     notifyListeners();
     context.push(appRoutes[index]);
   }
-  
-  final List<EventModel> _events = [];
 
+  final List<EventModel> _events = [];
   List<EventModel> get events => List.unmodifiable(_events);
 
   // ------------------ Reusable date formatter ------------------ //
@@ -51,65 +51,113 @@ class AllEventsController extends ChangeNotifier {
     }
   }
 
-  // ------------------ Fetch events from API ------------------ //
-  Future<void> fetchAllEvents() async {
-  try {
-    final authService = AuthService();
-    final token = await authService.getToken();
+  // Helper method: Fetch Google Calendar events ONLY if signed in with Google
+  Future<List<EventModel>> _fetchGoogleCalendarEvents() async {
+    final accessToken = GoogleServices().accessToken;
+    if (accessToken == null || accessToken.isEmpty) return [];
 
-    final baseUrl = dotenv.env['BASE_URL'] ?? '';
-
-    final response = await _dio.get(
-      '${baseUrl}api/v1/event/',
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      ),
+    final gEventsData = await GoogleServices().getGoogleCalendarEvents(
+      accessToken: accessToken,
+      timeMin: DateTime.now().subtract(const Duration(days: 30)),
     );
 
-    if (response.statusCode == 200) {
-      final List data = response.data;
+    return gEventsData.map((json) {
+      final rawStart = json['startTime'] ?? '';
+      final rawEnd = json['endTime'] ?? '';
 
-      final currentUserId = int.tryParse(UserSession().userId ?? '');
+      String extractTime(String isoString) {
+        final dt = DateTime.tryParse(isoString);
+        return dt != null ? DateFormat('HH:mm').format(dt) : '';
+      }
+
+      return EventModel(
+        id: json['id'].hashCode,
+        userName: UserSession().username ?? 'Google Calendar',
+        title: json['title'] ?? '',
+        description: json['description'] ?? '',
+        date: formatEventDate(rawStart),
+        startTime: extractTime(rawStart),
+        endTime: extractTime(rawEnd),
+        location: json['location'] ?? '',
+        alarmTime: '',
+        isCompleted: false,
+        createdAt: DateTime.now().toIso8601String(),
+        user: int.tryParse(UserSession().userId ?? '0') ?? 0,
+        category: 'Google Calendar',
+        isFavorite: false,
+      );
+    }).toList();
+  }
+
+  // ------------------ Fetch events from API ------------------ //
+  Future<void> fetchAllEvents() async {
+    try {
+      final authService = AuthService();
+      final token = await authService.getToken();
+
+      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+      final response = await _dio.get(
+        '${baseUrl}api/v1/event/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      List<EventModel> apiEvents = [];
+
+      if (response.statusCode == 200) {
+        final List data = response.data;
+        final currentUserId = int.tryParse(UserSession().userId ?? '');
+
+        apiEvents = data
+            .where((json) => json['user'] == currentUserId)
+            .map((json) {
+              final formattedDate = formatEventDate(json['date'] ?? '');
+              return EventModel(
+                id: json['id'] ?? 0,
+                userName: json['user_name']?.toString() ?? '',
+                title: json['title']?.toString() ?? '',
+                description: json['description']?.toString() ?? '',
+                date: formattedDate,
+                startTime: json['start_time']?.toString() ?? '',
+                endTime: json['end_time']?.toString() ?? '',
+                location: json['location']?.toString() ?? '',
+                alarmTime: json['alarm_time']?.toString() ?? '',
+                isCompleted: json['is_completed'] ?? false,
+                createdAt: json['created_at']?.toString() ?? '',
+                user: json['user'] ?? 0,
+                category: json['category']?.toString(),
+                isFavorite: json['is_favorite'] ?? false,
+              );
+            })
+            .toList();
+      }
+
+      // Fetch Google Calendar events ONLY if user signed in with Google
+      final googleEvents = await _fetchGoogleCalendarEvents();
+
       _events
         ..clear()
-        ..addAll(
-          data.where((json) => json['user'] == currentUserId).map((json) {
-            final formattedDate = formatEventDate(json['date'] ?? '');
+        ..addAll(apiEvents)
+        ..addAll(googleEvents);
 
-            return EventModel(
-              id: json['id'] ?? 0,
-              userName: json['user_name']?.toString() ?? '',
-              title: json['title']?.toString() ?? '',
-              description:json['description']?.toString() ?? '',
-              date: formattedDate,
-              startTime:json['start_time']?.toString() ?? '',
-              endTime: json['end_time']?.toString() ?? '',
-              location: json['location']?.toString() ?? '',
-              alarmTime:json['alarm_time']?.toString() ?? '',
-              isCompleted: json['is_completed'] ?? false,
-              createdAt:json['created_at']?.toString() ?? '',
-              user: json['user'] ?? 0,
-              category: json['category']?.toString(),
-              isFavorite: json['is_favorite'] ?? false,
-            );
-          }).toList(),
-        );
-      debugPrint('All event data-----------$data');
+      debugPrint('All event data-----------${_events.length}');
       notifyListeners();
+
       await Alarm.stopAll();
       for (final event in _events) {
         if (event.alarmTime.isNotEmpty) {
           await AlarmHelper.scheduleEventAlarm(event);
         }
       }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching events: $e');
     }
-  } catch (e) {
-    debugPrint('⚠️ Error fetching events: $e');
   }
-}
 
   Future<bool> deleteEvent(int eventId) async {
     try {
@@ -125,7 +173,7 @@ class AllEventsController extends ChangeNotifier {
           },
         ),
       );
-      
+
       return response.statusCode == 200 || response.statusCode == 204;
     } catch (e) {
       debugPrint('⚠️ Error deleting event: $e');
@@ -147,51 +195,54 @@ class AllEventsController extends ChangeNotifier {
     return false;
   }
 
-  Future<T?> runWithLoaderAndTimer<T>({required BuildContext context,required Future<T> Function() task,}) async {
-  final startTime = DateTime.now();
+  Future<T?> runWithLoaderAndTimer<T>({
+    required BuildContext context,
+    required Future<T> Function() task,
+  }) async {
+    final startTime = DateTime.now();
 
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          Duration elapsed = DateTime.now().difference(startTime);
-          // update every second
-          Future.delayed(const Duration(seconds: 1), () {
-            if (context.mounted) setState(() {});
-          });
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Duration elapsed = DateTime.now().difference(startTime);
 
-          return Center(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
+            Future.delayed(const Duration(seconds: 1), () {
+              if (context.mounted) setState(() {});
+            });
+
+            return Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Deleting...\n${elapsed.inSeconds}s",
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Deleting...\n${elapsed.inSeconds}s",
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    },
-  );
+            );
+          },
+        );
+      },
+    );
 
-  try {
-    final result = await task();
+    try {
+      final result = await task();
       return result;
     } finally {
-      if (context.mounted) Navigator.pop(context); 
+      if (context.mounted) Navigator.pop(context);
     }
   }
 }
