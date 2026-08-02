@@ -160,6 +160,9 @@ class HomeView extends StatelessWidget {
     }
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final String activeBgImage = homeController.currentBgIndex != null
+    ? (isDarkMode ? 'assets/ai_generated_img/db_${homeController.currentBgIndex}.png'
+    : 'assets/ai_generated_img/wb_${homeController.currentBgIndex}.png') : (isDarkMode ? 'assets/images/container_bgimg.png': 'assets/images/container_bgimg_light.png');
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
@@ -438,250 +441,291 @@ class HomeView extends StatelessWidget {
                   ),
                   image: DecorationImage(
                     image: AssetImage(
-                      isDarkMode? 'assets/images/container_bgimg.png': 'assets/images/container_bgimg_light.png',
+                     activeBgImage
                     ),
                     fit: BoxFit.cover,
                   ),
                 ),
                 child: Consumer<HomeController>(
                   builder: (context, homeController, _) {
-                    final aiReflectionText =homeController.currentReflection?.aiReflection.isNotEmpty == true
-                    ? homeController.currentReflection!.aiReflection: 'Today feels centered around connection, gratitude and emotionally meaningful movement.';
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Top Bar Header
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 16.w,
-                            right: 16.w,
-                            top: 16.h,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12.w,
-                                  vertical: 6.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isDarkMode
-                                  ? Colors.black.withOpacity(0.3): const Color(0xFFFFF7E5),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  border: Border.all(
-                                    color: const Color(0xFFC5A880).withOpacity(0.4),
-                                    width: 1,
+                    final aiReflectionText = homeController.currentReflection ?.aiReflection.isNotEmpty == true
+                    ? homeController.currentReflection!.aiReflection : 'Today feels centered around connection, gratitude and emotionally meaningful movement.';
+                    // Dynamically resolve image based on dark/light mode and current random index
+                    final activeBgImage = homeController.currentBgIndex != null
+                    ? (isDarkMode ? 'assets/ai_generated_img/db_${homeController.currentBgIndex}.png' : 'assets/ai_generated_img/wb_${homeController.currentBgIndex}.png')
+                    : (isDarkMode ? 'assets/images/container_bgimg.png' : 'assets/images/container_bgimg_light.png');
+
+                    return Container(
+                      width: 360.w,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: const Color(0xFFC5A880).withOpacity(0.25),
+                          width: 1,
+                        ),
+                        image: DecorationImage(
+                          image: AssetImage(activeBgImage),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Top Bar Header (Excluded from share)
+                          Padding(
+                            padding: EdgeInsets.only(left: 16.w,right: 16.w,top: 16.h,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 6.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDarkMode ? Colors.black.withOpacity(0.3) : const Color(0xFFFFF7E5),
+                                    borderRadius: BorderRadius.circular(20.r),
+                                    border: Border.all(
+                                      color: const Color(0xFFC5A880).withOpacity(0.4),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.wb_sunny_rounded,
+                                        color: const Color(0xFFFFA500),
+                                        size: 14.sp,
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        'AI Reflections',
+                                        style: GoogleFonts.outfit(
+                                          color: const Color(0xFFFFA500),
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.wb_sunny_rounded,
-                                      color: const Color(0xFFFFA500),
-                                      size: 14.sp,
-                                    ),
-                                    SizedBox(width: 6.w),
-                                    Text(
-                                      'AI Reflections',
-                                      style: GoogleFonts.outfit(
-                                        color: const Color(0xFFFFA500),
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+
+                          // ONLY THIS SECTION IS CAPTURED & SHARED AS AN IMAGE
+                          RepaintBoundary(
+                            key: _shareKey,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24.w,
+                                vertical: 20.h,
+                              ),
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(activeBgImage),
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
-                        SvgPicture.asset(
-                          'assets/icons/quote_mark.svg',
-                          width: 19.w,
-                          height: 20.h,
-                        ),
-                        RepaintBoundary(
-                          key: _shareKey,
-                          child: Container(
-                            color: isDarkMode? const Color(0xFF051123).withOpacity(0.2): Colors.transparent,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 24.w,
-                              vertical: 16.h,
-                            ), // Added vertical padding for spacing stability
-                            alignment: Alignment.center,
-                            child: Text(
-                              aiReflectionText,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.cormorant(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 20.sp,
-                                color: isDarkMode ? Colors.white : Colors.black,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/icons/quote_mark.svg',
+                                    width: 19.w,
+                                    height: 20.h,
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  Container(
+                                    color: isDarkMode ? const Color(0xFF051123).withOpacity(0.2): Colors.transparent,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w,
+                                      vertical: 12.h,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      aiReflectionText,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.cormorant(
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 20.sp,
+                                        color: isDarkMode ? Colors.white: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 10.h),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: isDarkMode? Colors.black.withOpacity(0.35): Colors.white,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(12.r),
-                              bottomRight: Radius.circular(12.r),
-                            ),
-                            border: Border(
-                              top: BorderSide(
-                                color: Colors.white.withOpacity(0.08),
-                                width: 1,
+                          SizedBox(height: 10.h),
+                          // Bottom Actions Bar (Excluded from share)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: isDarkMode? Colors.black.withOpacity(0.35): Colors.white.withOpacity(0.5),
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(12.r),
+                                bottomRight: Radius.circular(12.r),
+                              ),
+                              border: Border(
+                                top: BorderSide(
+                                  color: Colors.white.withOpacity(0.08),
+                                  width: 1,
+                                ),
                               ),
                             ),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    if (homeController.currentReflection != null) {
-                                      homeController.isReflectionFavorite = !homeController.isReflectionFavorite;
-                                      homeController.notifyListeners();
-                                      final success = await homeController.saveQuoteToFavorite(eventId: 0);
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            child: Row(
+                              children: [
+                                // Option A: Favorite
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      if (homeController.currentReflection != null) {
+                                        homeController.isReflectionFavorite = !homeController.isReflectionFavorite;
+                                        homeController.notifyListeners();
+                                        final success = await homeController.saveQuoteToFavorite(eventId: 0);
+                                        if (success) {
+                                          if (context.mounted) {
+                                            await showMessageDialog(
+                                              context,
+                                              "Reflection saved successfully!",
+                                              title: "Success",
+                                              icon: Icons.check_circle_outline,
+                                              iconColor: Colors.green,
+                                            );
+                                          }
+                                        } else {
+                                          homeController.isReflectionFavorite = !homeController.isReflectionFavorite;
+                                          homeController.notifyListeners();
+                                          if (context.mounted) {
+                                            await showMessageDialog(
+                                              context,
+                                              "Failed to save reflection. Please try again.",
+                                              title: "Error",
+                                              icon: Icons.error_outline,
+                                              iconColor: Colors.red,
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          homeController.isReflectionFavorite ? Icons.favorite_rounded: Icons.favorite_border_rounded,
+                                          color:homeController.isReflectionFavorite
+                                          ? Colors.red: (isDarkMode ? Colors.white: AppColors.fourth_color),
+                                          size: 22.sp,
+                                        ),
+                                        SizedBox(height: 4.h),
+                                        Text(
+                                          'Favorite',
+                                          style: GoogleFonts.outfit(
+                                            color: isDarkMode
+                                            ? Colors.white: AppColors.fourth_color,
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  height: 24.h,
+                                  width: 1,
+                                  color: Colors.white.withOpacity(0.12),
+                                ),
+                                // Option B: Save to Gallery
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      final success = await homeController.saveQuoteImageToGallery(_shareKey);
                                       if (success) {
                                         if (context.mounted) {
                                           await showMessageDialog(
                                             context,
-                                            "Reflection saved successfully!",
+                                            "Reflection saved to gallery successfully!",
                                             title: "Success",
                                             icon: Icons.check_circle_outline,
                                             iconColor: Colors.green,
                                           );
                                         }
                                       } else {
-                                        homeController.isReflectionFavorite =!homeController.isReflectionFavorite;
-                                        homeController.notifyListeners();
-
                                         if (context.mounted) {
                                           await showMessageDialog(
                                             context,
-                                            "Failed to save reflection. Please try again.",
+                                            "Failed to save image.",
                                             title: "Error",
                                             icon: Icons.error_outline,
                                             iconColor: Colors.red,
                                           );
                                         }
                                       }
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        homeController.isReflectionFavorite? Icons.favorite_rounded: Icons.favorite_border_rounded,
-                                        color:homeController.isReflectionFavorite? Colors.red: (isDarkMode? Colors.white: AppColors.fourth_color),
-                                        size: 22.sp,
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Text(
-                                        'Favorite',
-                                        style: GoogleFonts.outfit(
-                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.w500,
+                                    },
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.bookmark_border_rounded,
+                                          color: isDarkMode ? Colors.white: AppColors.fourth_color,
+                                          size: 22.sp,
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(height: 4.h),
+                                        Text(
+                                          'Save',
+                                          style: GoogleFonts.outfit(
+                                            color: isDarkMode ? Colors.white: AppColors.fourth_color,
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                height: 24.h,
-                                width: 1,
-                                color: Colors.white.withOpacity(0.12),
-                              ),
-                              // Option B: Save to Gallery
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    final success = await homeController.saveQuoteImageToGallery(_shareKey);
-                                    if (success) {
-                                      await showMessageDialog(
-                                        context,
-                                        "Reflection saved to gallery successfully!",
-                                        title: "Success",
-                                        icon: Icons.check_circle_outline,
-                                        iconColor: Colors.green,
-                                      );
-                                    } else {
-                                      await showMessageDialog(
-                                        context,
-                                        "Failed to save image.",
-                                        title: "Error",
-                                        icon: Icons.error_outline,
-                                        iconColor: Colors.red,
-                                      );
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.bookmark_border_rounded,
-                                        color: isDarkMode? Colors.white: AppColors.fourth_color,
-                                        size: 22.sp,
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Text(
-                                        'Save',
-                                        style: GoogleFonts.outfit(
+                                Container(
+                                  height: 24.h,
+                                  width: 1,
+                                  color: Colors.white.withOpacity(0.12),
+                                ),
+                                // Option C: Reusable Share Button
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => homeController.shareQuoteAsImage(context, _shareKey, bgAssetPath:activeBgImage),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.share_outlined,
                                           color: isDarkMode
-                                          ? Colors.white: AppColors.fourth_color,
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.w500,
+                                          ? Colors.white : AppColors.fourth_color,
+                                          size: 22.sp,
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(height: 4.h),
+                                        Text(
+                                          'Share',
+                                          style: GoogleFonts.outfit(
+                                            color: isDarkMode ? Colors.white : AppColors.fourth_color,
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                height: 24.h,
-                                width: 1,
-                                color: Colors.white.withOpacity(0.12),
-                              ),
-                              // Option C: Share
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => homeController.shareQuoteAsImage(
-                                    context,
-                                    _shareKey,
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.share_outlined,
-                                        color: isDarkMode? Colors.white: AppColors.fourth_color,
-                                        size: 22.sp,
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Text(
-                                        'Share',
-                                        style: GoogleFonts.outfit(
-                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -940,7 +984,6 @@ class HomeView extends StatelessWidget {
                           ],
                         ),
                         SizedBox(height: 18.h),
-
                         GestureDetector(
                           child: Container(
                             constraints: BoxConstraints(maxHeight: 180.h),
@@ -1133,7 +1176,7 @@ class HomeView extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () => homeController.shareQuoteAsImage(
                                     context,
-                                    _inspirationQuoteKey,
+                                    _inspirationQuoteKey, bgAssetPath: '',
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,

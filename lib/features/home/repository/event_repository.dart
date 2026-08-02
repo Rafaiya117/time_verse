@@ -39,8 +39,7 @@ class EventRepository {
     try {
       final token = await AuthService().getToken();
       final dateToFetch = date ?? DateTime.now();
-      final formattedDate =
-          "${dateToFetch.year.toString().padLeft(4, '0')}-${dateToFetch.month.toString().padLeft(2, '0')}-${dateToFetch.day.toString().padLeft(2, '0')}";
+      final formattedDate = "${dateToFetch.year.toString().padLeft(4, '0')}-${dateToFetch.month.toString().padLeft(2, '0')}-${dateToFetch.day.toString().padLeft(2, '0')}";
 
       final response = await _dio.get(
         'api/v1/event/',
@@ -51,14 +50,9 @@ class EventRepository {
           },
         ),
       );
-
       final data = response.data is String ? jsonDecode(response.data) : response.data;
-
       if (data is List) {
-        return data
-            .map((e) => EventModel.fromMap(e))
-            .where((event) => event.user.toString() == userId.toString())
-            .toList();
+        return data.map((e) => EventModel.fromMap(e)).where((event) => event.user.toString() == userId.toString()).toList();
       } else {
         debugPrint("❌ API did not return List");
         return [];
@@ -73,7 +67,6 @@ class EventRepository {
   Future<List<QuoteData>?> fetchInspirationalQuotes(String currentUserId) async {
     try {
       final token = await AuthService().getToken();
-
       final response = await _dio.get(
         'api/v1/event/',
         options: Options(
@@ -116,11 +109,8 @@ class EventRepository {
         debugPrint("📌 Type Description: ${latest['type_event_description']}");
 
         final quoteText = (latest['description']?.toString().trim().isNotEmpty == true)
-            ? latest['description'].toString()
-            : latest['type_event_description']?.toString() ?? '';
-
+        ? latest['description'].toString(): latest['type_event_description']?.toString() ?? '';
         debugPrint("✨ Final Quote Text: $quoteText");
-
         return [
           QuoteData(
             id: latest['id'],
@@ -207,9 +197,7 @@ class EventRepository {
           },
         ),
       );
-
       debugPrint('📥 AI Reflection Response Data: ${response.data}');
-
       if (response.statusCode == 200 && response.data != null) {
         debugPrint('ai_reflection ${response.data}');
         return EventReflectionResponse.fromJson(response.data);

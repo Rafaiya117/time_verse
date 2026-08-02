@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ui' as ui;
@@ -45,6 +46,15 @@ class HomeController extends ChangeNotifier {
 
   bool isReflectionFavorite = false;
   bool isFavorite = false;
+
+  static const int totalBgImages = 10;
+
+  int? currentBgIndex;
+
+  void setRandomBackgroundImage() {
+    currentBgIndex = Random().nextInt(totalBgImages) + 1; // Generates 1 to 10
+    notifyListeners();
+  }
 
   void toggleFavorite() {
     isFavorite = !isFavorite;
@@ -99,20 +109,14 @@ class HomeController extends ChangeNotifier {
     profileController.loadUserProfile().then((_) async {
       await fetchEvents();
       await todaysfetchEvents(profileController);
-
       debugPrint("TODAYS EVENTS LENGTH: ${todaysEvents.length}");
-
       if (todaysEvents.isEmpty) return;
-
       final userId = profileController.currentUser?.id;
       if (userId == null) return;
-
       if (await _repository.alarmsAlreadyScheduled(userId)) return;
-
       for (final event in todaysEvents) {
         if (event.alarmTime.isNotEmpty) {
           await AlarmHelper.scheduleEventAlarm(event);
-
           NotificationService.scheduleNotification(
             id: event.id,
             title: event.title,
@@ -122,7 +126,6 @@ class HomeController extends ChangeNotifier {
           );
         }
       }
-
       await _repository.markAlarmsScheduled(userId);
     });
 
@@ -289,6 +292,7 @@ class HomeController extends ChangeNotifier {
     if (reflection != null) {
       currentReflection = reflection;
       isReflectionFavorite = false;
+      setRandomBackgroundImage();
       notifyListeners();
     }
   }
@@ -300,42 +304,70 @@ class HomeController extends ChangeNotifier {
   }
 
   /// -------------------- Image Sharing & Saving -------------------- ///
-  void shareQuoteAsImage(BuildContext context, GlobalKey key) async {
-    final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary != null) {
-      final textImage = await boundary.toImage(pixelRatio: 3.0);
+  Future<void> shareQuoteAsImage(BuildContext context,GlobalKey key, {required String bgAssetPath,}) async {
+    try {
+      final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+
+      // 1. Capture text snapshot
+      final ui.Image textImage = await boundary.toImage(pixelRatio: 3.0);
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
-      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+      final size = Size(
+        textImage.width.toDouble(),
+        textImage.height.toDouble(),
+      );
+      ByteData assetData;
+      try {
+        assetData = await rootBundle.load(bgAssetPath);
+      } catch (_) {
+        final fallbackPath = Theme.of(context).brightness == Brightness.dark
+        ? 'assets/images/container_bgimg.png'
+        : 'assets/images/container_bgimg_light.png';
+        assetData = await rootBundle.load(fallbackPath);
+      }
 
-      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-      final assetPath = isDarkMode
-          ? 'assets/images/container_bgimg.png'
-          : 'assets/images/container_bgimg_light.png';
-
-      final ByteData assetData = await rootBundle.load(assetPath);
-      final ui.Codec codec = await ui.instantiateImageCodec(assetData.buffer.asUint8List());
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        assetData.buffer.asUint8List(),
+      );
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       final ui.Image bgImage = frameInfo.image;
-
       canvas.drawImageRect(
         bgImage,
-        Rect.fromLTWH(0, 0, bgImage.width.toDouble(), bgImage.height.toDouble()),
+        Rect.fromLTWH(0,0,
+          bgImage.width.toDouble(),
+          bgImage.height.toDouble(),
+        ),
         Rect.fromLTWH(0, 0, size.width, size.height),
         Paint(),
       );
       canvas.drawImage(textImage, Offset.zero, Paint());
 
       final finalPicture = recorder.endRecording();
-      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
-      final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+      final finalImage = await finalPicture.toImage(
+        textImage.width,
+        textImage.height,
+      );
+      final byteData = await finalImage.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
       final pngBytes = byteData!.buffer.asUint8List();
-
       final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/quote.png').create();
-      await file.writeAsBytes(pngBytes);
-
-      await Share.shareXFiles([XFile(file.path)], text: 'Your Daily Inspiration by Infiniqoute');
+      final filePath = '${tempDir.path}/reflection_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = File(filePath);
+      await file.writeAsBytes(pngBytes, flush: true);
+      if (context.mounted && await file.exists()) {
+        final box = context.findRenderObject() as RenderBox?;
+        final sharePositionOrigin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size: null;
+        await Share.shareXFiles(
+          [XFile(file.path, mimeType: 'image/png')],
+          text: 'Your Daily Inspiration by Infiniqoute',
+          sharePositionOrigin: sharePositionOrigin,
+        );
+      }
+    } catch (e) {
+      debugPrint("Error sharing image: $e");
     }
   }
 
