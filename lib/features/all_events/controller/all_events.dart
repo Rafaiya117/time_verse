@@ -91,73 +91,81 @@ class AllEventsController extends ChangeNotifier {
 
   // ------------------ Fetch events from API ------------------ //
   Future<void> fetchAllEvents() async {
-    try {
-      final authService = AuthService();
-      final token = await authService.getToken();
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-      final response = await _dio.get(
-        '${baseUrl}api/v1/event/',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
+    final response = await _dio.get(
+      '${baseUrl}api/v1/event/',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
 
-      List<EventModel> apiEvents = [];
+    List<EventModel> apiEvents = [];
 
-      if (response.statusCode == 200) {
-        final List data = response.data;
-        final currentUserId = int.tryParse(UserSession().userId ?? '');
+    if (response.statusCode == 200) {
+      final List data = response.data;
+      final currentUserId = int.tryParse(UserSession().userId ?? '');
 
-        apiEvents = data
-            .where((json) => json['user'] == currentUserId)
-            .map((json) {
-              final formattedDate = formatEventDate(json['date'] ?? '');
-              return EventModel(
-                id: json['id'] ?? 0,
-                userName: json['user_name']?.toString() ?? '',
-                title: json['title']?.toString() ?? '',
-                description: json['description']?.toString() ?? '',
-                date: formattedDate,
-                startTime: json['start_time']?.toString() ?? '',
-                endTime: json['end_time']?.toString() ?? '',
-                location: json['location']?.toString() ?? '',
-                alarmTime: json['alarm_time']?.toString() ?? '',
-                isCompleted: json['is_completed'] ?? false,
-                createdAt: json['created_at']?.toString() ?? '',
-                user: json['user'] ?? 0,
-                category: json['category']?.toString(),
-                isFavorite: json['is_favorite'] ?? false,
-              );
-            })
-            .toList();
-      }
-
-      // Fetch Google Calendar events ONLY if user signed in with Google
+      apiEvents = data
+          .where((json) => json['user'] == currentUserId)
+          .map((json) {
+            final formattedDate = formatEventDate(json['date'] ?? '');
+            return EventModel(
+              id: json['id'] ?? 0,
+              userName: json['user_name']?.toString() ?? '',
+              title: json['title']?.toString() ?? '',
+              description: json['description']?.toString() ?? '',
+              date: formattedDate,
+              startTime: json['start_time']?.toString() ?? '',
+              endTime: json['end_time']?.toString() ?? '',
+              location: json['location']?.toString() ?? '',
+              alarmTime: json['alarm_time']?.toString() ?? '',
+              isCompleted: json['is_completed'] ?? false,
+              createdAt: json['created_at']?.toString() ?? '',
+              user: json['user'] ?? 0,
+              category: json['category']?.toString(),
+              isFavorite: json['is_favorite'] ?? false,
+            );
+          }).toList();
+        }
       final googleEvents = await _fetchGoogleCalendarEvents();
-
       _events
-        ..clear()
-        ..addAll(apiEvents)
-        ..addAll(googleEvents);
+      ..clear()
+      ..addAll(apiEvents)
+      ..addAll(googleEvents);
 
-      debugPrint('All event data-----------${_events.length}');
-      notifyListeners();
+    debugPrint('All event data-----------${_events.length}');
+    notifyListeners();
 
-      await Alarm.stopAll();
-      for (final event in _events) {
-        if (event.alarmTime.isNotEmpty) {
-          await AlarmHelper.scheduleEventAlarm(event);
+    await Alarm.stopAll();
+    for (final event in _events) {
+      if (event.alarmTime.isNotEmpty) {
+        final parsedAlarm = DateTime.tryParse(event.alarmTime);
+
+        // Schedule only if alarm time is valid AND in the future
+        if (parsedAlarm != null && parsedAlarm.isAfter(DateTime.now())) {
+          try {
+            await AlarmHelper.scheduleEventAlarm(event);
+            debugPrint("⏰ Successfully scheduled alarm for: ${event.title} at $parsedAlarm");
+          } catch (alarmError) {
+            debugPrint("❌ Failed to set alarm for ${event.title}: $alarmError");
+          }
+        } else {
+          debugPrint("⚠️ Alarm skipped for ${event.title}. Time past or invalid: ${event.alarmTime}");
         }
       }
-    } catch (e) {
-      debugPrint('⚠️ Error fetching events: $e');
     }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching events: $e');
   }
+}
 
   Future<bool> deleteEvent(int eventId) async {
     try {

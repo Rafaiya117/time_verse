@@ -14,7 +14,7 @@ class GoogleServices {
   // Use instance for 7.x plugin
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
-  GoogleSignInAccount? _currentUser;//266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com
+  GoogleSignInAccount? _currentUser; //266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com
   final String serverClientId = '468767271373-igakn4plmbu2io7ocqph0miemm38lumq.apps.googleusercontent.com';
   String? _accessToken;
   String? get accessToken => _accessToken;
@@ -31,89 +31,88 @@ class GoogleServices {
     _googleSignIn.initialize(serverClientId: serverClientId);
   }
 
-
- Future<bool> signIn() async {
-  try {
-    if (_accessToken != null) {
-      debugPrint("🔵 Reusing existing Access Token: $_accessToken");
-      return true;
-    }
-
-    final user = await _googleSignIn.authenticate();
-    _currentUser = user;
-
-    if (_currentUser != null) {
-      final authentication = await _currentUser!.authentication;
-      final idToken = authentication.idToken;
-      debugPrint("🆔 ID TOKEN: $idToken");
-
-      // Request Access Token for local Google API calls
-      final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
-      _accessToken = auth.accessToken;
-      debugPrint("🔑 ACCESS TOKEN: $_accessToken");
-
-      // Get serverAuthCode for backend
-      final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
-      final String? serverAuthCode = serverAuth?.serverAuthCode;
-      debugPrint("🎟️ AUTH CODE: $serverAuthCode");
-
-      UserSession().username = _currentUser!.displayName;
-      UserSession().profileImageUrl = _currentUser!.photoUrl;
-
-      if (idToken != null && serverAuthCode != null) {
-        await sendTokensToApi(
-          idToken: idToken,
-          serverAuthCode: serverAuthCode,
-        );
+  Future<bool> signIn() async {
+    try {
+      if (_accessToken != null) {
+        debugPrint("🔵 Reusing existing Access Token: $_accessToken");
+        return true;
       }
 
-      debugPrint("✅ Google Sign-In Success for: ${_currentUser!.displayName}");
-      return true;
-    }
-    return false;
-  } catch (e) {
-    debugPrint("❌ Google Sign-In error: $e");
-    return false;
-  }
-}
+      final user = await _googleSignIn.authenticate();
+      _currentUser = user;
 
-Future<void> sendTokensToApi({required String idToken,required String serverAuthCode,}) async {
-  try {
-    final dio = Dio();
-    final baseurl = dotenv.env['BASE_URL'];
-    final String url = '${baseurl}api/v1/auth/login/idtoken/';
+      if (_currentUser != null) {
+        final authentication = await _currentUser!.authentication;
+        final idToken = authentication.idToken;
+        debugPrint("🆔 ID TOKEN: $idToken");
 
-    final response = await dio.post(
-      url,
-      data: {
-        'id_token': idToken,
-        'auth_code': serverAuthCode,
-      },
-      options: Options(headers: {'Content-Type': 'application/json'}),
-    );
+        // Request Access Token for local Google API calls
+        final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
+        _accessToken = auth.accessToken;
+        debugPrint("🔑 ACCESS TOKEN: $_accessToken");
 
-    if (response.statusCode == 200) {
-      final data = response.data;
+        // Get serverAuthCode for backend
+        final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
+        final String? serverAuthCode = serverAuth?.serverAuthCode;
+        debugPrint("🎟️ AUTH CODE: $serverAuthCode");
 
-      final backendAccessToken = data['access_token'];
-      if (backendAccessToken != null) {
-        await AuthService().saveToken(backendAccessToken);
-        await AppPrefs.setLoggedIn(true);
-        await AppPrefs.setGoogleLogin(true);
-        await AppPrefs.saveGoogleToken(backendAccessToken);
+        UserSession().username = _currentUser!.displayName;
+        UserSession().profileImageUrl = _currentUser!.photoUrl;
 
-        UserSession().username = data['name'] ?? UserSession().username;
-        UserSession().profileImageUrl = data['picture'] ?? UserSession().profileImageUrl;
+        if (idToken != null && serverAuthCode != null) {
+          await sendTokensToApi(
+            idToken: idToken,
+            serverAuthCode: serverAuthCode,
+          );
+        }
+
+        debugPrint("✅ Google Sign-In Success for: ${_currentUser!.displayName}");
+        return true;
       }
-
-      debugPrint('✅ Google login successful $response');
-    } else {
-      debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      debugPrint("❌ Google Sign-In error: $e");
+      return false;
     }
-  } on DioException catch (e) {
-    debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
   }
-}
+
+  Future<void> sendTokensToApi({required String idToken, required String serverAuthCode}) async {
+    try {
+      final dio = Dio();
+      final baseurl = dotenv.env['BASE_URL'];
+      final String url = '${baseurl}api/v1/auth/login/idtoken/';
+
+      final response = await dio.post(
+        url,
+        data: {
+          'id_token': idToken,
+          'auth_code': serverAuthCode,
+        },
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        final backendAccessToken = data['access_token'];
+        if (backendAccessToken != null) {
+          await AuthService().saveToken(backendAccessToken);
+          await AppPrefs.setLoggedIn(true);
+          await AppPrefs.setGoogleLogin(true);
+          await AppPrefs.saveGoogleToken(backendAccessToken);
+
+          UserSession().username = data['name'] ?? UserSession().username;
+          UserSession().profileImageUrl = data['picture'] ?? UserSession().profileImageUrl;
+        }
+
+        debugPrint('✅ Google login successful $response');
+      } else {
+        debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
+    }
+  }
 
   Future<void> createGoogleCalendarEvent({
     required String accessToken,
@@ -123,6 +122,7 @@ Future<void> sendTokensToApi({required String idToken,required String serverAuth
     required String endTime,
     String? description,
     String? location,
+    String? alarmTimeISO, // Added to pass same alarmISO created during saveEvent
   }) async {
     final dio = Dio();
 
@@ -135,6 +135,13 @@ Future<void> sendTokensToApi({required String idToken,required String serverAuth
       "location": location ?? "",
       "start": {"dateTime": startDateTime, "timeZone": "Asia/Dhaka"},
       "end": {"dateTime": endDateTime, "timeZone": "Asia/Dhaka"},
+      // Include Google Reminders
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          {"method": "popup", "minutes": 15}
+        ],
+      },
     };
 
     try {
@@ -170,7 +177,7 @@ Future<void> sendTokensToApi({required String idToken,required String serverAuth
 
     Map<String, dynamic> queryParameters = {
       'timeMin': startStr,
-      'singleEvents':true, 
+      'singleEvents': true,
       'orderBy': 'startTime',
     };
 
@@ -194,18 +201,31 @@ Future<void> sendTokensToApi({required String idToken,required String serverAuth
         final List items = response.data['items'] ?? [];
         debugPrint("✅ Fetched ${items.length} events from Google Calendar");
 
-        // Transform response into structured event list
+        // Transform response into structured event list compatible with EventModel
         return items.map((event) {
-          final start = event['start']?['dateTime'] ?? event['start']?['date'];
-          final end = event['end']?['dateTime'] ?? event['end']?['date'];
+          final startRaw = event['start']?['dateTime'] ?? event['start']?['date'] ?? '';
+          final endRaw = event['end']?['dateTime'] ?? event['end']?['date'] ?? '';
+
+          DateTime? startDt = DateTime.tryParse(startRaw);
+
+          // Calculate default alarmTime as 15 minutes before event start time
+          String alarmISO = '';
+          if (startDt != null) {
+            alarmISO = startDt.subtract(const Duration(minutes: 15)).toIso8601String();
+          }
+
+          // Generate stable integer ID for AlarmHelper / Notifications
+          final int eventId = event['id'].toString().hashCode.abs() % 1000000;
 
           return {
-            'id': event['id'],
+            'id': eventId,
             'title': event['summary'] ?? 'No Title',
             'description': event['description'] ?? '',
             'location': event['location'] ?? '',
-            'startTime': start,
-            'endTime': end,
+            'startTime': startRaw,
+            'endTime': endRaw,
+            'date': startDt != null ? "${startDt.year}-${startDt.month.toString().padLeft(2, '0')}-${startDt.day.toString().padLeft(2, '0')}" : '',
+            'alarm_time': alarmISO, // Populates alarmTime so AlarmHelper.scheduleEventAlarm works!
           };
         }).toList();
       } else {

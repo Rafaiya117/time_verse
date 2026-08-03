@@ -166,40 +166,38 @@ class AddEventController extends ChangeNotifier {
 
   // --- Helper Formatters ---
   String _formatAlarmTime(String date, String time) {
-    final cleanDate = date.trim();
-    final cleanTime = time.trim();
+  final cleanDate = date.trim();
+  final cleanTime = time.trim();
 
-    if (cleanTime.isEmpty) return "${cleanDate}T00:00:00${_localTimeZoneOffset()}";
+  if (cleanTime.isEmpty) return "${cleanDate}T00:00:00";
 
-    try {
-      final timeFormatter = cleanTime.split(':').length == 3 ? DateFormat("HH:mm:ss") : DateFormat("HH:mm");
-      DateTime? parsedDate;
-      for (final format in _dateFormats) {
-        try {
-          parsedDate = format.parse(cleanDate);
-          break;
-        } catch (_) {}
-      }
-      parsedDate ??= DateTime.parse(cleanDate);
-
-      final parsedTime = timeFormatter.parse(cleanTime);
-      final combined = DateTime(
-        parsedDate.year, parsedDate.month, parsedDate.day,
-        parsedTime.hour, parsedTime.minute, parsedTime.second,
-      );
-
-      return "${DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined)}${_localTimeZoneOffset()}";
-    } catch (_) {
-      return "${date}T00:00:00${_localTimeZoneOffset()}";
+  try {
+    final timeFormatter = cleanTime.split(':').length == 3 
+        ? DateFormat("HH:mm:ss") 
+        : DateFormat("HH:mm");
+        
+    DateTime? parsedDate;
+    for (final format in _dateFormats) {
+      try {
+        parsedDate = format.parse(cleanDate);
+        break;
+      } catch (_) {}
     }
-  }
+    parsedDate ??= DateTime.parse(cleanDate);
 
-  String _localTimeZoneOffset() {
-    final offset = DateTime.now().timeZoneOffset;
-    final hours = offset.inHours.abs().toString().padLeft(2, '0');
-    final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-    return "${offset.isNegative ? '-' : '+'}$hours:$minutes";
+    final parsedTime = timeFormatter.parse(cleanTime);
+    final combined = DateTime(
+      parsedDate.year, parsedDate.month, parsedDate.day,
+      parsedTime.hour, parsedTime.minute, parsedTime.second,
+    );
+
+    // Return pure local ISO format without timezone suffix (+06:00 / Z)
+    return DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined);
+  } catch (_) {
+    return "${date}T00:00:00";
   }
+}
+
 
   void selectCategory(String categoryName) {
     selectedCategory = categoryName;

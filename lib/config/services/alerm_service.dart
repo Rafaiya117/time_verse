@@ -13,11 +13,14 @@ class AlarmHelper {
     }
 
     try {
-      final utcTime = DateTime.parse(event.alarmTime);
-      final localTime = tz.TZDateTime.from(utcTime, tz.local);
+      if (event.alarmTime.isEmpty) return;
 
-      if (localTime.isBefore(tz.TZDateTime.now(tz.local))) {
-        debugPrint('⛔ Skipping past alarm: ${event.title}');
+      // DateTime.parse().toLocal() converts both "2026-08-03T08:59:00Z" and "2026-08-03T14:59:00" 
+      // accurately into your device's exact local time (14:59:00 local)
+      final localTime = DateTime.parse(event.alarmTime).toLocal();
+
+      if (localTime.isBefore(DateTime.now())) {
+        debugPrint('⛔ Skipping past alarm for ${event.title}: $localTime (Now: ${DateTime.now()})');
         return;
       }
 
@@ -44,9 +47,14 @@ class AlarmHelper {
       debugPrint('⚠️ Failed to schedule alarm for ${event.title}: $e');
     }
   }
+
   static Future<void> scheduleAlarmsForEvents(List<EventModel> events) async {
     for (var event in events) {
       await scheduleEventAlarm(event);
     }
+  }
+
+  static void resetScheduledIds() {
+    _scheduledIds.clear();
   }
 }

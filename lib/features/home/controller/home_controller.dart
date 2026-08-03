@@ -47,7 +47,7 @@ class HomeController extends ChangeNotifier {
   bool isReflectionFavorite = false;
   bool isFavorite = false;
 
-  static const int totalBgImages = 10;
+  static const int totalBgImages = 11;
 
   int? currentBgIndex;
 

@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
 
       if (isRememberMe && shouldShowMood) {
-        await AppPrefs.markMoodTrackerShownToday();
+        AppPrefs.markMoodTrackerShownToday();
         if (!mounted) return;
 
         showDialog(
@@ -54,6 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
           if (context.mounted) context.push('/home');
         });
       } else {
+        AppPrefs.markMoodTrackerShownToday();
         context.push('/home');
       }
     } else {

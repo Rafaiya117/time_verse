@@ -75,7 +75,7 @@ class AppPrefs {
   static const _googleUserNameKey = 'google_user_name';
   static const _googleUserEmailKey = 'google_user_email';
 
-  static const String _keyLastMoodDate = 'last_mood_tracker_date';
+ static const String _keyLastMoodTrackerDate = 'last_mood_tracker_date';
 
   /// ✅ Login persistence
   static Future<void> setLoggedIn(bool value) async {
@@ -175,16 +175,20 @@ static Future<void> clearGoogleToken() async {
 
   static Future<bool> shouldShowMoodTrackerToday() async {
     final prefs = await SharedPreferences.getInstance();
-    final lastShownDate = prefs.getString(_keyLastMoodDate);
-    final todayStr = DateTime.now().toIso8601String().split('T')[0]; // Format: "YYYY-MM-DD"
+    final lastShownDate = prefs.getString(_keyLastMoodTrackerDate);
+    final todayDate = _getTodayDateString();
 
-    return lastShownDate != todayStr;
+    return lastShownDate != todayDate;
   }
 
-  /// Call this when mood tracker popup is displayed
+  /// Saves today's date so the dialog won't pop up again today.
   static Future<void> markMoodTrackerShownToday() async {
     final prefs = await SharedPreferences.getInstance();
-    final todayStr = DateTime.now().toIso8601String().split('T')[0];
-    await prefs.setString(_keyLastMoodDate, todayStr);
+    await prefs.setString(_keyLastMoodTrackerDate, _getTodayDateString());
+  }
+
+  static String _getTodayDateString() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
 }
