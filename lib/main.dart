@@ -65,9 +65,9 @@ void main() async {
   await Alarm.init();
 
   await Purchases.configure(
-    PurchasesConfiguration(dotenv.env['REVENUE_CAT_API']!),
+    PurchasesConfiguration('goog_ivtlyZlqEWjaXHEZPUlSfuPOnLE'),
   );
-
+  debugPrint("RevenueCat initialized");
   runApp(const MyApp());
 
   _initBackgroundServices();

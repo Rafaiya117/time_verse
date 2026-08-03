@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -18,17 +17,28 @@ class SubscriptionController extends ChangeNotifier {
   Offerings? offerings;
   bool isPurchasing = false;
 
-  // ✅ Purchase status
-  String? purchaseStatus; // success | cancelled | failed
 
-  // ✅ Load offerings
+  String? purchaseStatus; 
   Future<void> loadOfferings() async {
     try {
+      debugPrint("Loading offerings...");
       Offerings fetchedOfferings = await Purchases.getOfferings();
+      debugPrint("Offerings loaded");
+      debugPrint(fetchedOfferings.toString());
       offerings = fetchedOfferings;
+      debugPrint(
+        "Current Offering: ${offerings?.current?.identifier}",
+      );
+
+      debugPrint(
+        "Packages Count: ${offerings?.current?.availablePackages.length}",
+      );
+
       notifyListeners();
-    } catch (e) {
-      debugPrint("Error fetching offerings: $e");
+    } catch (e, s) {
+      debugPrint("ERROR");
+      debugPrint(e.toString());
+      debugPrint(s.toString());
     }
   }
 
@@ -40,8 +50,6 @@ class SubscriptionController extends ChangeNotifier {
 
       final purchaseResult = await Purchases.purchasePackage(package);
       final customerInfo = purchaseResult.customerInfo;
-
-      // ✅ SUCCESS
       if (customerInfo.entitlements.active.isNotEmpty) {
         purchaseStatus = "success";
         debugPrint("Purchase Success");
@@ -52,10 +60,7 @@ class SubscriptionController extends ChangeNotifier {
 
     } on PlatformException catch (e) {
 
-      // ✅ CANCELLED
-      if (e.code == '1' ||
-          e.message?.contains('cancelled') == true ||
-          e.toString().contains('PurchaseCancelledError')) {
+      if (e.code == '1' || e.message?.contains('cancelled') == true || e.toString().contains('PurchaseCancelledError')) {
 
         purchaseStatus = "cancelled";
         debugPrint("Purchase Cancelled");
@@ -75,8 +80,26 @@ class SubscriptionController extends ChangeNotifier {
     }
   }
 
-  // ✅ Getter for packages
   List<Package> get availablePackages {
     return offerings?.current?.availablePackages ?? [];
+  }
+
+  List<String> get offeringFeatures {
+    final metadata = offerings?.current?.metadata;
+    if (metadata != null && metadata.containsKey('features')) {
+      final dynamic list = metadata['features'];
+      if (list is List) {
+        return List<String>.from(list);
+      }
+    }
+
+    // Fallback defaults if offline or metadata is missing
+    return [
+      'Unlimited Daily Inspiration',
+      'Smart Event Reminders',
+      'Save Your Favorite Quotes',
+      'Premium Calming Backgrounds',
+      'Personal Notification Messages',
+    ];
   }
 }
