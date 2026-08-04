@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
@@ -24,37 +26,39 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final isFirstLaunch = await AppPrefs.isFirstLaunch();
     final isLoggedIn = await AppPrefs.isLoggedIn();
+    final isRememberMe = await AppPrefs.isRememberMeEnabled();
     final isGoogleLogin = await AppPrefs.isGoogleLogin();
     final googleToken = isGoogleLogin ? await AppPrefs.getGoogleToken() : null;
 
     if (!mounted) return;
 
     final shouldForceLogin = isGoogleLogin && (googleToken == null || googleToken.isEmpty);
+    
+    // Regular login requires "Remember Me" to be enabled to persist session.
+    // Google login persists as long as the token is valid.
+    final isSessionValid = isGoogleLogin ? !shouldForceLogin : isRememberMe;
 
     if (isFirstLaunch) {
       await AppPrefs.setFirstLaunch(false);
       context.push('/landing');
-    } else if (isLoggedIn && !shouldForceLogin) {
-      final isRememberMe = await AppPrefs.isRememberMeEnabled();
+    } else if (isLoggedIn && isSessionValid) {
       final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
 
       if (!mounted) return;
 
-      if (isRememberMe && shouldShowMood) {
-        AppPrefs.markMoodTrackerShownToday();
+      if (shouldShowMood) {
+        await AppPrefs.markMoodTrackerShownToday();
         if (!mounted) return;
 
         showDialog(
           context: context,
           barrierDismissible: false,
-          // ignore: deprecated_member_use
           barrierColor: Colors.black.withOpacity(0.5),
           builder: (dialogContext) => const MoodTrackerPopup(),
         ).then((_) {
           if (context.mounted) context.push('/home');
         });
       } else {
-        AppPrefs.markMoodTrackerShownToday();
         context.push('/home');
       }
     } else {

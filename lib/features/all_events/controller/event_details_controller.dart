@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'dart:ui' as ui;
@@ -21,71 +22,115 @@ class EventController extends ChangeNotifier {
   final Dio _dio = Dio();
   EventModel? eventDetail;
 
-  Future<void> shareQuoteToSocialMedia([String? explicitText]) async {
-    try {
-      final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
-      final textImage = await boundary.toImage(pixelRatio: 3.0);
-      
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+  Future<void> shareQuoteToSocialMedia([String? explicitText, String? bgAssetPath]) async {
+  try {
+    final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) return;
+    final textImage = await boundary.toImage(pixelRatio: 3.0);
+    
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
 
-      // 🛠️ Draws explicit soft grey layer profile
+    // 🛠️ Dynamic Asset Background Rendering
+    if (bgAssetPath != null && bgAssetPath.isNotEmpty) {
+      final ImageStream stream = AssetImage(bgAssetPath).resolve(const ImageConfiguration());
+      final Completer<ui.Image> completer = Completer<ui.Image>();
+      late ImageStreamListener listener;
+
+      listener = ImageStreamListener((ImageInfo frame, bool _) {
+        completer.complete(frame.image);
+        stream.removeListener(listener);
+      });
+      stream.addListener(listener);
+
+      final ui.Image bgUiImage = await completer.future;
+
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromLTWH(0, 0, size.width, size.height),
+        image: bgUiImage,
+        fit: BoxFit.cover,
+      );
+    } else {
       final paint = Paint()..color = const Color.fromARGB(255, 112, 98, 98);
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-      canvas.drawImage(textImage, Offset.zero, Paint());
-
-      final finalPicture = recorder.endRecording();
-      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
-      final byteData = await finalImage.toByteData(format: ImageByteFormat.png);
-      final pngBytes = byteData!.buffer.asUint8List();
-      
-      final tempDir = await getTemporaryDirectory();
-      final uniqueFileName = 'social_share_${DateTime.now().millisecondsSinceEpoch}.png';
-      final file = await File('${tempDir.path}/$uniqueFileName').create();
-      await file.writeAsBytes(pngBytes);
-
-      final sharedContent = explicitText ?? quoteText;
-
-      debugPrint('📸 Generated pure local share file path: ${file.path}');
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: '✨ Check out this inspiring insight:\n“ $sharedContent ”',
-      );
-    } catch (e) {
-      debugPrint('⚠️ Local social media sharing failed: $e');
     }
+
+    canvas.drawImage(textImage, Offset.zero, Paint());
+
+    final finalPicture = recorder.endRecording();
+    final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+    final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+    
+    final tempDir = await getTemporaryDirectory();
+    final uniqueFileName = 'social_share_${DateTime.now().millisecondsSinceEpoch}.png';
+    final file = await File('${tempDir.path}/$uniqueFileName').create();
+    await file.writeAsBytes(pngBytes);
+
+    final sharedContent = explicitText ?? quoteText;
+
+    debugPrint('📸 Generated pure local share file path: ${file.path}');
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: '✨ Check out this inspiring insight:\n“ $sharedContent ”',
+    );
+  } catch (e) {
+    debugPrint('⚠️ Local social media sharing failed: $e');
   }
+}
 
-  Future<void> shareQuoteAsImage([String? explicitText]) async {
-    try {
-      final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
+Future<void> shareQuoteAsImage([String? explicitText, String? bgAssetPath]) async {
+  try {
+    final boundary = quoteShareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) return;
 
-      final textImage = await boundary.toImage(pixelRatio: 3.0);
-      
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+    final textImage = await boundary.toImage(pixelRatio: 3.0);
+    
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
 
-      // 🛠️ Draws explicit soft grey layer profile
+    // 🛠️ Dynamic Asset Background Rendering
+    if (bgAssetPath != null && bgAssetPath.isNotEmpty) {
+      final ImageStream stream = AssetImage(bgAssetPath).resolve(const ImageConfiguration());
+      final Completer<ui.Image> completer = Completer<ui.Image>();
+      late ImageStreamListener listener;
+
+      listener = ImageStreamListener((ImageInfo frame, bool _) {
+        completer.complete(frame.image);
+        stream.removeListener(listener);
+      });
+      stream.addListener(listener);
+
+      final ui.Image bgUiImage = await completer.future;
+
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromLTWH(0, 0, size.width, size.height),
+        image: bgUiImage,
+        fit: BoxFit.cover,
+      );
+    } else {
       final paint = Paint()..color = const Color.fromARGB(255, 117, 90, 90);
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-      canvas.drawImage(textImage, Offset.zero, Paint());
-
-      final finalPicture = recorder.endRecording();
-      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
-      final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
-      final pngBytes = byteData!.buffer.asUint8List();
-
-      await Gal.putImageBytes(pngBytes, album: 'MyQuotes');
-
-      debugPrint('📸 Image successfully saved directly to the device gallery!');
-    } catch (e) {
-      debugPrint('⚠️ Error saving quote to gallery: $e');
     }
+
+    canvas.drawImage(textImage, Offset.zero, Paint());
+
+    final finalPicture = recorder.endRecording();
+    final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+    final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+
+    await Gal.putImageBytes(pngBytes, album: 'MyQuotes');
+
+    debugPrint('📸 Image successfully saved directly to the device gallery!');
+  } catch (e) {
+    debugPrint('⚠️ Error saving quote to gallery: $e');
   }
+}
 
   Future<EventModel?> fetchEventDetailsById(int eventId) async {
     // 1. If eventDetail is already loaded (e.g. passed from Google Calendar), use it directly

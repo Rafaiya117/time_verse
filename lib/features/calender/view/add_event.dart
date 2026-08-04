@@ -402,135 +402,166 @@ class AddEventPage extends StatelessWidget {
               SizedBox(height: 12.h),
               _buildFormContainer(
                 context,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    String selectedOption = 'Don\'t repeat';
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return StatefulBuilder(
-                          builder: (context, setModalState) {
-                            Widget buildRadioRow(String label) {
-                              final isCurrent = selectedOption == label;
-                              return InkWell(
-                                onTap: () {
-                                  setModalState(() => selectedOption = label);
-                                  Navigator.pop(context);
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 4.w),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 20.w,
-                                        height: 20.h,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isCurrent ? const Color(0xFF2F80ED) : Colors.grey.shade600,
-                                            width: isCurrent ? 6 : 2,
+                child: Consumer<AddEventController>(
+                  builder: (context, controller, _) {
+                    final currentRepeat = controller.selectedRepeat ?? 'Don\'t repeat';
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return StatefulBuilder(
+                              builder: (context, setModalState) {
+                                Widget buildRadioRow(String label) {
+                                  final isCurrent = currentRepeat == label;
+                                  return InkWell(
+                                    onTap: () {
+                                      controller.selectRepeat(label);
+                                      Navigator.pop(context);
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 14.h,
+                                        horizontal: 4.w,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 20.w,
+                                            height: 20.h,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isCurrent
+                                                    ? const Color(0xFF2F80ED)
+                                                    : Colors.grey.shade600,
+                                                width: isCurrent ? 6 : 2,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 16.w),
+                                          Text(
+                                            label,
+                                            style: GoogleFonts.inter(
+                                              color: Colors.white,
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return Dialog(
+                                  backgroundColor: const Color(0xFF15181F),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24.r),
+                                  ),
+                                  insetPadding: EdgeInsets.symmetric(
+                                    horizontal: 24.w,
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20.w),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Repeat',
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontSize: 20.sp,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(width: 16.w),
-                                      Text(
-                                        label,
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w400,
+                                        SizedBox(height: 6.h),
+                                        Text(
+                                          currentRepeat == 'Don\'t repeat'
+                                          ? 'This event doesn\'t repeat.': 'Repeats $currentRepeat',
+                                          style: GoogleFonts.inter(
+                                            color: Colors.grey.shade400,
+                                            fontSize: 14.sp,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(height: 16.h),
+                                        buildRadioRow('Don\'t repeat'),
+                                        Divider(
+                                          color: Colors.grey.shade800,
+                                          height: 1,
+                                        ),
+                                        buildRadioRow('Every 1 day'),
+                                        Divider(
+                                          color: Colors.grey.shade800,
+                                          height: 1,
+                                        ),
+                                        buildRadioRow('Every 1 week'),
+                                        Divider(
+                                          color: Colors.grey.shade800,
+                                          height: 1,
+                                        ),
+                                        buildRadioRow('Every 1 month'),
+                                        Divider(
+                                          color: Colors.grey.shade800,
+                                          height: 1,
+                                        ),
+                                        buildRadioRow('Every 1 year'),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-
-                            return Dialog(
-                              backgroundColor: const Color(0xFF15181F),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-                              insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-                              child: Padding(
-                                padding: EdgeInsets.all(20.w),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Repeat',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    SizedBox(height: 6.h),
-                                    Text(
-                                      'This event doesn\'t repeat.',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.grey.shade400,
-                                        fontSize: 14.sp,
-                                      ),
-                                    ),
-                                    SizedBox(height: 16.h),
-                                    buildRadioRow('Don\'t repeat'),
-                                    Divider(color: Colors.grey.shade800, height: 1),
-                                    buildRadioRow('Every 1 day'),
-                                    Divider(color: Colors.grey.shade800, height: 1),
-                                    buildRadioRow('Every 1 week'),
-                                    Divider(color: Colors.grey.shade800, height: 1),
-                                    buildRadioRow('Every 1 month'),
-                                    Divider(color: Colors.grey.shade800, height: 1),
-                                    buildRadioRow('Every 1 year'),
-                                  ],
-                                ),
-                              ),
+                                );
+                              },
                             );
                           },
                         );
                       },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                            child: Text(
+                              '🔁',
+                              style: TextStyle(fontSize: 18.sp),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Repeat',
+                                  style: GoogleFonts.inter(
+                                    color: isDarkMode
+                                    ? Colors.white: Colors.black,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  currentRepeat,
+                                  style: GoogleFonts.inter(
+                                    color: isDarkMode
+                                    ? Colors.grey.shade500: Colors.grey.shade400,
+                                    fontSize: 13.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: const Color(0xFFFFA500),
+                            size: 22.sp,
+                          ),
+                        ],
+                      ),
                     );
                   },
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 2.h, right: 12.w),
-                        child: Text('🔁', style: TextStyle(fontSize: 18.sp)),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Repeat',
-                              style: GoogleFonts.inter(
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              'Don\'t repeat', 
-                              style: GoogleFonts.inter(
-                                color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade400,
-                                fontSize: 13.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: const Color(0xFFFFA500),
-                        size: 22.sp,
-                      ),
-                    ],
-                  ),
                 ),
               ),
               SizedBox(height: 20.h),
@@ -541,7 +572,6 @@ class AddEventPage extends StatelessWidget {
               Consumer<AddEventController>(
                 builder: (context, controller, _) {
                   final categories = controller.categories;
-
                   if (categories.isEmpty) {
                     return SizedBox(
                       height: 80.h,

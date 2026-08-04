@@ -40,7 +40,7 @@ class AllEvents extends StatelessWidget {
             //SizedBox(height: 20.h,),
             Consumer<AllEventsController>(
               builder: (context, controller, _) {
-                final todayEvents = controller.events.where((e) => e.date == 'Today').toList();
+                final todayEvents = controller.events.where((e) => e.date == 'Today').toList().reversed.toList();
                 return Expanded(
                   child: ListView.builder(
                     itemCount: todayEvents.length,
@@ -108,7 +108,17 @@ class AllEvents extends StatelessWidget {
                 );
               },
             ),
-            // SizedBox(height: 10.h),
+            
+          ],
+        ),
+      ),
+      bottomNavigationBar:Consumer<AllEventsController>(
+        builder: (context, controller, _) => CustomBottomNavBar(),
+      ),
+    );
+  }
+}
+// SizedBox(height: 10.h),
             //   Center(
             //     child: CustomButton(
             //       text: "Add New Event",
@@ -125,12 +135,3 @@ class AllEvents extends StatelessWidget {
             //       width: double.infinity,
             //   ),
             // ),
-          ],
-        ),
-      ),
-      bottomNavigationBar:Consumer<AllEventsController>(
-        builder: (context, controller, _) => CustomBottomNavBar(),
-      ),
-    );
-  }
-}

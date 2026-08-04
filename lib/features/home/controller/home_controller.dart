@@ -371,58 +371,55 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  Future<bool> saveQuoteImageToGallery(GlobalKey key, {bool isDarkMode = true}) async {
-    try {
-      bool hasAccess = await Gal.hasAccess();
-      if (!hasAccess) {
-        hasAccess = await Gal.requestAccess();
-        if (!hasAccess) return false;
-      }
-
-      final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      final textImage = await boundary.toImage(pixelRatio: 3.0);
-
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
-
-      final String bgAssetPath = isDarkMode
-          ? 'assets/images/container_bgimg.png'
-          : 'assets/images/container_bgimg_light.png';
-
-      final ImageStream stream = AssetImage(bgAssetPath).resolve(const ImageConfiguration());
-      final Completer<ui.Image> completer = Completer<ui.Image>();
-      late ImageStreamListener listener;
-
-      listener = ImageStreamListener((ImageInfo frame, bool _) {
-        completer.complete(frame.image);
-        stream.removeListener(listener);
-      });
-      stream.addListener(listener);
-
-      final ui.Image bgUiImage = await completer.future;
-
-      paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTWH(0, 0, size.width, size.height),
-        image: bgUiImage,
-        fit: BoxFit.cover,
-      );
-
-      canvas.drawImage(textImage, Offset.zero, Paint());
-
-      final finalPicture = recorder.endRecording();
-      final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
-      final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
-      final pngBytes = byteData!.buffer.asUint8List();
-
-      await Gal.putImageBytes(pngBytes);
-      return true;
-    } catch (e) {
-      debugPrint("Save error: $e");
-      return false;
+  Future<bool> saveQuoteImageToGallery(GlobalKey key, {required String bgAssetPath}) async {
+  try {
+    bool hasAccess = await Gal.hasAccess();
+    if (!hasAccess) {
+      hasAccess = await Gal.requestAccess();
+      if (!hasAccess) return false;
     }
+
+    final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final textImage = await boundary.toImage(pixelRatio: 3.0);
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final size = Size(textImage.width.toDouble(), textImage.height.toDouble());
+
+    // Uses the exact dynamic asset path passed from View
+    final ImageStream stream = AssetImage(bgAssetPath).resolve(const ImageConfiguration());
+    final Completer<ui.Image> completer = Completer<ui.Image>();
+    late ImageStreamListener listener;
+
+    listener = ImageStreamListener((ImageInfo frame, bool _) {
+      completer.complete(frame.image);
+      stream.removeListener(listener);
+    });
+    stream.addListener(listener);
+
+    final ui.Image bgUiImage = await completer.future;
+
+    paintImage(
+      canvas: canvas,
+      rect: Rect.fromLTWH(0, 0, size.width, size.height),
+      image: bgUiImage,
+      fit: BoxFit.cover,
+    );
+
+    canvas.drawImage(textImage, Offset.zero, Paint());
+
+    final finalPicture = recorder.endRecording();
+    final finalImage = await finalPicture.toImage(textImage.width, textImage.height);
+    final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+
+    await Gal.putImageBytes(pngBytes);
+    return true;
+  } catch (e) {
+    debugPrint("Save error: $e");
+    return false;
   }
+}
 
   @override
   void dispose() {

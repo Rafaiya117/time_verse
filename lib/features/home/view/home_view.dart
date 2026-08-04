@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -572,40 +574,10 @@ class HomeView extends StatelessWidget {
                                 // Favorite Button
                                 Expanded(
                                   child: GestureDetector(
-                                    onTap: () async {
-                                      if (homeController.currentReflection !=
-                                          null) {
-                                        homeController.isReflectionFavorite =
-                                            !homeController
-                                                .isReflectionFavorite;
+                                    onTap: () {
+                                      if (homeController.currentReflection != null) {
+                                        homeController.isReflectionFavorite = !homeController.isReflectionFavorite;
                                         homeController.notifyListeners();
-                                        final success = await homeController
-                                            .saveQuoteToFavorite(eventId: 0);
-                                        if (success) {
-                                          if (context.mounted) {
-                                            await showMessageDialog(
-                                              context,
-                                              "Reflection saved successfully!",
-                                              title: "Success",
-                                              icon: Icons.check_circle_outline,
-                                              iconColor: Colors.green,
-                                            );
-                                          }
-                                        } else {
-                                          homeController.isReflectionFavorite =
-                                              !homeController
-                                                  .isReflectionFavorite;
-                                          homeController.notifyListeners();
-                                          if (context.mounted) {
-                                            await showMessageDialog(
-                                              context,
-                                              "Failed to save reflection. Please try again.",
-                                              title: "Error",
-                                              icon: Icons.error_outline,
-                                              iconColor: Colors.red,
-                                            );
-                                          }
-                                        }
                                       }
                                     },
                                     child: Column(
@@ -613,15 +585,9 @@ class HomeView extends StatelessWidget {
                                       children: [
                                         Icon(
                                           homeController.isReflectionFavorite
-                                              ? Icons.favorite_rounded
-                                              : Icons.favorite_border_rounded,
-                                          color:
-                                              homeController
-                                                  .isReflectionFavorite
-                                              ? Colors.red
-                                              : (isDarkMode
-                                                    ? Colors.white
-                                                    : AppColors.fourth_color),
+                                          ? Icons.favorite_rounded: Icons.favorite_border_rounded,
+                                          color:homeController.isReflectionFavorite
+                                          ? Colors.red: (isDarkMode? Colors.white: AppColors.fourth_color),
                                           size: 22.sp,
                                         ),
                                         SizedBox(height: 4.h),
@@ -629,8 +595,7 @@ class HomeView extends StatelessWidget {
                                           'Favorite',
                                           style: GoogleFonts.outfit(
                                             color: isDarkMode
-                                                ? Colors.white
-                                                : AppColors.fourth_color,
+                                            ? Colors.white: AppColors.fourth_color,
                                             fontSize: 13.sp,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -648,8 +613,10 @@ class HomeView extends StatelessWidget {
                                 Expanded(
                                   child: GestureDetector(
                                     onTap: () async {
-                                      final success = await homeController
-                                          .saveQuoteImageToGallery(_shareKey);
+                                      final success = await homeController.saveQuoteImageToGallery(
+                                        _shareKey,
+                                        bgAssetPath: activeBgImage,
+                                      );
                                       if (success) {
                                         if (context.mounted) {
                                           await showMessageDialog(
@@ -924,21 +891,22 @@ class HomeView extends StatelessWidget {
                 builder: (context, homeController, child) {
                   final currentIdx = homeController.currentQuoteIndex;
                   final String quoteKeyStr = 'quote_capture_${currentIdx % (homeController.inspirationalQuotes.isNotEmpty ? homeController.inspirationalQuotes.length : 1)}';
-                  final GlobalKey _inspirationQuoteKey = GlobalObjectKey(quoteKeyStr);
+                  final GlobalKey _inspirationQuoteKey = GlobalObjectKey(quoteKeyStr,);
 
-                  final currentQuote = homeController.inspirationalQuotes.isNotEmpty? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]: null;
+                  final currentQuote = homeController.inspirationalQuotes.isNotEmpty
+                  ? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]: null;
+                  final int randomImageNum = (Random(currentIdx).nextInt(11)) + 1;
+                  final String prefix = isDarkMode ? 'db_' : 'wb_';
+                  final String currentBgPath = 'assets/ai_generated_img/$prefix$randomImageNum.png';
+
                   return Container(
                     padding: EdgeInsets.all(24.w),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFF6AD14).withValues(alpha: 0.22),
-                          const Color(0xFFFFB800).withValues(alpha: 0.12),
-                        ],
-                      ),
                       borderRadius: BorderRadius.circular(16.r),
+                      image: DecorationImage(
+                        image: AssetImage(currentBgPath),
+                        fit: BoxFit.cover,
+                      ),
                       border: Border.all(
                         color: const Color(0xFFFFB800).withValues(alpha: 0.35),
                         width: 1.2,
@@ -970,7 +938,8 @@ class HomeView extends StatelessWidget {
                                 vertical: 4.h,
                               ),
                               decoration: BoxDecoration(
-                                color: isDarkMode? Colors.black26: const Color(0xFFFFFAEE),
+                                color: isDarkMode
+                                ? Colors.black26 : const Color(0xFFFFFAEE),
                                 borderRadius: BorderRadius.circular(12.r),
                                 border: Border.all(
                                   color: const Color(0xFFFFB800).withOpacity(0.4),
@@ -986,7 +955,8 @@ class HomeView extends StatelessWidget {
                                   ),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    currentQuote?.name != null && currentQuote!.name.isNotEmpty? currentQuote.name: 'Motivation',
+                                    currentQuote?.name != null && currentQuote!.name.isNotEmpty
+                                    ? currentQuote.name : 'Motivation',
                                     style: GoogleFonts.outfit(
                                       color: const Color(0xFFE5A100),
                                       fontSize: 13.sp,
@@ -1018,77 +988,76 @@ class HomeView extends StatelessWidget {
                                 height: 1.4,
                               ),
                               child: homeController.inspirationalQuotes.isEmpty
-                                ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFFFFA500),
+                              ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFFFFA500),
                                   ),
                                 )
                                 : PageView.builder(
-                                key: ValueKey(
-                                  homeController.inspirationalQuotes.length,
-                                ),
-                                controller: homeController.pageController,
-                                itemCount: homeController.inspirationalQuotes.length,
-                                onPageChanged: (index) {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    if (context.mounted) {
-                                      homeController.updateQuoteIndex(index,);
-                                    }
-                                  });
-                                },
-                                itemBuilder: (context, index) {
-                                  if (index >=homeController.inspirationalQuotes.length) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  final quote = homeController.inspirationalQuotes[index];
-                                  return Column(
-                                    crossAxisAlignment:CrossAxisAlignment.start,
-                                    mainAxisAlignment:MainAxisAlignment.center,
-                                    children: [
-                                      Flexible(
-                                        child: RepaintBoundary(
-                                          key: _inspirationQuoteKey,
-                                          child: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 6.w),
-                                            decoration: BoxDecoration(),
-                                            child: Text(
-                                              quote.quote,
-                                              textAlign: TextAlign.start,
-                                              style: GoogleFonts.cormorant(
-                                                fontWeight:FontWeight.w400,
-                                                fontSize: 18.sp,
-                                                color: isDarkMode? AppColors.l_schedule_clr3: Colors.black87.withOpacity(0.6),
-                                                fontStyle:FontStyle.italic,
+                                  key: ValueKey(
+                                    homeController.inspirationalQuotes.length,
+                                    ),
+                                    controller: homeController.pageController,
+                                    itemCount: homeController.inspirationalQuotes.length,
+                                      onPageChanged: (index) {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          if (context.mounted) {
+                                            homeController.updateQuoteIndex(index);
+                                          }
+                                        });
+                                      },
+                                      itemBuilder: (context, index) {
+                                        if (index >= homeController.inspirationalQuotes.length) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        final quote = homeController.inspirationalQuotes[index];
+                                        return Column(
+                                          crossAxisAlignment:CrossAxisAlignment.start,
+                                          mainAxisAlignment:MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: RepaintBoundary(
+                                                key: _inspirationQuoteKey,
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 6.w,),
+                                                  decoration:const BoxDecoration(),
+                                                  child: Text(
+                                                    quote.quote,
+                                                    textAlign: TextAlign.start,
+                                                    style: GoogleFonts.cormorant(
+                                                      fontWeight:FontWeight.w400,
+                                                      fontSize: 18.sp,
+                                                      color: isDarkMode? AppColors.l_schedule_clr3
+                                                      : Colors.black87.withOpacity(0.6,),
+                                                      fontStyle:FontStyle.italic,
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 10.h),
-                                      Text(
-                                        "— ${quote.reference}",
-                                        style: GoogleFonts.playfair(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16.sp,
-                                          color: isDarkMode
-                                          ? Colors.white60
-                                          : Colors.black54,
-                                          fontStyle: FontStyle.italic
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
+                                            SizedBox(height: 10.h),
+                                            Text(
+                                              "— ${quote.reference}",
+                                              style: GoogleFonts.playfair(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 16.sp,
+                                                color: isDarkMode? Colors.white60: Colors.black54,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20.h),
-                        Container(
-                          padding: EdgeInsets.only(top: 14.h),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
+                            SizedBox(height: 20.h),
+                            Container(
+                              padding: EdgeInsets.only(top: 14.h),
+                              decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
                                 color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.08),
                                 width: 1,
                               ),
@@ -1115,15 +1084,17 @@ class HomeView extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        homeController.isFavorite ? Icons.favorite_rounded: Icons.favorite_border_rounded,
-                                        color: homeController.isFavorite? Colors.red: (isDarkMode ? Colors.white: AppColors.fourth_color),
+                                        homeController.isFavorite
+                                        ? Icons.favorite_rounded: Icons.favorite_border_rounded,
+                                        color: homeController.isFavorite
+                                        ? Colors.red: (isDarkMode? Colors.white: AppColors.fourth_color),
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Favorite',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode ? Colors.white : AppColors.fourth_color,
+                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -1141,7 +1112,11 @@ class HomeView extends StatelessWidget {
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
-                                    final success = await homeController.saveQuoteImageToGallery( _inspirationQuoteKey);
+                                    // Passes the exact current dynamic background image path to gallery saver
+                                    final success = await homeController.saveQuoteImageToGallery(
+                                      _inspirationQuoteKey,
+                                      bgAssetPath: currentBgPath,
+                                    );
                                     if (success) {
                                       await showMessageDialog(
                                         context,
@@ -1165,14 +1140,14 @@ class HomeView extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.bookmark_border_rounded,
-                                        color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                        color: isDarkMode ? Colors.white: AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Save',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                          color: isDarkMode ? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -1191,21 +1166,22 @@ class HomeView extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () => homeController.shareQuoteAsImage(
                                     context,
-                                    _inspirationQuoteKey, bgAssetPath: '',
+                                    _inspirationQuoteKey,
+                                    bgAssetPath: currentBgPath,
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
                                         Icons.share_outlined,
-                                        color: isDarkMode ? Colors.white : AppColors.fourth_color,
+                                        color: isDarkMode ? Colors.white: AppColors.fourth_color,
                                         size: 22.sp,
                                       ),
                                       SizedBox(height: 4.h),
                                       Text(
                                         'Share',
                                         style: GoogleFonts.outfit(
-                                          color: isDarkMode ? Colors.white : AppColors.fourth_color,
+                                          color: isDarkMode ? Colors.white: AppColors.fourth_color,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w500,
                                         ),

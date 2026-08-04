@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -55,11 +57,15 @@ class EventDetails extends StatelessWidget {
             }
 
             final eventDetail = eventController.eventDetail!;
-
-            // ✅ Compute exact rendered string once to maintain parity across share/save triggers
             final currentQuoteText = eventDetail.description.isEmpty 
-                ? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.' 
-                : eventDetail.description;
+            ? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.' 
+            : eventDetail.description;
+
+            // 🖼️ Calculate dynamic random background image path (1..11) based on quote seed
+            final int randomSeed = currentQuoteText.hashCode;
+            final int randomImageNum = (Random(randomSeed).nextInt(11)) + 1;
+            final String prefix = isDarkMode ? 'db_' : 'wb_';
+            final String currentBgPath = 'assets/ai_generated_img/$prefix$randomImageNum.png';
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 40.0.h),
@@ -92,6 +98,11 @@ class EventDetails extends StatelessWidget {
                                 end: Alignment.bottomRight,
                               )
                               : null,
+                              // 🖼️ Render dynamic asset background on the card
+                              image: DecorationImage(
+                                image: AssetImage(currentBgPath),
+                                fit: BoxFit.cover,
+                              ),
                               borderRadius: BorderRadius.circular(16.r),
                               border: Border.all(
                                 color: const Color(0xFFFFB703).withOpacity(0.4),
@@ -180,7 +191,7 @@ class EventDetails extends StatelessWidget {
                                         child: RepaintBoundary(
                                           key: eventController.quoteShareKey,
                                           child: Container(
-                                            color: isDarkMode ? Colors.transparent : Colors.white,
+                                            color: Colors.transparent, // Keep transparent so canvas background image shows through correctly
                                             child: Text(
                                               '“ $currentQuoteText ”',
                                               textAlign: TextAlign.center,
@@ -219,8 +230,8 @@ class EventDetails extends StatelessWidget {
                           CustomButton(
                             text: "Save",
                             onPressed: () async {
-                              await eventController.shareQuoteAsImage(currentQuoteText);
-                              // 🛠️ UPDATE: Safe check before showing SnackBar
+                              // 🛠️ Pass currentBgPath to draw image on canvas before saving
+                              await eventController.shareQuoteAsImage(currentQuoteText, currentBgPath);
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Quote saved as image!')),
@@ -247,8 +258,8 @@ class EventDetails extends StatelessWidget {
                             text: "Share",
                             onPressed: () {
                               debugPrint('button clicked');
-                              // ✅ FIX: Pass the parsed runtime quote text downstream
-                              eventController.shareQuoteToSocialMedia(currentQuoteText);
+                              // 🛠️ Pass currentBgPath to draw image on canvas before sharing
+                              eventController.shareQuoteToSocialMedia(currentQuoteText, currentBgPath);
                             },
                             gradient: AppGradientColors.button_gradient,
                             textColor: AppColors.text_color,

@@ -21,6 +21,26 @@ class AddEventController extends ChangeNotifier {
   String? selectedCategory;
   String? selectedRepeat;
 
+  // Options List (matching EditEventController)
+  final List<String> repeatOptions = [
+    "Don't repeat",
+    'Every 1 day',
+    'Every 1 week',
+    'Every 1 month',
+    'Every 1 year',
+  ];
+
+  // Map user UI text to backend API choice keys
+  static const Map<String, String?> _repeatMap = {
+    "Don't repeat": null,
+    'Every 1 day': 'Every 1 day',
+    'Every 1 week': 'Every 1 week',
+    'Every 1 month': 'Every 1 month',
+    'Every 1 year': 'Every 1 year',
+  };
+
+  String? get apiRepeatValue => _repeatMap[selectedRepeat] ?? selectedRepeat;
+
   // Text Controllers
   final titleController = TextEditingController();
   final dateController = TextEditingController();
@@ -30,7 +50,15 @@ class AddEventController extends ChangeNotifier {
   final alarmTimeController = TextEditingController();
   final noteController = TextEditingController();
 
-  List<TextEditingController> get _allControllers => [titleController,dateController,startTimeController,endTimeController,locationController,alarmTimeController,noteController,];
+  List<TextEditingController> get _allControllers => [
+        titleController,
+        dateController,
+        startTimeController,
+        endTimeController,
+        locationController,
+        alarmTimeController,
+        noteController,
+      ];
 
   static final List<DateFormat> _dateFormats = [
     DateFormat("yyyy-MM-dd"),
@@ -70,134 +98,132 @@ class AddEventController extends ChangeNotifier {
   }
 
   Future<void> saveEvent({
-  required BuildContext context,
-  required String rawStart,
-  required String rawEnd,
-  required String rawAlarm,
-  required VoidCallback onSuccess,
-}) async {
-  final start = _cleanTimeStr(rawStart);
-  final end = _cleanTimeStr(rawEnd);
-  final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
-  final formattedAlarmISO = _formatAlarmTime(dateController.text, calculatedAlarmTime);
+    required BuildContext context,
+    required String rawStart,
+    required String rawEnd,
+    required String rawAlarm,
+    required VoidCallback onSuccess,
+  }) async {
+    final start = _cleanTimeStr(rawStart);
+    final end = _cleanTimeStr(rawEnd);
+    final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
+    final formattedAlarmISO = _formatAlarmTime(dateController.text, calculatedAlarmTime);
 
-  final validationError = validateFields(
-    title: titleController.text,
-    date: dateController.text,
-    startTime: start,
-    endTime: end,
-  );
-
-  if (validationError != null) {
-    await showMessageDialog(
-      context, validationError,
-      title: 'Validation Error',
-      icon: Icons.warning_amber_outlined,
-      iconColor: Colors.orange,
-    );
-    return;
-  }
-
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const Center(child: CircularProgressIndicator()),
-  );
-
-  try {
-    final result = await _repository.createTask(
-      title: titleController.text.trim(),
-      date: _parseBackendDate(dateController.text.trim()),
+    final validationError = validateFields(
+      title: titleController.text,
+      date: dateController.text,
       startTime: start,
       endTime: end,
-      location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
-      alarmTime: formattedAlarmISO,
-      categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
-      note: noteController.text.trim(),
-      repeat: selectedRepeat, 
     );
 
-    if (context.mounted) Navigator.pop(context);
+    if (validationError != null) {
+      await showMessageDialog(
+        context, validationError,
+        title: 'Validation Error',
+        icon: Icons.warning_amber_outlined,
+        iconColor: Colors.orange,
+      );
+      return;
+    }
 
-    if (result != null) {
-      await AlarmHelper.scheduleEventAlarm(EventModel.fromMap(result));
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
 
-      try {
-        final alarmTime = DateTime.tryParse(result['alarm_time'] ?? '');
-        if (alarmTime != null) {
-          await NotificationService.scheduleNotification(
-            id: result['id'],
-            title: result['title'],
-            body: result['description'],
-            alarmTime: alarmTime,
-            payload: result['id'],
-          );
+    try {
+      final result = await _repository.createTask(
+        title: titleController.text.trim(),
+        date: _parseBackendDate(dateController.text.trim()),
+        startTime: start,
+        endTime: end,
+        location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
+        alarmTime: formattedAlarmISO,
+        categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
+        note: noteController.text.trim(),
+        repeat: apiRepeatValue,
+      );
+
+      if (context.mounted) Navigator.pop(context);
+
+      if (result != null) {
+        await AlarmHelper.scheduleEventAlarm(EventModel.fromMap(result));
+
+        try {
+          final alarmTime = DateTime.tryParse(result['alarm_time'] ?? '');
+          if (alarmTime != null) {
+            await NotificationService.scheduleNotification(
+              id: result['id'],
+              title: result['title'],
+              body: result['description'],
+              alarmTime: alarmTime,
+              payload: result['id'],
+            );
+          }
+        } catch (e) {
+          debugPrint("⚠️ Notification error: $e");
         }
-      } catch (e) {
-        debugPrint("⚠️ Notification error: $e");
+
+        clearFields();
+        onSuccess();
+
+        if (context.mounted) {
+          await showMessageDialog(
+            context, 'Saved successfully',
+            title: 'Success',
+            icon: Icons.check_circle_outline,
+            iconColor: Colors.green,
+          );
+          await context.read<HomeController>().fetchEvents();
+          context.push('/event_details', extra: result['id'] as int);
+        }
       }
-
-      clearFields();
-      onSuccess();
-
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
       if (context.mounted) {
         await showMessageDialog(
-          context, 'Saved successfully',
-          title: 'Success',
-          icon: Icons.check_circle_outline,
-          iconColor: Colors.green,
+          context, 'Failed to save event:\n${_formatErrorMessage(e)}',
+          title: 'Error',
+          icon: Icons.error_outline,
+          iconColor: Colors.red,
         );
-        await context.read<HomeController>().fetchEvents();
-        context.push('/event_details', extra: result['id'] as int);
       }
     }
-  } catch (e) {
-    if (context.mounted) Navigator.pop(context);
-    if (context.mounted) {
-      await showMessageDialog(
-        context, 'Failed to save event:\n${_formatErrorMessage(e)}',
-        title: 'Error',
-        icon: Icons.error_outline,
-        iconColor: Colors.red,
-      );
-    }
   }
-}
 
   // --- Helper Formatters ---
   String _formatAlarmTime(String date, String time) {
-  final cleanDate = date.trim();
-  final cleanTime = time.trim();
+    final cleanDate = date.trim();
+    final cleanTime = time.trim();
 
-  if (cleanTime.isEmpty) return "${cleanDate}T00:00:00";
+    if (cleanTime.isEmpty) return "${cleanDate}T00:00:00";
 
-  try {
-    final timeFormatter = cleanTime.split(':').length == 3 
-        ? DateFormat("HH:mm:ss") 
-        : DateFormat("HH:mm");
-        
-    DateTime? parsedDate;
-    for (final format in _dateFormats) {
-      try {
-        parsedDate = format.parse(cleanDate);
-        break;
-      } catch (_) {}
+    try {
+      final timeFormatter = cleanTime.split(':').length == 3
+          ? DateFormat("HH:mm:ss")
+          : DateFormat("HH:mm");
+
+      DateTime? parsedDate;
+      for (final format in _dateFormats) {
+        try {
+          parsedDate = format.parse(cleanDate);
+          break;
+        } catch (_) {}
+      }
+      parsedDate ??= DateTime.parse(cleanDate);
+
+      final parsedTime = timeFormatter.parse(cleanTime);
+      final combined = DateTime(
+        parsedDate.year, parsedDate.month, parsedDate.day,
+        parsedTime.hour, parsedTime.minute, parsedTime.second,
+      );
+
+      return DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined);
+    } catch (_) {
+      return "${date}T00:00:00";
     }
-    parsedDate ??= DateTime.parse(cleanDate);
-
-    final parsedTime = timeFormatter.parse(cleanTime);
-    final combined = DateTime(
-      parsedDate.year, parsedDate.month, parsedDate.day,
-      parsedTime.hour, parsedTime.minute, parsedTime.second,
-    );
-
-    // Return pure local ISO format without timezone suffix (+06:00 / Z)
-    return DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined);
-  } catch (_) {
-    return "${date}T00:00:00";
   }
-}
-
 
   void selectCategory(String categoryName) {
     selectedCategory = categoryName;

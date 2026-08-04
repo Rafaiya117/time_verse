@@ -279,7 +279,7 @@ class LoginPage extends StatelessWidget {
                 child: SocialAuthButton(
                   text: 'Sign in with Google',
                   icon: SvgPicture.asset(
-                    'assets/icons/gmail.svg', // Ensure this points to your standard colorful Google asset icon
+                    'assets/icons/gmail.svg',
                     fit: BoxFit.contain,
                   ),
                   onTap: () async {
@@ -287,7 +287,25 @@ class LoginPage extends StatelessWidget {
                     if (success) {
                       await AppPrefs.setLoggedIn(true);
                       await AppPrefs.setFirstLaunch(false);
-                      if (context.mounted) context.push('/home');
+
+                      if (context.mounted) {
+                        final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
+                        if (shouldShowMood) {
+                          await AppPrefs.markMoodTrackerShownToday();
+                          if (!context.mounted) return;
+
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            barrierColor: Colors.black.withOpacity(0.5),
+                            builder: (dialogContext) => const MoodTrackerPopup(),
+                          ).then((_) {
+                            if (context.mounted) context.push('/home');
+                          });
+                        } else {
+                          context.push('/home');
+                        }
+                      }
                     } else {
                       if (context.mounted) {
                         await showMessageDialog(
