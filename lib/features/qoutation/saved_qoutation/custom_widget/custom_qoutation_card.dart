@@ -78,94 +78,96 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. RepaintBoundary wraps ONLY the card background + quote body content
-                RepaintBoundary(
-                  key: widget.boundaryKey,
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: Image.asset(
-                          bgImagePath,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                Stack(
+                  children: [
+                    RepaintBoundary(
+                      key: widget.boundaryKey,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Image.asset(
+                              bgImagePath,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 52, 16, 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SvgPicture.asset(
-                                  'assets/icons/calender_2.svg',
-                                  width: 20.w,
-                                  height: 15.h,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  child: Text(
+                                    widget.quoteText,
+                                    style: GoogleFonts.cormorant(
+                                      color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.4,
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  () {
-                                    try {
-                                      DateTime parsedDate = DateTime.parse(widget.time).toLocal();
-                                      return DateFormat("MMM d, yyyy '•' h:mm a").format(parsedDate);
-                                    } catch (e) {
-                                      return widget.time;
-                                    }
-                                  }(),
-                                  style: GoogleFonts.playfair(
-                                    color: const Color(0xFFFFB703),
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
+                                const SizedBox(height: 20),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  child: Text(
+                                    '— ${widget.author}',
+                                    style: GoogleFonts.outfit(
+                                      color: AppColors.fourth_color,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '“',
-                              style: GoogleFonts.playfairDisplay(
-                                color: AppColors.fourth_color,
-                                fontSize: 42,
-                                fontWeight: FontWeight.bold,
-                                height: 0.6,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Text(
-                                widget.quoteText,
-                                style: GoogleFonts.cormorant(
-                                  color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Text(
-                                '— ${widget.author}',
-                                style: GoogleFonts.outfit(
-                                  color: AppColors.fourth_color,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      right: 16,
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/calender_2.svg',
+                            width: 20.w,
+                            height: 15.h,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              () {
+                                try {
+                                  DateTime parsedDate = DateTime.parse(
+                                    widget.time,
+                                  ).toLocal();
+                                  return DateFormat(
+                                    "MMM d, yyyy '•' h:mm a",
+                                  ).format(parsedDate);
+                                } catch (e) {
+                                  return widget.time;
+                                }
+                              }(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.playfair(
+                                color: const Color(0xFFFFB703),
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-
-                // 2. Action buttons sit OUTSIDE the RepaintBoundary
                 Container(
                   decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? AppColors.containers_bgd.withOpacity(0.85)
-                        : const Color(0xFFF4F6F5).withOpacity(0.85),
+                    color: isDarkMode ? AppColors.containers_bgd.withOpacity(0.85): const Color(0xFFF4F6F5).withOpacity(0.85),
                     border: Border(
                       top: BorderSide(color: AppColors.fourth_color.withOpacity(0.2)),
                     ),
@@ -284,8 +286,8 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                 radius: 12,
                 backgroundColor: AppColors.fourth_color,
                 child: Icon(Icons.check, size: 16, color: AppColors.text_color),
-              ),
             ),
+          ),
         ],
       ),
     );

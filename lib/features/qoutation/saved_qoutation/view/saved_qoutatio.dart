@@ -114,8 +114,9 @@ class SavedQoutation extends StatelessWidget {
                   CustomButton(
                     text: "Share All",
                     onPressed: () {
-                      final controller = Provider.of<SavedQouteController>(context, listen: false);
-                      controller.shareQuotesAsImage(_boundaryKey);
+                      final controller = Provider.of<SavedQouteController>(context,listen: false,);
+                      final cardKeys = controller.filteredQuotes.map((q) => controller.getCardKey(q['id'] as int)).toList();
+                      controller.shareAllQuotesAsImages(cardKeys);
                     },
                     leadingIcon: SvgPicture.asset(
                       'assets/icons/share_filled.svg',

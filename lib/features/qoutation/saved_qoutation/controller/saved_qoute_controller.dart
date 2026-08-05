@@ -188,4 +188,19 @@ class SavedQouteController extends ChangeNotifier {
     }
     return false;
   }
+
+  Future<void> shareAllQuotesAsImages(List<GlobalKey> cardKeys) async {
+    List<XFile> imageFiles = [];
+
+    for (var key in cardKeys) {
+      final file = await _captureCardAsImage(key);
+      if (file != null) {
+        imageFiles.add(XFile(file.path));
+      }
+    }
+
+    if (imageFiles.isNotEmpty) {
+      await Share.shareXFiles(imageFiles, text: 'Check out my saved quotes!');
+    }
+  }
 }
