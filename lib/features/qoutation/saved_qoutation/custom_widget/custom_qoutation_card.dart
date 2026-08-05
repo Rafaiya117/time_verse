@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,11 +17,12 @@ class QuoteCardWidget extends StatefulWidget {
   final String bookmarkIconPath;
   final String bookmarkFilledIconPath;
 
-  // ✅ Optional selection state
   final bool isSelected;
   final VoidCallback? onTap;
-  final VoidCallback? onHeartTap; // for heart
-  final VoidCallback? onBookmarkTap; // new for bookmark
+  final VoidCallback? onHeartTap;
+  final VoidCallback? onBookmarkTap;
+  final VoidCallback? onShareTap;
+  final GlobalKey boundaryKey;
   final int id;
 
   const QuoteCardWidget({
@@ -33,10 +36,12 @@ class QuoteCardWidget extends StatefulWidget {
     required this.bookmarkIconPath,
     required this.bookmarkFilledIconPath,
     required this.id,
+    required this.boundaryKey,
     this.isSelected = false,
     this.onTap,
     this.onHeartTap,
-    this.onBookmarkTap, // added
+    this.onBookmarkTap,
+    this.onShareTap,
   });
 
   @override
@@ -47,18 +52,25 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
   bool isLiked = false;
   bool isBookmarked = false;
 
+  String _getBackgroundImagePath(bool isDarkMode) {
+    const totalImages = 5;
+    final imageIndex = (widget.id.abs() % totalImages) + 1;
+    final prefix = isDarkMode ? 'db' : 'wb';
+    return 'assets/ai_generated_img/${prefix}_$imageIndex.png';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bgImagePath = _getBackgroundImagePath(isDarkMode);
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Stack(
         children: [
           Container(
-            clipBehavior: Clip.antiAlias, // Ensures the bottom actions row conforms to the border radius
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: isDarkMode ? AppColors.containers_bgd : const Color(0xFFF4F6F5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.fourth_color),
             ),
@@ -66,85 +78,94 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Top Section Padding Container
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // 1. RepaintBoundary wraps ONLY the card background + quote body content
+                RepaintBoundary(
+                  key: widget.boundaryKey,
+                  child: Stack(
                     children: [
-                      // Date / Time header row
-                      Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/calender_2.svg',
-                            width:20.w,
-                            height: 15.h,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            () {
-                              try {
-                                DateTime parsedDate = DateTime.parse(widget.time,).toLocal();
-                                return DateFormat("MMM d, yyyy '•' h:mm a",).format(parsedDate);
-                              } catch (e) {
-                                return widget.time; // Fallback to raw string if parsing fails
-                              }
-                            }(),
-                            style: GoogleFonts.playfair(
-                              color: const Color(0xFFFFB703),
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
+                      Positioned.fill(
+                        child: Image.asset(
+                          bgImagePath,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/icons/calender_2.svg',
+                                  width: 20.w,
+                                  height: 15.h,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  () {
+                                    try {
+                                      DateTime parsedDate = DateTime.parse(widget.time).toLocal();
+                                      return DateFormat("MMM d, yyyy '•' h:mm a").format(parsedDate);
+                                    } catch (e) {
+                                      return widget.time;
+                                    }
+                                  }(),
+                                  style: GoogleFonts.playfair(
+                                    color: const Color(0xFFFFB703),
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Elegant Styled Big Quotation Mark
-                      Text(
-                        '“',
-                        style: GoogleFonts.playfairDisplay(
-                          color: AppColors.fourth_color,
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
-                          height: 0.6,
-                        ),
-                      ),
-
-                      // Quote Content Body Text
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          widget.quoteText,
-                          style: GoogleFonts.cormorant(
-                            color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Author Row Signature
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          '— ${widget.author}',
-                          style: GoogleFonts.outfit(
-                            color: AppColors.fourth_color,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '“',
+                              style: GoogleFonts.playfairDisplay(
+                                color: AppColors.fourth_color,
+                                fontSize: 42,
+                                fontWeight: FontWeight.bold,
+                                height: 0.6,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Text(
+                                widget.quoteText,
+                                style: GoogleFonts.cormorant(
+                                  color: isDarkMode ? AppColors.text_color : const Color(0xFF373F4B),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Text(
+                                '— ${widget.author}',
+                                style: GoogleFonts.outfit(
+                                  color: AppColors.fourth_color,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // 2. Bottom Actions Row Bar (Divided symmetrically with borders)
+                // 2. Action buttons sit OUTSIDE the RepaintBoundary
                 Container(
                   decoration: BoxDecoration(
+                    color: isDarkMode
+                        ? AppColors.containers_bgd.withOpacity(0.85)
+                        : const Color(0xFFF4F6F5).withOpacity(0.85),
                     border: Border(
                       top: BorderSide(color: AppColors.fourth_color.withOpacity(0.2)),
                     ),
@@ -152,7 +173,6 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                   height: 52,
                   child: Row(
                     children: [
-                      // Action Component 1: Favorite Button
                       Expanded(
                         child: InkWell(
                           onTap: () {
@@ -169,7 +189,9 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 width: 16.w,
                                 height: 14.h,
                                 colorFilter: ColorFilter.mode(
-                                  isLiked ? Colors.red: (isDarkMode ? AppColors.text_color : AppColors.fourth_color),
+                                  isLiked
+                                      ? Colors.red
+                                      : (isDarkMode ? AppColors.text_color : AppColors.fourth_color),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -185,11 +207,7 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                           ),
                         ),
                       ),
-                      
-                      // Vertical separator line
                       VerticalDivider(color: AppColors.fourth_color.withOpacity(0.2), width: 1, thickness: 1),
-
-                      // Action Component 2: Save Button
                       Expanded(
                         child: InkWell(
                           onTap: () {
@@ -206,8 +224,9 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                                 width: 13.w,
                                 height: 16.h,
                                 colorFilter: ColorFilter.mode(
-                                  isBookmarked ? AppColors.fourth_color
-                                  : (isDarkMode ? AppColors.text_color : AppColors.fourth_color),
+                                  isBookmarked
+                                      ? AppColors.fourth_color
+                                      : (isDarkMode ? AppColors.text_color : AppColors.fourth_color),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -223,14 +242,10 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
                           ),
                         ),
                       ),
-
-                      // Vertical separator line
                       VerticalDivider(color: AppColors.fourth_color.withOpacity(0.2), width: 1, thickness: 1),
-
-                      // Action Component 3: Share Button
                       Expanded(
                         child: InkWell(
-                          onTap: () {}, // Kept share functionality unchanged as per requirement
+                          onTap: widget.onShareTap,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -261,8 +276,6 @@ class _QuoteCardWidgetState extends State<QuoteCardWidget> {
               ],
             ),
           ),
-
-          // ✅ Keep Selection Overlay Checkmark logic exactly where it belongs
           if (widget.isSelected)
             Positioned(
               top: 8,

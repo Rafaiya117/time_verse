@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
@@ -13,6 +14,14 @@ import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 class SavedQouteController extends ChangeNotifier {
   final List<Map<String, dynamic>> savedQuotes = [];
   final Set<int> selectedQuotes = {};
+  final Map<int, GlobalKey> _cardKeys = {};
+
+  GlobalKey getCardKey(int id) {
+    if (!_cardKeys.containsKey(id)) {
+      _cardKeys[id] = GlobalKey();
+    }
+    return _cardKeys[id]!;
+  }
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -55,10 +64,7 @@ class SavedQouteController extends ChangeNotifier {
 
   void shareSelectedQuotes(BuildContext context) {
     if (selectedQuotes.isEmpty) return;
-    final quotesToShare = selectedQuotes
-        .map((i) => savedQuotes[i]['description'])
-        .where((q) => q != null && q.toString().trim().isNotEmpty)
-        .join('\n\n');
+    final quotesToShare = selectedQuotes.map((i) => savedQuotes[i]['description']).where((q) => q != null && q.toString().trim().isNotEmpty).join('\n\n');
     if (quotesToShare.trim().isEmpty) return;
     Share.share(quotesToShare);
   }
@@ -133,27 +139,53 @@ class SavedQouteController extends ChangeNotifier {
     }
   }
 
-  Future<void> shareQuotesAsImage(GlobalKey boundaryKey) async {
+
+  Future<File?> _captureCardAsImage(GlobalKey boundaryKey) async {
     try {
-      final RenderRepaintBoundary? boundary = 
-          boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      
-      if (boundary == null) return;
+      final RenderRepaintBoundary? boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return null;
+
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      
+
       if (byteData != null) {
         final buffer = byteData.buffer.asUint8List();
         final tempDir = await getTemporaryDirectory();
-        final file = await File('${tempDir.path}/wisdom_journal.png').create();
+        final file = await File('${tempDir.path}/quote_${DateTime.now().millisecondsSinceEpoch}.png').create();
         await file.writeAsBytes(buffer);
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          text: 'Check out my Wisdom Journal entry!',
-        );
+        return file;
       }
     } catch (e) {
-      debugPrint('⚠️ Error compiling layout vector image files: $e');
+      debugPrint('⚠️ Error capturing card image: $e');
     }
+    return null;
+  }
+
+  Future<void> shareQuotesAsImage(dynamic input) async {
+  if (input is GlobalKey) {
+    final file = await _captureCardAsImage(input);
+    if (file != null) {
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Check out this quote from my Wisdom Journal!',
+      );
+    }
+  } else if (input is String) {
+    // Shares raw text directly (Individual card Share)
+    await Share.share(input);
+  }
+}
+
+  Future<bool> saveQuoteToGallery(GlobalKey boundaryKey) async {
+    final file = await _captureCardAsImage(boundaryKey);
+    if (file != null) {
+      try {
+        await Gal.putImage(file.path);
+        return true;
+      } catch (e) {
+        debugPrint('⚠️ Error saving image to gallery: $e');
+      }
+    }
+    return false;
   }
 }

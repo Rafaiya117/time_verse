@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
@@ -33,9 +32,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     final shouldForceLogin = isGoogleLogin && (googleToken == null || googleToken.isEmpty);
-    
-    // Regular login requires "Remember Me" to be enabled to persist session.
-    // Google login persists as long as the token is valid.
     final isSessionValid = isGoogleLogin ? !shouldForceLogin : isRememberMe;
 
     if (isFirstLaunch) {

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
 import 'package:time_verse/config/services/google_service.dart';
@@ -30,12 +31,12 @@ class AddEventRepository {
     );
 
     if (response.statusCode == 200 && response.data is List) {
+      debugPrint('!--------- Category ${response.data.toString()}---------!');
       return (response.data as List).map((json) => EventCategory.fromJson(json)).toList();
     }
     return [];
   }
 
-  /// Creates an event in the backend and optionally syncs to Google Calendar
   Future<Map<String, dynamic>?> createTask({
     required String title,
     required String date,
@@ -78,9 +79,9 @@ class AddEventRepository {
       "is_completed": isCompleted,
       if (location?.trim().isNotEmpty ?? false) "location": location!.trim(),
       if (categoryName?.trim().isNotEmpty ?? false)
-        "category_name": categoryName!.trim(),
+      "category_name": categoryName!.trim(),
       if (note?.trim().isNotEmpty ?? false)
-        "type_event_description": note!.trim(),
+      "type_event_description": note!.trim(),
     };
 
     final response = await _dio.post(

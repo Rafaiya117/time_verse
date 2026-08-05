@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -200,10 +202,7 @@ class AddEventController extends ChangeNotifier {
     if (cleanTime.isEmpty) return "${cleanDate}T00:00:00";
 
     try {
-      final timeFormatter = cleanTime.split(':').length == 3
-          ? DateFormat("HH:mm:ss")
-          : DateFormat("HH:mm");
-
+      final timeFormatter = cleanTime.split(':').length == 3 ? DateFormat("HH:mm:ss") : DateFormat("HH:mm");
       DateTime? parsedDate;
       for (final format in _dateFormats) {
         try {
@@ -251,8 +250,9 @@ class AddEventController extends ChangeNotifier {
       final parsedStart = DateFormat("HH:mm").parse(start);
       Duration offset = const Duration(minutes: 10);
 
-      if (alarmClean.contains('5 min')) offset = const Duration(minutes: 5);
-      else if (alarmClean.contains('10 min')) offset = const Duration(minutes: 10);
+      if (alarmClean.contains('5 min')) {
+        offset = const Duration(minutes: 5);
+      } else if (alarmClean.contains('10 min')) offset = const Duration(minutes: 10);
       else if (alarmClean.contains('30 min')) offset = const Duration(minutes: 30);
       else if (alarmClean.contains('1 hr') || alarmClean.contains('60 min')) offset = const Duration(hours: 1);
 

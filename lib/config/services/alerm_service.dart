@@ -1,7 +1,8 @@
+// ignore_for_file: deprecated_member_use
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
-import 'package:timezone/timezone.dart' as tz;
 
 class AlarmHelper {
   static final Set<int> _scheduledIds = {};
@@ -14,11 +15,7 @@ class AlarmHelper {
 
     try {
       if (event.alarmTime.isEmpty) return;
-
-      // DateTime.parse().toLocal() converts both "2026-08-03T08:59:00Z" and "2026-08-03T14:59:00" 
-      // accurately into your device's exact local time (14:59:00 local)
       final localTime = DateTime.parse(event.alarmTime).toLocal();
-
       if (localTime.isBefore(DateTime.now())) {
         debugPrint('⛔ Skipping past alarm for ${event.title}: $localTime (Now: ${DateTime.now()})');
         return;
@@ -36,16 +33,29 @@ class AlarmHelper {
             title: event.title,
             body: event.description,
             stopButton: 'STOP',
+            icon: 'notification_icon',
           ),
+          payload: event.id.toString(),
         ),
       );
-
       _scheduledIds.add(event.id);
-
       debugPrint('⏰ Alarm scheduled for ${event.title} at $localTime');
     } catch (e) {
       debugPrint('⚠️ Failed to schedule alarm for ${event.title}: $e');
     }
+  }
+
+  static void listenToAlarmRingtone(BuildContext context) {
+    Alarm.ringStream.stream.listen((alarmSettings) {
+      if (context.mounted) {
+        context.push('/alarm', extra: alarmSettings);
+      }
+    });
+  }
+
+  static Future<void> stopAlarm(int id) async {
+    await Alarm.stop(id);
+    _scheduledIds.remove(id);
   }
 
   static Future<void> scheduleAlarmsForEvents(List<EventModel> events) async {

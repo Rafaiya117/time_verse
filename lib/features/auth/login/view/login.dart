@@ -166,7 +166,6 @@ class LoginPage extends StatelessWidget {
                 child: CustomButton(
                   text: "Continue",
                   onPressed: () async {
-                    //context.push('/home');
                     if (loginController.validateLoginFields()) {
                       final success = await loginController.loginUser();
                       if (success) {
@@ -184,7 +183,7 @@ class LoginPage extends StatelessWidget {
                         await context.read<ProfileController>().loadUserProfile();
                         if (context.mounted) {
                           final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
-                          if (loginController.rememberMe && shouldShowMood) {
+                          if (shouldShowMood) {
                             await AppPrefs.markMoodTrackerShownToday();
                             if (!context.mounted) return;
 
@@ -226,19 +225,18 @@ class LoginPage extends StatelessWidget {
                   width: double.infinity,
                 ),
               ),
-              SizedBox(height: 20.h,),
+              SizedBox(height: 20.h),
               Row(
                 children: [
-                  // Left divider line
                   Expanded(
                     child: Container(
-                      height: 1.5, // Total line thickness
-                      margin: EdgeInsets.only(right: 12.w), // Space before text
+                      height: 1.5,
+                      margin: EdgeInsets.only(right: 12.w),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
-                            Colors.white.withOpacity(0.65,), // Solid/visible near the text
+                            Colors.white.withOpacity(0.0),
+                            Colors.white.withOpacity(0.65),
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -250,7 +248,7 @@ class LoginPage extends StatelessWidget {
                   Text(
                     'Or continue with',
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF9E9E9E), // Muted grey color matching the image text
+                      color: const Color(0xFF9E9E9E),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -259,12 +257,12 @@ class LoginPage extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 1.5,
-                      margin: EdgeInsets.only(left: 12.w), // Space after text
+                      margin: EdgeInsets.only(left: 12.w),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.55,), // Solid/visible near the text
-                            Colors.white.withOpacity(0.0,), // Fades out completely at outer edge
+                            Colors.white.withOpacity(0.55),
+                            Colors.white.withOpacity(0.0),
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -274,7 +272,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 30.h,),
+              SizedBox(height: 30.h),
               Center(
                 child: SocialAuthButton(
                   text: 'Sign in with Google',

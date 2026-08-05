@@ -142,14 +142,19 @@ class SavedQoutation extends StatelessWidget {
                 key: _boundaryKey,
                 child: Container(
                   color: Colors.transparent,
-                  child: Consumer<SavedQouteController>(
+                  child: 
+                  Consumer<SavedQouteController>(
                     builder: (context, controller, _) {
                       return Column(
-                        children: controller.filteredQuotes.map((quote) {    
-                          debugPrint("Quote ID: ${quote['id']}");
+                        children: controller.filteredQuotes.map((quote) {
+                          final quoteId = quote['id'] as int;
+                          final cardKey = controller.getCardKey(quoteId);
+
                           return Column(
                             children: [
                               QuoteCardWidget(
+                                boundaryKey: cardKey,
+                                id: quoteId,
                                 time: quote['time'] ?? '',
                                 quoteText: quote['description'] ?? '',
                                 author: quote['author'] ?? '',
@@ -158,14 +163,23 @@ class SavedQoutation extends StatelessWidget {
                                 heartFilledIconPath:'assets/icons/heart_filled.svg',
                                 bookmarkIconPath: 'assets/icons/bookmark.svg',
                                 bookmarkFilledIconPath:'assets/icons/bookmark_filled.svg',
-                                id: quote['id'] as int,
                                 onHeartTap: () {
-                                  print("Heart clicked: ${quote['id']}");
+                                  controller.toggleFavorite(quoteId);
                                 },
-                                onBookmarkTap: () {
-                                  final int id = (quote['id'] as int?) ?? 0;
-                                  controller.toggleQuoteSelection(id);                           
-                                  print("Bookmark clicked: ${quote['id']}");
+                                onBookmarkTap: () async {
+                                  final success = await controller.saveQuoteToGallery(cardKey);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          success ? 'Quote image saved to gallery!' : 'Failed to save image.',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                onShareTap: () {
+                                  controller.shareQuotesAsImage(quote['description']);
                                 },
                               ),
                               SizedBox(height: 10.h),
