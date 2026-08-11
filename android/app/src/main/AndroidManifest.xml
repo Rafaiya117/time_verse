@@ -10,7 +10,8 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="com.android.vending.BILLING" />
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> 
+    
     <application
         android:label="InfiniQoute"
         android:name="${applicationName}"

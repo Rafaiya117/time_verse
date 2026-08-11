@@ -66,6 +66,16 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
+  // Helper method: Normalize time format (e.g., "11:00:00" -> "11:00")
+  String _normalizeTime(String rawTime) {
+    if (rawTime.isEmpty) return '';
+    final parts = rawTime.split(':');
+    if (parts.length >= 2) {
+      return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+    }
+    return rawTime;
+  }
+
   // Helper method: Fetch Google Calendar events ONLY if signed in with Google
   Future<List<EventModel>> _fetchGoogleCalendarEvents({DateTime? filterDate}) async {
     final accessToken = GoogleServices().accessToken;
@@ -142,8 +152,8 @@ class CalendarController extends ChangeNotifier {
             title: json['title']?.toString() ?? '',
             description: json['description']?.toString() ?? '',
             date: formattedDate,
-            startTime: json['start_time']?.toString() ?? '',
-            endTime: json['end_time']?.toString() ?? '',
+            startTime: _normalizeTime(json['start_time']?.toString() ?? ''),
+            endTime: _normalizeTime(json['end_time']?.toString() ?? ''),
             location: json['location']?.toString() ?? '',
             alarmTime: json['alarm_time']?.toString() ?? '',
             isCompleted: json['is_completed'] ?? false,
@@ -158,10 +168,21 @@ class CalendarController extends ChangeNotifier {
       // Fetch Google Calendar events ONLY if user signed in with Google
       final googleEvents = await _fetchGoogleCalendarEvents(filterDate: targetDate);
 
+      // Deduplicate backend and Google Calendar events based on title, date, and start time
+      final Map<String, EventModel> uniqueEvents = {};
+
+      for (var event in [...apiEvents, ...googleEvents]) {
+        final key = '${event.title.trim().toLowerCase()}_${event.date}_${_normalizeTime(event.startTime)}';
+        
+        // Keep backend event if already added, otherwise add Google event
+        if (!uniqueEvents.containsKey(key)) {
+          uniqueEvents[key] = event;
+        }
+      }
+
       _events
         ..clear()
-        ..addAll(apiEvents)
-        ..addAll(googleEvents);
+        ..addAll(uniqueEvents.values);
 
       debugPrint('!--------Upcoming events-----------${_events.length}');
       notifyListeners();

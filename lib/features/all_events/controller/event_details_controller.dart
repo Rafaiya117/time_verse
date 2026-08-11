@@ -133,66 +133,63 @@ Future<void> shareQuoteAsImage([String? explicitText, String? bgAssetPath]) asyn
 }
 
   Future<EventModel?> fetchEventDetailsById(int eventId) async {
-    // 1. If eventDetail is already loaded (e.g. passed from Google Calendar), use it directly
-    if (eventDetail != null && eventDetail!.id == eventId) {
-      return eventDetail;
-    }
+  if (eventDetail != null && eventDetail!.id == eventId) {
+    return eventDetail;
+  }
 
-    try {
-      final authService = AuthService();
-      final token = await authService.getToken();
-      final baseUrl = dotenv.env['BASE_URL'] ?? '';
-      final url = '${baseUrl}api/v1/event/details/?event_id=$eventId';
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+    final url = '${baseUrl}api/v1/event/details/?event_id=$eventId';
 
-      final response = await _dio.get(
-        url,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
+    final response = await _dio.get(
+      url,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+      debugPrint('✅ Event details fetched: $data');
+      
+      eventDetail = EventModel(
+        id: data['id'] ?? 0,
+        userName: "${data['user_first_name'] ?? ''} ${data['user_last_name'] ?? ''}".trim(),
+        title: data['title']?.toString() ?? '',
+        description: data['description']?.toString() ?? '',
+        date: data['date']?.toString() ?? '',
+        startTime: data['start_time']?.toString() ?? '',
+        endTime: data['end_time']?.toString() ?? '',
+        location: data['location']?.toString() ?? '',
+        alarmTime: data['alarm_time']?.toString() ?? '',
+        isCompleted: data['is_completed'] ?? false,
+        isFavorite: data['is_favorite'] ?? false,
+        createdAt: data['created_at']?.toString() ?? '',
+        user: data['user'] ?? 0,
+        category: data['category']?.toString(),
       );
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        debugPrint('✅ Event details fetched: $data');
-        eventDetail = EventModel(
-          id: data['id'] ?? 0,
-          userName: "${data['user_first_name'] ?? ''} ${data['user_last_name'] ?? ''}".trim(),
-          title: data['title']?.toString() ?? '',
-          description: data['description']?.toString() ?? '',
-          date: data['date']?.toString() ?? '',
-          startTime: data['start_time']?.toString() ?? '',
-          endTime: data['end_time']?.toString() ?? '',
-          location: data['location']?.toString() ?? '',
-          alarmTime: data['alarm_time']?.toString() ?? '',
-          isCompleted: data['is_completed'] ?? false,
-          isFavorite: data['is_favorite'] ?? false,
-          createdAt: data['created_at']?.toString() ?? '',
-          user: data['user'] ?? 0,
-          category: data['category']?.toString(),
-        );
-        debugPrint('📌 Event details stored in controller: $eventDetail');
-        notifyListeners();
-        return eventDetail;
-      } else {
-        debugPrint('❌ Failed to fetch event details: ${response.statusCode}');
-        return null;
+      if (eventDetail!.description.isNotEmpty) {
+        quoteText = eventDetail!.description;
       }
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        debugPrint('ℹ️ Event ID $eventId not found on server (likely a Google Calendar event).');
-        // If eventDetail was set prior to navigation, return it instead of failing
-        return eventDetail;
-      }
-      debugPrint('⚠️ DioError fetching event details: $e');
-      return null;
-    } catch (e) {
-      debugPrint('⚠️ Error fetching event details: $e');
+
+      debugPrint('📌 Event details stored in controller: ${eventDetail?.description}');
+      notifyListeners();
+      return eventDetail;
+    } else {
+      debugPrint('❌ Failed to fetch event details: ${response.statusCode}');
       return null;
     }
+  } catch (e) {
+    debugPrint('⚠️ Error fetching event details: $e');
+    return null;
   }
+}
 
   String formatTime(String timeString) {
     final utc = DateTime.parse(timeString);

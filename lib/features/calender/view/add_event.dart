@@ -658,9 +658,10 @@ class AddEventPage extends StatelessWidget {
                     rawEnd: timeController.formatTime(
                       timeController.getTime('end'),
                     ),
-                    rawAlarm: timeController.formatTime(
-                      timeController.getTime('alarm'),
-                    ),
+                    rawAlarm:
+                      addEventController.alarmTimeController.text.isNotEmpty
+                      ? addEventController.alarmTimeController.text
+                      : timeController.selectedReminderOption, 
                     onSuccess: () {},
                   );
                 },

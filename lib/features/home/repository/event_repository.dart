@@ -9,12 +9,6 @@ import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 import 'package:time_verse/features/home/model/ai_refelction_model.dart';
 import 'package:time_verse/features/home/model/quotedata_model.dart';
 
-// Update these imports to match your project paths:
-// import 'path/to/auth_service.dart';
-// import 'path/to/event_model.dart';
-// import 'path/to/quote_data.dart';
-// import 'path/to/event_reflection_response.dart';
-
 class EventRepository {
   final Dio _dio = Dio(
     BaseOptions(
@@ -105,6 +99,7 @@ class EventRepository {
         final latest = userEvents.last;
 
         debugPrint("🏆 Latest Event ID: ${latest['id']}");
+        debugPrint("🏆 Alarm time ${latest['alarm_time']}");
         debugPrint("📝 Description: ${latest['description']}");
         debugPrint("📌 Type Description: ${latest['type_event_description']}");
 
@@ -114,7 +109,7 @@ class EventRepository {
         return [
           QuoteData(
             id: latest['id'],
-            name: latest['category_name'],
+            name: latest['category_name']?.toString() ?? '', // 👈 Fixed: handles null safely
             quote: quoteText,
             reference: latest['title']?.toString() ?? '',
           ),

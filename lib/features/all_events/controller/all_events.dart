@@ -134,9 +134,9 @@ class AllEventsController extends ChangeNotifier {
               isFavorite: json['is_favorite'] ?? false,
             );
           }).toList();
-        }
-      final googleEvents = await _fetchGoogleCalendarEvents();
-      _events
+    }
+    final googleEvents = await _fetchGoogleCalendarEvents();
+    _events
       ..clear()
       ..addAll(apiEvents)
       ..addAll(googleEvents);
@@ -144,13 +144,20 @@ class AllEventsController extends ChangeNotifier {
     debugPrint('All event data-----------${_events.length}');
     notifyListeners();
 
+    // Re-schedule alarms
     await Alarm.stopAll();
+    final now = DateTime.now();
+
     for (final event in _events) {
       if (event.alarmTime.isNotEmpty) {
-        final parsedAlarm = DateTime.tryParse(event.alarmTime);
+        DateTime? parsedAlarm = DateTime.tryParse(event.alarmTime)?.toLocal();
+        if (parsedAlarm == null) {
+          try {
+            parsedAlarm = DateFormat("yyyy-MM-dd HH:mm").parse(event.alarmTime, true).toLocal();
+          } catch (_) {}
+        }
 
-        // Schedule only if alarm time is valid AND in the future
-        if (parsedAlarm != null && parsedAlarm.isAfter(DateTime.now())) {
+        if (parsedAlarm != null && parsedAlarm.isAfter(now)) {
           try {
             await AlarmHelper.scheduleEventAlarm(event);
             debugPrint("⏰ Successfully scheduled alarm for: ${event.title} at $parsedAlarm");
@@ -158,7 +165,7 @@ class AllEventsController extends ChangeNotifier {
             debugPrint("❌ Failed to set alarm for ${event.title}: $alarmError");
           }
         } else {
-          debugPrint("⚠️ Alarm skipped for ${event.title}. Time past or invalid: ${event.alarmTime}");
+          debugPrint("⚠️ Alarm skipped for ${event.title}. Time past or invalid: ${event.alarmTime} (Parsed: $parsedAlarm, Now: $now)");
         }
       }
     }

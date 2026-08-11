@@ -249,7 +249,7 @@ class HomeController extends ChangeNotifier {
       ..addAll(fetchedEvents)
       ..addAll(googleEvents);
 
-    debugPrint("✅ TODAYS EVENTS LENGTH: ${todaysEvents.length}");
+    debugPrint("✅ TODAYS EVENTS LENGTH: ${todaysEvents.first.description}");
     notifyListeners();
   }
 
