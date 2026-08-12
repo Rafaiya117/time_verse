@@ -1,3 +1,5 @@
+import 'package:time_verse/features/all_events/model/event_model.dart';
+
 class EditEventModel {
   final String? id;
   final String? title;
@@ -65,7 +67,6 @@ class EditEventModel {
     };
   }
 
-  /// Helper to convert UI display string to API repeat value
   static String selectedRepeatToApi(String? value) {
     if (value == null) return "1 day";
     final val = value.toLowerCase();
@@ -77,6 +78,34 @@ class EditEventModel {
   }
 }
 
+// Extension to map EditEventModel -> EventModel cleanly
+extension EditEventModelMapper on EditEventModel {
+  EventModel toEventModel({String? overrideAlarmTime}) {
+    final dateString = date != null
+        ? "${date!.year.toString().padLeft(4, '0')}-${date!.month.toString().padLeft(2, '0')}-${date!.day.toString().padLeft(2, '0')}"
+        : '';
+
+    return EventModel(
+      id: int.tryParse(id ?? '') ?? 0,
+      userName: '',
+      title: title ?? '',
+      description: note ?? '',
+      date: dateString,
+      startTime: startTime ?? '',
+      endTime: endTime ?? '',
+      location: (location == null || location!.isEmpty) ? "unknown" : location!,
+      alarmTime: overrideAlarmTime ?? reminder ?? '',
+      isCompleted: false,
+      isFavorite: false,
+      createdAt: '',
+      user: 0,
+      category: category?.toString(),
+      category_name: category?.toString(),
+    );
+  }
+}
+
+  /// Helper to convert UI display string to API repeat value
 class EditCategoryModel {
   final String id;
   final String name;

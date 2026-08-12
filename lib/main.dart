@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:alarm/alarm.dart';
@@ -104,7 +106,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool hasConnection = true;
-  StreamSubscription<AlarmSet>? _ringSubscription;
+  StreamSubscription<AlarmSettings>? _ringSubscription;
   @override
   void initState() {
     super.initState();
@@ -116,35 +118,28 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    // _ringSubscription = Alarm.ringing.listen((alarmSet) {
-    //   if (alarmSet.alarms.isEmpty) return;
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     appRouter.push('/alarm');
-    //   });
-    // });
+  // _ringSubscription = Alarm.ringing.listen((alarmSet) {
+  // if (alarmSet.alarms.isEmpty) return;
+  // final alarm = alarmSet.alarms.first;
 
-  //   _ringSubscription = Alarm.ringing.listen((alarmSet) {
-  //     if (alarmSet.alarms.isEmpty || _isAlarmLaunch) return;
-
-  //     _isAlarmLaunch = true;
-  //     final alarm = alarmSet.alarms.first;
-
-  //     WidgetsBinding.instance.addPostFrameCallback((_) {
-  //       appRouter.go('/alarm', extra: alarm);
+  // WidgetsBinding.instance.addPostFrameCallback((_) {
+  //   if (!mounted) return;
+  //   // Always navigate using push
+  //   appRouter.push('/alarm', extra: alarm);
   //     });
   //   });
-  // }
-
-  _ringSubscription = Alarm.ringing.listen((alarmSet) {
-  if (alarmSet.alarms.isEmpty) return;
-  final alarm = alarmSet.alarms.first;
-
+   _ringSubscription = Alarm.ringStream.stream.listen((alarmSettings) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (!mounted) return;
-    // Always navigate using push
-    appRouter.push('/alarm', extra: alarm);
-      });
-    });
+    
+    // Prevent duplicate routing if already on the alarm screen
+    final currentRoute = appRouter.routerDelegate.currentConfiguration.uri.toString();
+    if (currentRoute != '/alarm') {
+      appRouter.push('/alarm', extra: alarmSettings);
+    }
+  });
+});
+  
   }
 
   @override

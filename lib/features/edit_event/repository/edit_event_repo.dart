@@ -89,13 +89,13 @@ class EditEventRepository {
     }
   }
 
-  /// Update event via API
-  Future<bool> updateEvent(String eventId, EditEventModel eventData) async {
+  /// Update event via API (Returns response map or null)
+  Future<Map<String, dynamic>?> updateEvent(String eventId, EditEventModel eventData) async {
     try {
       final int? id = int.tryParse(eventId);
       if (id == null) {
         debugPrint('⚠️ Invalid event ID: $eventId');
-        return false;
+        return null;
       }
 
       final authService = AuthService();
@@ -120,15 +120,19 @@ class EditEventRepository {
       debugPrint(
         '✅ Event updated successfully with status: ${response.statusCode}',
       );
-      return response.statusCode == 200 || response.statusCode == 204;
+      
+      if ((response.statusCode == 200 || response.statusCode == 204) && response.data is Map) {
+        return Map<String, dynamic>.from(response.data);
+      }
+      return {};
     } on DioException catch (e) {
       debugPrint(
         '❌ Dio Error updating event: ${e.response?.statusCode} - ${e.response?.data}',
       );
-      return false;
+      return null;
     } catch (e) {
       debugPrint('⚠️ Error updating event in repo: $e');
-      return false;
+      return null;
     }
   }
 }

@@ -90,7 +90,8 @@ class AllEventsController extends ChangeNotifier {
   }
 
   // ------------------ Fetch events from API ------------------ //
-  Future<void> fetchAllEvents() async {
+  // in all event controller
+Future<void> fetchAllEvents() async {
   try {
     final authService = AuthService();
     final token = await authService.getToken();
@@ -146,26 +147,30 @@ class AllEventsController extends ChangeNotifier {
 
     // Re-schedule alarms
     await Alarm.stopAll();
-    final now = DateTime.now();
+    
+    // Add 1-minute buffer to catch alarms triggering right as data loads
+    final nowWithBuffer = DateTime.now().subtract(const Duration(minutes: 1));
 
     for (final event in _events) {
       if (event.alarmTime.isNotEmpty) {
-        DateTime? parsedAlarm = DateTime.tryParse(event.alarmTime)?.toLocal();
-        if (parsedAlarm == null) {
-          try {
-            parsedAlarm = DateFormat("yyyy-MM-dd HH:mm").parse(event.alarmTime, true).toLocal();
-          } catch (_) {}
-        }
+        final cleanIso = event.alarmTime.trim().replaceAll(RegExp(r'Z$'), '');
+        final parsedAlarm = DateTime.tryParse(cleanIso);
 
-        if (parsedAlarm != null && parsedAlarm.isAfter(now)) {
+        if (parsedAlarm != null && parsedAlarm.isAfter(nowWithBuffer)) {
           try {
             await AlarmHelper.scheduleEventAlarm(event);
-            debugPrint("⏰ Successfully scheduled alarm for: ${event.title} at $parsedAlarm");
+            debugPrint(
+              "⏰ Successfully scheduled alarm for: ${event.title} at $parsedAlarm",
+            );
           } catch (alarmError) {
-            debugPrint("❌ Failed to set alarm for ${event.title}: $alarmError");
+            debugPrint(
+              "❌ Failed to set alarm for ${event.title}: $alarmError",
+            );
           }
         } else {
-          debugPrint("⚠️ Alarm skipped for ${event.title}. Time past or invalid: ${event.alarmTime} (Parsed: $parsedAlarm, Now: $now)");
+          debugPrint(
+            "⚠️ Alarm skipped for ${event.title}. Time past or invalid: ${event.alarmTime} (Parsed: $parsedAlarm, Now: ${DateTime.now()})",
+          );
         }
       }
     }

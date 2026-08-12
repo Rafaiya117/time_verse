@@ -106,7 +106,8 @@ class HomeController extends ChangeNotifier {
     _isInitialized = true;
 
     /// Load profile FIRST
-    profileController.loadUserProfile().then((_) async {
+    // in home controller
+profileController.loadUserProfile().then((_) async {
       await fetchEvents();
       await todaysfetchEvents(profileController);
       debugPrint("TODAYS EVENTS LENGTH: ${todaysEvents.length}");
@@ -114,16 +115,17 @@ class HomeController extends ChangeNotifier {
       final userId = profileController.currentUser?.id;
       if (userId == null) return;
       if (await _repository.alarmsAlreadyScheduled(userId)) return;
+
+      final now = DateTime.now();
       for (final event in todaysEvents) {
         if (event.alarmTime.isNotEmpty) {
-          await AlarmHelper.scheduleEventAlarm(event);
-          NotificationService.scheduleNotification(
-            id: event.id,
-            title: event.title,
-            body: event.description,
-            alarmTime: DateTime.parse(event.alarmTime),
-            payload: event.id,
-          );
+          // Clean ISO string consistently
+          final cleanIso = event.alarmTime.trim().replaceAll(RegExp(r'Z$'), '');
+          final parsedAlarm = DateTime.tryParse(cleanIso);
+
+          if (parsedAlarm != null && parsedAlarm.isAfter(now)) {
+            await AlarmHelper.scheduleEventAlarm(event);
+          }
         }
       }
       await _repository.markAlarmsScheduled(userId);
