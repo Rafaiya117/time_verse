@@ -18,13 +18,24 @@ class CalendarController extends ChangeNotifier {
   DateTime? get selectedDay => model.selectedDay;
   final Dio _dio = Dio();
 
+  // void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  //   model
+  //     ..selectedDay = selectedDay
+  //     ..focusedDay = focusedDay;
+
+  //   fetchUpcomingEvents(date: selectedDay);
+  //   notifyListeners();
+  // }
+
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     model
       ..selectedDay = selectedDay
       ..focusedDay = focusedDay;
 
-    fetchUpcomingEvents(date: selectedDay);
+    _events.clear();
     notifyListeners();
+
+    fetchUpcomingEvents(date: selectedDay);
   }
 
   final List<EventModel> _events = [];

@@ -1,47 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/custom_header.dart';
+import 'package:time_verse/features/settings/notification/controller/notification_controller.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<NotificationSettingsController>();
+
     return Scaffold(
       body: Stack(
         children: [
-          // Positioned.fill(
-          //   child: Image.asset(
-          //     'assets/images/mountain_bg.png',
-          //     fit: BoxFit.cover,
-          //   ),
-          // ),
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
-                // gradient: LinearGradient(
-                //   begin: Alignment.topCenter,
-                //   end: Alignment.bottomCenter,
-                //   colors: [
-                //     // ignore: deprecated_member_use
-                //     const Color(0xFF020813).withOpacity(0.95), 
-                //     // ignore: deprecated_member_use
-                //     const Color(0xFF0A1120).withOpacity(0.85),
-                //     // ignore: deprecated_member_use
-                //     const Color(0xFF0D1527).withOpacity(0.40), 
-                //   ],
-                // ),
-              ),
+              decoration: const BoxDecoration(),
             ),
           ),
           SafeArea(
             child: Column(
               children: [
                 CustomHeaderBar(
-                  title: 'Notification',
-                  leftSpacing: 90.w,
-                  rightSpacing: 79.w,
+                  title: 'Notification Settings',
+                  leftSpacing: 60.w,
+                  rightSpacing: 50.w,
                 ),
                 SizedBox(height: 24.h),
                 Expanded(
@@ -49,23 +34,64 @@ class NotificationsScreen extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
                     children: [
-                      const NotificationCard(
-                        title: 'Reminder Scheduled',
-                        description: 'Your mindfulness reminder has been scheduled for tonight.',
-                        iconWidget: CustomCalendarIcon(),
+                      // --- MAIN ALERTS TOGGLES ---
+                      _buildSectionTitle('Alert Preferences'),
+                      SizedBox(height: 12.h),
+                      _buildSwitchTile(
+                        context: context,
+                        title: 'Allow Notifications',
+                        subtitle: 'Receive push & event reminder alerts',
+                        value: controller.allowNotifications,
+                        icon: Icons.notifications_active_outlined,
+                        onChanged: controller.setAllowNotifications,
                       ),
-                      SizedBox(height: 16.h),
-                      const NotificationCard(
-                        title: 'Premium Activated',
-                        description: 'Your premium membership has been successfully activated.',
-                        iconWidget: CustomDollarIcon(),
+                      SizedBox(height: 12.h),
+                      _buildSwitchTile(
+                        context: context,
+                        title: 'Allow Alarms',
+                        subtitle: 'Trigger full screen exact time alarms',
+                        value: controller.allowAlarms,
+                        icon: Icons.alarm,
+                        onChanged: controller.setAllowAlarms,
                       ),
-                      SizedBox(height: 16.h),
-                      const NotificationCard(
-                        title: 'New AI Wisdom Generated',
-                        description: 'Your personalized cosmic quote is ready to explore and save.',
-                        iconWidget: CustomSparkIcon(),
+                      SizedBox(height: 12.h),
+                      _buildSwitchTile(
+                        context: context,
+                        title: 'Vibration',
+                        subtitle: 'Vibrate on alarms and notifications',
+                        value: controller.vibrate,
+                        icon: Icons.vibration,
+                        onChanged: controller.setVibrate,
                       ),
+
+                      SizedBox(height: 24.h),
+
+                      // --- VOLUME CONTROL SLIDERS ---
+                      _buildSectionTitle('Audio Volume'),
+                      SizedBox(height: 12.h),
+                      _buildSliderTile(
+                        context: context,
+                        title: 'Notification Volume',
+                        value: controller.notificationVolume,
+                        icon: Icons.volume_down_outlined,
+                        onChanged: controller.setNotificationVolume,
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildSliderTile(
+                        context: context,
+                        title: 'Alarm Volume',
+                        value: controller.alarmVolume,
+                        icon: Icons.alarm_add_sharp,
+                        onChanged: controller.setAlarmVolume,
+                      ),
+
+                      SizedBox(height: 24.h),
+
+                      // --- SOUND SELECTION ---
+                      _buildSectionTitle('Sound Profile'),
+                      SizedBox(height: 12.h),
+                      _buildRingtoneSelector(context: context),
+                      SizedBox(height: 24.h),
                     ],
                   ),
                 ),
@@ -76,128 +102,194 @@ class NotificationsScreen extends StatelessWidget {
       ),
     );
   }
-}
 
+  // Section Header Text Helper
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFFFFB703),
+      ),
+    );
+  }
 
-class NotificationCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final Widget iconWidget;
-
-  const NotificationCard({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.iconWidget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  // Switch Settings Item Card
+  Widget _buildSwitchTile({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required IconData icon,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Theme.of(context).brightness == Brightness.dark?const Color(0xFF091222).withOpacity(0.85): Color(0xFFFFFFFF),
+        color: isDarkMode ? const Color(0xFF091222).withOpacity(0.85) : Colors.white,
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
-          // ignore: deprecated_member_use
           color: const Color(0xFFFFB703).withOpacity(0.3),
           width: 1.1,
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          iconWidget,
-          SizedBox(width: 16.w),
+          Icon(icon, color: const Color(0xFFFFB703), size: 22.sp),
+          SizedBox(width: 14.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
                   style: GoogleFonts.outfit(
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).brightness == Brightness.dark?Colors.white:Colors.black,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
-                SizedBox(height: 6.h),
+                SizedBox(height: 2.h),
                 Text(
-                  description,
+                  subtitle,
                   style: GoogleFonts.outfit(
-                    fontSize: 13.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
-                    height: 1.35,
-                    color: const Color(0xFF9CA3AF), // Clean neutral ash tone text body
+                    color: const Color(0xFF9CA3AF),
                   ),
                 ),
               ],
+            ),
+          ),
+          Switch(
+            value: value,
+            activeColor: const Color(0xFFFFB703),
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Volume Slider Settings Item Card
+  Widget _buildSliderTile({
+    required BuildContext context,
+    required String title,
+    required double value,
+    required IconData icon,
+    required ValueChanged<double> onChanged,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF091222).withOpacity(0.85) : Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: const Color(0xFFFFB703).withOpacity(0.3),
+          width: 1.1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: const Color(0xFFFFB703), size: 20.sp),
+              SizedBox(width: 12.w),
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${(value * 100).toInt()}%',
+                style: GoogleFonts.outfit(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF9CA3AF),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 4.h,
+              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 7.r),
+            ),
+            child: Slider(
+              value: value,
+              activeColor: const Color(0xFFFFB703),
+              inactiveColor: const Color(0xFF9CA3AF).withOpacity(0.3),
+              onChanged: onChanged,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-// MARK: - Specialized Icon Components
+  // Sound Picker Selector Card
+  Widget _buildRingtoneSelector({required BuildContext context}) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final controller = context.read<NotificationSettingsController>();
 
-class CustomCalendarIcon extends StatelessWidget {
-  const CustomCalendarIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // Custom modern minimal Calendar block graphic
-    return Container(
-      width: 28.w,
-      height: 28.h,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2563EB).withOpacity(0.2),
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Icon(Icons.calendar_month, color: const Color(0xFF60A5FA), size: 18.sp),
-    );
-  }
-}
-
-class CustomDollarIcon extends StatelessWidget {
-  const CustomDollarIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 28.w,
-      height: 28.h,
-      child: Center(
-        child: Text(
-          '\$',
-          style: GoogleFonts.outfit(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFFFFB703), // Matching direct amber accent color spec
+    return InkWell(
+      onTap: () => controller.openDeviceSoundSettings(),
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        decoration: BoxDecoration(
+          color: isDarkMode
+              ? const Color(0xFF091222).withOpacity(0.85)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: const Color(0xFFFFB703).withOpacity(0.3),
+            width: 1.1,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class CustomSparkIcon extends StatelessWidget {
-  const CustomSparkIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 28.w,
-      height: 28.h,
-      child: Center(
-        child: Icon(
-          Icons.start,
-          color: const Color(0xFFFFB703), // Cosmic four-point star accent
-          size: 20.sp,
+        child: Row(
+          children: [
+            Icon(Icons.music_note, color: const Color(0xFFFFB703), size: 22.sp),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Alarm Sound',
+                    style: GoogleFonts.outfit(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    'Configure in Device Settings',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.open_in_new,
+              color: const Color(0xFFFFB703),
+              size: 20.sp,
+            ),
+          ],
         ),
       ),
     );

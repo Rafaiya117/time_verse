@@ -104,10 +104,7 @@ class HomeController extends ChangeNotifier {
   void initOnce(ProfileController profileController) {
     if (_isInitialized) return;
     _isInitialized = true;
-
-    /// Load profile FIRST
-    // in home controller
-profileController.loadUserProfile().then((_) async {
+    profileController.loadUserProfile().then((_) async {
       await fetchEvents();
       await todaysfetchEvents(profileController);
       debugPrint("TODAYS EVENTS LENGTH: ${todaysEvents.length}");

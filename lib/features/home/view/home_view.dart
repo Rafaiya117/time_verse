@@ -35,7 +35,8 @@ class HomeView extends StatelessWidget {
         homeController.initOnce(profileController);
         homeController.fetchAIMooodReflection();
         homeController.updateIndexFromRoute(currentRouteUri);
-        homeController.todaysfetchEvents(profileController);
+        homeController.selectDate(DateTime.now(), profileController);
+        //homeController.todaysfetchEvents(profileController);
       });
     }
 

@@ -13,7 +13,7 @@ class FancyCalendarView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<CalendarController>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     const goldColor = Color(0xFFFFA500); 
     const whiteColor = Colors.white; 
 
@@ -52,27 +52,55 @@ class FancyCalendarView extends StatelessWidget {
         // --- CUSTOM BUILDERS (HEADER & WEEKDAYS) ---
         calendarBuilders: CalendarBuilders(
           headerTitleBuilder: (context, date) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _monthName(date.month),
-                  style: GoogleFonts.outfit(
-                    color: Color(0xFFF5B301), 
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w500, 
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () async {
+                final selectedDate = await showDatePicker(
+                  context: context,
+                  initialDate: controller.focusedDay,
+                  firstDate: DateTime(2020, 1, 1),
+                  lastDate: DateTime(2030, 12, 31),
+                  initialDatePickerMode: DatePickerMode.year, // Defaults to year/month view directly
+                );
+
+                if (selectedDate != null) {
+                  // Update focusedDay via controller so TableCalendar updates its view
+                  controller.onDaySelected(selectedDate, selectedDate);
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _monthName(date.month),
+                        style: GoogleFonts.outfit(
+                          color: const Color(0xFFF5B301), 
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w500, 
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Icon(
+                        Icons.arrow_drop_down,
+                        color: const Color(0xFFF5B301),
+                        size: 24.sp,
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  '${date.year}',
-                  style: GoogleFonts.outfit(
-                    color: Color(0xFFF5B301), 
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
+                  SizedBox(height: 2.h),
+                  Text(
+                    '${date.year}',
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xFFF5B301), 
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
           
