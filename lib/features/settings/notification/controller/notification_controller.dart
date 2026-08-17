@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:time_verse/features/settings/notification/model/notification_model.dart';
 import 'package:android_intent_plus/android_intent.dart';
@@ -15,6 +14,7 @@ class NotificationSettingsController extends ChangeNotifier {
   double get notificationVolume => _settings.notificationVolume;
   double get alarmVolume => _settings.alarmVolume;
   String get selectedRingtone => _settings.selectedRingtone;
+  int snoozeDurationMinutes = 5;
 
   // Setters / Actions
   void setAllowNotifications(bool val) {
@@ -44,6 +44,12 @@ class NotificationSettingsController extends ChangeNotifier {
 
   void setSelectedRingtone(String ringtone) {
     _settings.selectedRingtone = ringtone;
+    notifyListeners();
+  }
+
+
+  void setSnoozeDuration(int minutes) {
+    snoozeDurationMinutes = minutes;
     notifyListeners();
   }
 

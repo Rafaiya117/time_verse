@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:time_verse/config/app_route/app_route.dart';
 import 'package:time_verse/core/utils/colors.dart';
+import 'package:time_verse/features/settings/notification/controller/notification_controller.dart';
 
 // class ExampleAlarmRingScreen extends StatefulWidget {
 //   const ExampleAlarmRingScreen({required this.alarmSettings, super.key});
@@ -132,24 +134,24 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: 20.h),
+                    //SizedBox(height: 16.h),
                     // Bell Header Icon
-                    Icon(
-                      Icons.notifications_active,
-                      color: const Color(0xFFFFB703),
-                      size: 56.sp,
-                    ),
-                    SizedBox(height: 12.h),
+                    // Icon(
+                    //   Icons.notifications_active,
+                    //   color: const Color(0xFFFFB703),
+                    //   size: 40.sp,
+                    // ),
+                    // SizedBox(height: 12.h),
                     // Subtitle Title Text Layer
-                    Text(
-                      'ALARM RINGING FOR',
-                      style: GoogleFonts.cormorant(
-                        color: const Color(0xFFFFB703),
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 5.5,
-                      ),
-                    ),
+                    // Text(
+                    //   'ALARM RINGING FOR',
+                    //   style: GoogleFonts.cormorant(
+                    //     color: const Color(0xFFFFB703),
+                    //     fontSize: 15.sp,
+                    //     fontWeight: FontWeight.w600,
+                    //     letterSpacing: 5.5,
+                    //   ),
+                    // ),
                     SizedBox(height: 12.h),
                     // Heading Main dynamic Title
                     Text(
@@ -180,7 +182,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       formattedTime,
                       style: GoogleFonts.playfairDisplay(
                         color: const Color(0xFFFF9F1C),
-                        fontSize: 68.sp,
+                        fontSize: 60.sp,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -1,
                       ),
@@ -207,7 +209,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
                       decoration: BoxDecoration(
-                        color:  isDarkMode?Color(0xFF041124):Colors.white.withOpacity(0.85),
+                        color:  Colors.transparent,
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -293,16 +295,30 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                             height: 50.h,
                             child: OutlinedButton(
                               onPressed: () async {
+                                final snoozeMinutes = context.read<NotificationSettingsController>().snoozeDurationMinutes;
                                 await Alarm.set(
                                   alarmSettings: widget.alarmSettings.copyWith(
                                     dateTime: DateTime.now().add(
-                                      const Duration(minutes: 1),
+                                      Duration(
+                                        minutes: snoozeMinutes,
+                                      ), // Uses dynamic configured duration
                                     ),
                                   ),
                                 );
                                 if (!mounted) return;
                                 appRouter.go('/home');
                               },
+                              // onPressed: () async {
+                              //   await Alarm.set(
+                              //     alarmSettings: widget.alarmSettings.copyWith(
+                              //       dateTime: DateTime.now().add(
+                              //         const Duration(minutes: 1),
+                              //       ),
+                              //     ),
+                              //   );
+                              //   if (!mounted) return;
+                              //   appRouter.go('/home');
+                              // },
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
                                   color: isDarkMode ? Colors.white30 : const Color(0xFFFFB800),

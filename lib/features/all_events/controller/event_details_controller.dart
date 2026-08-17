@@ -74,7 +74,7 @@ class EventController extends ChangeNotifier {
     debugPrint('📸 Generated pure local share file path: ${file.path}');
     await Share.shareXFiles(
       [XFile(file.path)],
-      text: '✨ Check out this inspiring insight:\n“ $sharedContent ”',
+      text: '✨Inspired by InfiniQuote',
     );
   } catch (e) {
     debugPrint('⚠️ Local social media sharing failed: $e');

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -45,6 +47,8 @@ class NotificationsScreen extends StatelessWidget {
                         icon: Icons.notifications_active_outlined,
                         onChanged: controller.setAllowNotifications,
                       ),
+                      SizedBox(height: 12.h),
+                      _buildSnoozeDurationTile(context: context),
                       SizedBox(height: 12.h),
                       _buildSwitchTile(
                         context: context,
@@ -294,6 +298,80 @@ class NotificationsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildSnoozeDurationTile({required BuildContext context}) {
+    final controller = context.watch<NotificationSettingsController>();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF091222).withOpacity(0.85): Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: const Color(0xFFFFB703).withOpacity(0.3),
+          width: 1.1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.snooze, color: const Color(0xFFFFB703), size: 22.sp),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Snooze Duration',
+                  style: GoogleFonts.outfit(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'Delay duration when snoozing an alarm',
+                  style: GoogleFonts.outfit(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<int>(
+              value: controller.snoozeDurationMinutes,
+              dropdownColor: isDarkMode ? const Color(0xFF091222): Colors.white,
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: const Color(0xFFFFB703),
+                size: 22.sp,
+              ),
+              style: GoogleFonts.outfit(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFFFB703),
+              ),
+              items: [5, 10, 15, 20, 30].map((int minutes) {
+                return DropdownMenuItem<int>(
+                  value: minutes,
+                  child: Text('$minutes min'),
+                );
+              }).toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  controller.setSnoozeDuration(val);
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // MARK: - Structural Design Dividers
@@ -308,9 +386,7 @@ class GradientDivider extends StatelessWidget {
       height: 1.h,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isLeft
-              ? [Colors.transparent, const Color(0xFFFFB703).withOpacity(0.5)]
-              : [const Color(0xFFFFB703).withOpacity(0.5), Colors.transparent],
+          colors: isLeft ? [Colors.transparent, const Color(0xFFFFB703).withOpacity(0.5)]: [const Color(0xFFFFB703).withOpacity(0.5), Colors.transparent],
         ),
       ),
     );
