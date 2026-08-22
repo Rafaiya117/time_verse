@@ -15,6 +15,7 @@ import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 import 'package:time_verse/features/calender/controller/calender_controller.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
+import 'package:time_verse/features/calender/widget/custom_repeate_widget.dart';
 import 'package:time_verse/features/calender/widget/time_picker_custom_widget.dart';
 
 class AddEventPage extends StatelessWidget {
@@ -404,7 +405,7 @@ class AddEventPage extends StatelessWidget {
                 context,
                 child: Consumer<AddEventController>(
                   builder: (context, controller, _) {
-                    final currentRepeat = controller.selectedRepeat ?? 'Don\'t repeat';
+                    final currentRepeat = controller.displayRepeatText;
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
@@ -413,12 +414,29 @@ class AddEventPage extends StatelessWidget {
                           builder: (BuildContext context) {
                             return StatefulBuilder(
                               builder: (context, setModalState) {
-                                Widget buildRadioRow(String label) {
-                                  final isCurrent = currentRepeat == label;
+                                Widget buildRadioRow(
+                                  String label, {
+                                  bool isCustom = false,
+                                }) {
+                                  final bool isCurrent = isCustom
+                                      ? controller.selectedRepeat == 'Custom'
+                                      : controller.selectedRepeat == label ||
+                                            (controller.selectedRepeat ==
+                                                    null &&
+                                                label == "Don't repeat");
+
                                   return InkWell(
                                     onTap: () {
-                                      controller.selectRepeat(label);
-                                      Navigator.pop(context);
+                                      if (isCustom) {
+                                        Navigator.pop(context);
+                                        showCustomRepeatDialog(
+                                          context,
+                                          controller,
+                                        );
+                                      } else {
+                                        controller.selectRepeat(label);
+                                        Navigator.pop(context);
+                                      }
                                     },
                                     child: Padding(
                                       padding: EdgeInsets.symmetric(
@@ -442,7 +460,11 @@ class AddEventPage extends StatelessWidget {
                                           ),
                                           SizedBox(width: 16.w),
                                           Text(
-                                            label,
+                                            isCustom &&
+                                                    controller.selectedRepeat ==
+                                                        'Custom'
+                                                ? currentRepeat
+                                                : label,
                                             style: GoogleFonts.inter(
                                               color: Colors.white,
                                               fontSize: 16.sp,
@@ -454,6 +476,7 @@ class AddEventPage extends StatelessWidget {
                                     ),
                                   );
                                 }
+
                                 return Dialog(
                                   backgroundColor: const Color(0xFF15181F),
                                   shape: RoundedRectangleBorder(
@@ -480,7 +503,8 @@ class AddEventPage extends StatelessWidget {
                                         SizedBox(height: 6.h),
                                         Text(
                                           currentRepeat == 'Don\'t repeat'
-                                          ? 'This event doesn\'t repeat.': 'Repeats $currentRepeat',
+                                              ? 'This event doesn\'t repeat.'
+                                              : 'Repeats $currentRepeat',
                                           style: GoogleFonts.inter(
                                             color: Colors.grey.shade400,
                                             fontSize: 14.sp,
@@ -508,6 +532,14 @@ class AddEventPage extends StatelessWidget {
                                           height: 1,
                                         ),
                                         buildRadioRow('Every 1 year'),
+                                        Divider(
+                                          color: Colors.grey.shade800,
+                                          height: 1,
+                                        ),
+                                        buildRadioRow(
+                                          'Custom...',
+                                          isCustom: true,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -536,7 +568,8 @@ class AddEventPage extends StatelessWidget {
                                   'Repeat',
                                   style: GoogleFonts.inter(
                                     color: isDarkMode
-                                    ? Colors.white: Colors.black,
+                                        ? Colors.white
+                                        : Colors.black,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -546,7 +579,8 @@ class AddEventPage extends StatelessWidget {
                                   currentRepeat,
                                   style: GoogleFonts.inter(
                                     color: isDarkMode
-                                    ? Colors.grey.shade500: Colors.grey.shade400,
+                                        ? Colors.grey.shade500
+                                        : Colors.grey.shade400,
                                     fontSize: 13.sp,
                                   ),
                                 ),

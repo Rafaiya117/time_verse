@@ -47,23 +47,25 @@ class AddEventRepository {
     String? categoryName,
     bool isCompleted = false,
     String? note,
-    String? repeat, // <-- Added parameter
+    String? repeat,
   }) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final url = "${baseUrl}api/v1/event/create/";
 
-    // Map UI label to backend format
+    // Map UI label/custom values to backend repeat string format
     String formattedRepeat = "1 day";
-    if (repeat != null) {
+    if (repeat != null && repeat.isNotEmpty) {
       final lower = repeat.toLowerCase();
-      if (lower.contains("week")) {
-        formattedRepeat = "1 week";
+      if (lower.startsWith("every ")) {
+        formattedRepeat = repeat.substring(6).trim();
+      } else if (lower.contains("week")) {
+        formattedRepeat = repeat.contains(RegExp(r'\d+')) ? repeat : "1 week";
       } else if (lower.contains("month")) {
-        formattedRepeat = "1 month";
+        formattedRepeat = repeat.contains(RegExp(r'\d+')) ? repeat : "1 month";
       } else if (lower.contains("year")) {
-        formattedRepeat = "1 year";
+        formattedRepeat = repeat.contains(RegExp(r'\d+')) ? repeat : "1 year";
       } else if (lower.contains("day")) {
-        formattedRepeat = "1 day";
+        formattedRepeat = repeat.contains(RegExp(r'\d+')) ? repeat : "1 day";
       } else {
         formattedRepeat = repeat;
       }
@@ -75,13 +77,13 @@ class AddEventRepository {
       "start_time": startTime,
       "end_time": endTime,
       "alarm_time": alarmTime,
-      "repeat": formattedRepeat, // <-- Added to body
+      "repeat": formattedRepeat,
       "is_completed": isCompleted,
       if (location?.trim().isNotEmpty ?? false) "location": location!.trim(),
       if (categoryName?.trim().isNotEmpty ?? false)
-      "category_name": categoryName!.trim(),
+        "category_name": categoryName!.trim(),
       if (note?.trim().isNotEmpty ?? false)
-      "type_event_description": note!.trim(),
+        "type_event_description": note!.trim(),
     };
 
     final response = await _dio.post(
@@ -104,7 +106,7 @@ class AddEventRepository {
             startTime: startTime,
             endTime: endTime,
             description: note,
-            location: location, 
+            location: location,
             date: date,
           );
         }

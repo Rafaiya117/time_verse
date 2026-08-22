@@ -23,6 +23,35 @@ class AddEventController extends ChangeNotifier {
   String? selectedCategory;
   String? selectedRepeat;
 
+  int customRepeatCount = 1;
+  String customRepeatUnit = 'week'; // 'day', 'week', 'month', 'year'
+  List<String> selectedDays = ['S']; // 'S', 'M', 'T', 'W', 'T', 'F', 'S'
+  
+  String repeatEndType = 'Never'; // 'Never', 'On', 'After'
+  
+  // Dynamic custom end date state
+  DateTime? _customEndDate;
+
+  DateTime get customEndDate {
+    if (_customEndDate != null) return _customEndDate!;
+    
+    // Dynamic fallback based on dateController text or current date (+30 days)
+    if (dateController.text.isNotEmpty) {
+      final parsedDate = DateTime.tryParse(dateController.text);
+      if (parsedDate != null) {
+        return parsedDate.add(const Duration(days: 30));
+      }
+    }
+    return DateTime.now().add(const Duration(days: 30));
+  }
+
+  set customEndDate(DateTime value) {
+    _customEndDate = value;
+    notifyListeners();
+  }
+
+  int customOccurrences = 1;
+
   // Options List
   final List<String> repeatOptions = [
     "Don't repeat",
@@ -30,6 +59,7 @@ class AddEventController extends ChangeNotifier {
     'Every 1 week',
     'Every 1 month',
     'Every 1 year',
+    'Custom...',
   ];
 
   static const Map<String, String?> _repeatMap = {
@@ -40,8 +70,46 @@ class AddEventController extends ChangeNotifier {
     'Every 1 year': 'Every 1 year',
   };
 
-  String? get apiRepeatValue => _repeatMap[selectedRepeat] ?? selectedRepeat;
+  void selectRepeat(String label) {
+    selectedRepeat = label;
+    notifyListeners();
+  }
 
+  void setCustomRepeat({
+    required int count,
+    required String unit,
+    required List<String> days,
+    required String endType,
+    required DateTime endDate,
+    required int occurrences,
+  }) {
+    customRepeatCount = count;
+    customRepeatUnit = unit;
+    selectedDays = days;
+    repeatEndType = endType;
+    _customEndDate = endDate;
+    customOccurrences = occurrences;
+    selectedRepeat = 'Custom';
+    notifyListeners();
+  }
+
+  String get displayRepeatText {
+    if (selectedRepeat == 'Custom') {
+      final unitStr = customRepeatUnit.toLowerCase();
+      final plural = customRepeatCount > 1 ? 's' : '';
+      return 'Every $customRepeatCount $unitStr$plural';
+    }
+    return selectedRepeat ?? "Don't repeat";
+  }
+
+  String? get apiRepeatValue {
+    if (selectedRepeat == 'Custom') {
+      final unitStr = customRepeatUnit.toLowerCase();
+      final plural = customRepeatCount > 1 ? 's' : '';
+      return 'Every $customRepeatCount $unitStr$plural';
+    }
+    return _repeatMap[selectedRepeat] ?? selectedRepeat;
+  }
   // Text Controllers
   final titleController = TextEditingController();
   final dateController = TextEditingController();
@@ -93,12 +161,18 @@ class AddEventController extends ChangeNotifier {
     return null;
   }
 
-  Future<void> saveEvent({required BuildContext context,required String rawStart,required String rawEnd,
-  required String rawAlarm,required VoidCallback onSuccess,}) async {
+  Future<void> saveEvent({
+    required BuildContext context,
+    required String rawStart,
+    required String rawEnd,
+    required String rawAlarm,
+    required VoidCallback onSuccess,
+  }) async {
     final start = _cleanTimeStr(rawStart);
     final end = _cleanTimeStr(rawEnd);
     final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
-    final formattedAlarmISO = _formatAlarmISO(dateController.text, calculatedAlarmTime);
+    final formattedAlarmISO =
+        _formatAlarmISO(dateController.text, calculatedAlarmTime);
 
     final validationError = validateFields(
       title: titleController.text,
@@ -130,9 +204,12 @@ class AddEventController extends ChangeNotifier {
         date: _parseBackendDate(dateController.text.trim()),
         startTime: start,
         endTime: end,
-        location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
+        location: locationController.text.trim().isEmpty
+            ? null
+            : locationController.text.trim(),
         alarmTime: formattedAlarmISO,
-        categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
+        categoryName:
+            selectedCategory?.isEmpty == true ? null : selectedCategory,
         note: noteController.text.trim(),
         repeat: apiRepeatValue,
       );
@@ -142,7 +219,7 @@ class AddEventController extends ChangeNotifier {
       if (result != null) {
         final resultMap = Map<String, dynamic>.from(result);
         if (resultMap['alarm_time'] == null ||
-          resultMap['alarm_time'].toString().isEmpty) {
+            resultMap['alarm_time'].toString().isEmpty) {
           resultMap['alarm_time'] = formattedAlarmISO;
         }
 
@@ -152,7 +229,7 @@ class AddEventController extends ChangeNotifier {
         // Schedule Banner Notification
         try {
           final alarmDateTime = DateTime.tryParse(
-            resultMap['alarm_time'].toString().replaceAll('Z', ''));
+              resultMap['alarm_time'].toString().replaceAll('Z', ''));
           if (alarmDateTime != null) {
             await NotificationService.scheduleNotification(
               id: eventModel.id,
@@ -318,11 +395,7 @@ class AddEventController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectRepeat(String? repeat) {
-    selectedRepeat = repeat;
-    notifyListeners();
-  }
-
+  
   void clearFields() {
     for (var controller in _allControllers) {
       controller.clear();
