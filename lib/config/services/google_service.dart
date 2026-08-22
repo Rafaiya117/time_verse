@@ -59,6 +59,12 @@ class GoogleServices {
         UserSession().username = _currentUser!.displayName;
         UserSession().profileImageUrl = _currentUser!.photoUrl;
 
+        await AppPrefs.saveGoogleUser(
+          _currentUser!.displayName ?? '',
+          _currentUser!.email,
+          photoUrl: _currentUser!.photoUrl,
+        );
+
         if (idToken != null && serverAuthCode != null) {
           await sendTokensToApi(
             idToken: idToken,

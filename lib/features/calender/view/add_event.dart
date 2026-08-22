@@ -419,11 +419,8 @@ class AddEventPage extends StatelessWidget {
                                   bool isCustom = false,
                                 }) {
                                   final bool isCurrent = isCustom
-                                      ? controller.selectedRepeat == 'Custom'
-                                      : controller.selectedRepeat == label ||
-                                            (controller.selectedRepeat ==
-                                                    null &&
-                                                label == "Don't repeat");
+                                  ? controller.selectedRepeat == 'Custom': controller.selectedRepeat == label ||
+                                  (controller.selectedRepeat == null && label == "Don't repeat");
 
                                   return InkWell(
                                     onTap: () {
@@ -460,11 +457,7 @@ class AddEventPage extends StatelessWidget {
                                           ),
                                           SizedBox(width: 16.w),
                                           Text(
-                                            isCustom &&
-                                                    controller.selectedRepeat ==
-                                                        'Custom'
-                                                ? currentRepeat
-                                                : label,
+                                            isCustom && controller.selectedRepeat == 'Custom'? currentRepeat : label,
                                             style: GoogleFonts.inter(
                                               color: Colors.white,
                                               fontSize: 16.sp,

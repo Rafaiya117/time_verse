@@ -106,7 +106,7 @@ class HomeView extends StatelessWidget {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: isDarkMode ? AppColors.text_color: AppColors.heading_color,
+                                  color: isDarkMode ? AppColors.text_color : AppColors.heading_color,
                                   width: 2,
                                 ),
                               ),
@@ -114,11 +114,12 @@ class HomeView extends StatelessWidget {
                                 child: Selector<ProfileController, String?>(
                                   selector: (_, controller) => controller.currentUser?.profilePicture,
                                   builder: (_, profilePicture, __) {
-                                    final imageProvider = (profilePicture != null && profilePicture.isNotEmpty)
-                                    ? NetworkImage(profilePicture) as ImageProvider<Object>
-                                    : const AssetImage(
-                                      'assets/images/profile_img.png',
-                                    ) as ImageProvider<Object>;
+                                    final String? activePhoto = (UserSession().profileImageUrl != null && UserSession().profileImageUrl!.isNotEmpty)
+                                    ? UserSession().profileImageUrl : profilePicture;
+
+                                    final imageProvider = (activePhoto != null && activePhoto.isNotEmpty)
+                                    ? NetworkImage(activePhoto) as ImageProvider<Object>
+                                    : const AssetImage('assets/images/profile_img.png',) as ImageProvider<Object>;
                                     return Image(
                                       image: imageProvider,
                                       fit: BoxFit.cover,

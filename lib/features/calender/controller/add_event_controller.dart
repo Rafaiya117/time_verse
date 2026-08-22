@@ -1,5 +1,4 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -24,18 +23,14 @@ class AddEventController extends ChangeNotifier {
   String? selectedRepeat;
 
   int customRepeatCount = 1;
-  String customRepeatUnit = 'week'; // 'day', 'week', 'month', 'year'
-  List<String> selectedDays = ['S']; // 'S', 'M', 'T', 'W', 'T', 'F', 'S'
+  String customRepeatUnit = 'week';
+  List<String> selectedDays = ['S'];
   
-  String repeatEndType = 'Never'; // 'Never', 'On', 'After'
-  
-  // Dynamic custom end date state
+  String repeatEndType = 'Never'; 
   DateTime? _customEndDate;
 
   DateTime get customEndDate {
     if (_customEndDate != null) return _customEndDate!;
-    
-    // Dynamic fallback based on dateController text or current date (+30 days)
     if (dateController.text.isNotEmpty) {
       final parsedDate = DateTime.tryParse(dateController.text);
       if (parsedDate != null) {
@@ -49,9 +44,7 @@ class AddEventController extends ChangeNotifier {
     _customEndDate = value;
     notifyListeners();
   }
-
   int customOccurrences = 1;
-
   // Options List
   final List<String> repeatOptions = [
     "Don't repeat",
@@ -64,10 +57,10 @@ class AddEventController extends ChangeNotifier {
 
   static const Map<String, String?> _repeatMap = {
     "Don't repeat": '',
-    'Every 1 day': 'Every 1 day',
-    'Every 1 week': 'Every 1 week',
-    'Every 1 month': 'Every 1 month',
-    'Every 1 year': 'Every 1 year',
+    'Every 1 day': '1 day',
+    'Every 1 week': '1 week',
+    'Every 1 month': '1 month',
+    'Every 1 year': '1 year',
   };
 
   void selectRepeat(String label) {
@@ -106,10 +99,26 @@ class AddEventController extends ChangeNotifier {
     if (selectedRepeat == 'Custom') {
       final unitStr = customRepeatUnit.toLowerCase();
       final plural = customRepeatCount > 1 ? 's' : '';
-      return 'Every $customRepeatCount $unitStr$plural';
+      return '$customRepeatCount $unitStr$plural';
     }
-    return _repeatMap[selectedRepeat] ?? selectedRepeat;
+    return _repeatMap[selectedRepeat] ?? (selectedRepeat?.replaceFirst(RegExp(r'^Every\s+', caseSensitive: false), '').trim());
   }
+
+  Map<String, dynamic>? get customRepeatMap {
+    if (selectedRepeat != 'Custom') return null;
+
+    final formattedDays = selectedDays.map((d) => d.split('-').first).toList();
+
+    return {
+      "repeat_every": customRepeatCount,
+      "repeat_unit": customRepeatUnit.toLowerCase(),
+      "repeat_days": formattedDays,
+      "ends": repeatEndType.toLowerCase(),
+      "end_date": repeatEndType == 'On' ? DateFormat('yyyy-MM-dd').format(customEndDate) : null,
+      "end_count": repeatEndType == 'After' ? customOccurrences : null,
+    };
+  }
+
   // Text Controllers
   final titleController = TextEditingController();
   final dateController = TextEditingController();
@@ -171,8 +180,7 @@ class AddEventController extends ChangeNotifier {
     final start = _cleanTimeStr(rawStart);
     final end = _cleanTimeStr(rawEnd);
     final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
-    final formattedAlarmISO =
-        _formatAlarmISO(dateController.text, calculatedAlarmTime);
+    final formattedAlarmISO = _formatAlarmISO(dateController.text, calculatedAlarmTime);
 
     final validationError = validateFields(
       title: titleController.text,
@@ -204,29 +212,24 @@ class AddEventController extends ChangeNotifier {
         date: _parseBackendDate(dateController.text.trim()),
         startTime: start,
         endTime: end,
-        location: locationController.text.trim().isEmpty
-            ? null
-            : locationController.text.trim(),
+        location: locationController.text.trim().isEmpty ? null: locationController.text.trim(),
         alarmTime: formattedAlarmISO,
-        categoryName:
-            selectedCategory?.isEmpty == true ? null : selectedCategory,
+        categoryName: selectedCategory?.isEmpty == true ? null: selectedCategory,
         note: noteController.text.trim(),
         repeat: apiRepeatValue,
+        customRepeat: customRepeatMap,
       );
 
       if (context.mounted) Navigator.pop(context);
 
       if (result != null) {
         final resultMap = Map<String, dynamic>.from(result);
-        if (resultMap['alarm_time'] == null ||
-            resultMap['alarm_time'].toString().isEmpty) {
+        if (resultMap['alarm_time'] == null || resultMap['alarm_time'].toString().isEmpty) {
           resultMap['alarm_time'] = formattedAlarmISO;
         }
 
         final eventModel = EventModel.fromMap(resultMap);
         await AlarmHelper.scheduleEventAlarm(eventModel);
-
-        // Schedule Banner Notification
         try {
           final alarmDateTime = DateTime.tryParse(
               resultMap['alarm_time'].toString().replaceAll('Z', ''));
@@ -277,9 +280,6 @@ class AddEventController extends ChangeNotifier {
     }
   }
 
-  // --- CONSOLIDATED TIME & DATE UTILITIES ---
-
-  /// Standardizes any time string (12h AM/PM or 24h) to "HH:mm" format.
   String _cleanTimeStr(String raw) {
     final clean = raw.trim();
     if (clean.isEmpty) return "00:00";
@@ -306,7 +306,6 @@ class AddEventController extends ChangeNotifier {
     if (alarmClean.isEmpty || startTimeClean.isEmpty) return startTimeClean;
     try {
       final lowerAlarm = alarmClean.toLowerCase();
-      // If user provided a direct time (e.g., "09:50 AM" or "21:50")
       if (lowerAlarm.contains(':') || lowerAlarm.contains('am') || lowerAlarm.contains('pm')) {
         return _cleanTimeStr(lowerAlarm);
       }
@@ -336,7 +335,6 @@ class AddEventController extends ChangeNotifier {
     }
   }
 
-  /// Parses date & time into a combined local DateTime object.
   DateTime _parseDateTime(String rawDate, String rawTime) {
     final cleanDate = rawDate.trim();
     final cleanTime = _cleanTimeStr(rawTime);
@@ -357,7 +355,6 @@ class AddEventController extends ChangeNotifier {
     return DateTime(parsedDate.year, parsedDate.month, parsedDate.day, hour, minute);
   }
 
-  /// Formats date and time into local ISO 8601 String (`yyyy-MM-ddTHH:mm:ss`).
   String _formatAlarmISO(String date, String time) {
     try {
       final dt = _parseDateTime(date, time);
@@ -367,7 +364,6 @@ class AddEventController extends ChangeNotifier {
     }
   }
 
-  /// Normalizes any date string into `yyyy-MM-dd`.
   String _parseBackendDate(String rawDateText) {
     for (final format in _dateFormats) {
       try {
@@ -395,7 +391,6 @@ class AddEventController extends ChangeNotifier {
     notifyListeners();
   }
 
-  
   void clearFields() {
     for (var controller in _allControllers) {
       controller.clear();
