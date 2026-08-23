@@ -126,11 +126,11 @@ class CalenderView extends StatelessWidget {
                           },
                           onDelete: () async {
                             showRemoveEventDialog(
-                                context,
+                              context,
                                 onConfirm: () async {
                                   final success = await controller.runWithLoaderAndTimer(
                                     context: context,
-                                    task: () => controller.removeEventFromList(event.id),);
+                                    task: () => controller.removeEventFromList(event),);
                                   if (success != true) {
                                     debugPrint('❌ Failed to delete event');
                                 }

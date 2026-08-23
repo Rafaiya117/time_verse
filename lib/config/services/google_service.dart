@@ -225,6 +225,7 @@ class GoogleServices {
 
           return {
             'id': eventId,
+            'google_id': event['id'],
             'title': event['summary'] ?? 'No Title',
             'description': event['description'] ?? '',
             'location': event['location'] ?? '',
@@ -241,6 +242,35 @@ class GoogleServices {
     } catch (e) {
       debugPrint("❌ Google Calendar Fetch Exception: $e");
       return [];
+    }
+  }
+
+  Future<bool> deleteGoogleCalendarEvent({
+    required String accessToken,
+    required String eventId,
+  }) async {
+    final dio = Dio();
+    try {
+      final response = await dio.delete(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events/$eventId",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        debugPrint("✅ Event deleted from Google Calendar");
+        return true;
+      } else {
+        debugPrint("⚠️ Google Calendar delete error: ${response.data}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Google Calendar Delete Exception: $e");
+      return false;
     }
   }
 }

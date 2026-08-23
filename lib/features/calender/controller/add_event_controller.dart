@@ -15,7 +15,8 @@ import 'package:time_verse/features/home/controller/home_controller.dart';
 class AddEventController extends ChangeNotifier {
   final AddEventRepository _repository;
 
-  AddEventController({AddEventRepository? repository}) : _repository = repository ?? AddEventRepository();
+  AddEventController({AddEventRepository? repository})
+      : _repository = repository ?? AddEventRepository();
 
   List<EventCategory> categories = [];
   bool isLoading = false;
@@ -25,8 +26,8 @@ class AddEventController extends ChangeNotifier {
   int customRepeatCount = 1;
   String customRepeatUnit = 'week';
   List<String> selectedDays = ['S'];
-  
-  String repeatEndType = 'Never'; 
+
+  String repeatEndType = 'Never';
   DateTime? _customEndDate;
 
   DateTime get customEndDate {
@@ -44,8 +45,9 @@ class AddEventController extends ChangeNotifier {
     _customEndDate = value;
     notifyListeners();
   }
+
   int customOccurrences = 1;
-  // Options List
+
   final List<String> repeatOptions = [
     "Don't repeat",
     'Every 1 day',
@@ -101,7 +103,9 @@ class AddEventController extends ChangeNotifier {
       final plural = customRepeatCount > 1 ? 's' : '';
       return '$customRepeatCount $unitStr$plural';
     }
-    return _repeatMap[selectedRepeat] ?? (selectedRepeat?.replaceFirst(RegExp(r'^Every\s+', caseSensitive: false), '').trim());
+    return _repeatMap[selectedRepeat] ??
+        (selectedRepeat?.replaceFirst(
+            RegExp(r'^Every\s+', caseSensitive: false), '').trim());
   }
 
   Map<String, dynamic>? get customRepeatMap {
@@ -114,7 +118,8 @@ class AddEventController extends ChangeNotifier {
       "repeat_unit": customRepeatUnit.toLowerCase(),
       "repeat_days": formattedDays,
       "ends": repeatEndType.toLowerCase(),
-      "end_date": repeatEndType == 'On' ? DateFormat('yyyy-MM-dd').format(customEndDate) : null,
+      "end_date":
+          repeatEndType == 'On' ? DateFormat('yyyy-MM-dd').format(customEndDate) : null,
       "end_count": repeatEndType == 'After' ? customOccurrences : null,
     };
   }
@@ -129,14 +134,14 @@ class AddEventController extends ChangeNotifier {
   final noteController = TextEditingController();
 
   List<TextEditingController> get _allControllers => [
-    titleController,
-    dateController,
-    startTimeController,
-    endTimeController,
-    locationController,
-    alarmTimeController,
-    noteController,
-  ];
+        titleController,
+        dateController,
+        startTimeController,
+        endTimeController,
+        locationController,
+        alarmTimeController,
+        noteController,
+      ];
 
   static final List<DateFormat> _dateFormats = [
     DateFormat("yyyy-MM-dd"),
@@ -162,7 +167,12 @@ class AddEventController extends ChangeNotifier {
     }
   }
 
-  String? validateFields({required String title,required String date,required String startTime,required String endTime,}) {
+  String? validateFields({
+    required String title,
+    required String date,
+    required String startTime,
+    required String endTime,
+  }) {
     if (title.trim().isEmpty) return "Event title is required";
     if (date.trim().isEmpty) return "Event date is required";
     if (startTime.trim().isEmpty) return "Start time is required";
@@ -180,7 +190,8 @@ class AddEventController extends ChangeNotifier {
     final start = _cleanTimeStr(rawStart);
     final end = _cleanTimeStr(rawEnd);
     final calculatedAlarmTime = _calculateAlarmOffset(start, rawAlarm.trim());
-    final formattedAlarmISO = _formatAlarmISO(dateController.text, calculatedAlarmTime);
+    final formattedAlarmISO =
+        _formatAlarmISO(dateController.text, calculatedAlarmTime);
 
     final validationError = validateFields(
       title: titleController.text,
@@ -212,9 +223,11 @@ class AddEventController extends ChangeNotifier {
         date: _parseBackendDate(dateController.text.trim()),
         startTime: start,
         endTime: end,
-        location: locationController.text.trim().isEmpty ? null: locationController.text.trim(),
+        location: locationController.text.trim().isEmpty
+            ? null
+            : locationController.text.trim(),
         alarmTime: formattedAlarmISO,
-        categoryName: selectedCategory?.isEmpty == true ? null: selectedCategory,
+        categoryName: selectedCategory?.isEmpty == true ? null : selectedCategory,
         note: noteController.text.trim(),
         repeat: apiRepeatValue,
         customRepeat: customRepeatMap,
@@ -224,21 +237,37 @@ class AddEventController extends ChangeNotifier {
 
       if (result != null) {
         final resultMap = Map<String, dynamic>.from(result);
-        if (resultMap['alarm_time'] == null || resultMap['alarm_time'].toString().isEmpty) {
+        if (resultMap['alarm_time'] == null ||
+            resultMap['alarm_time'].toString().isEmpty) {
           resultMap['alarm_time'] = formattedAlarmISO;
         }
 
         final eventModel = EventModel.fromMap(resultMap);
-        await AlarmHelper.scheduleEventAlarm(eventModel);
+
+        // Generate recurring timestamps via repository helper
+        final baseDateTime = _parseDateTime(dateController.text, calculatedAlarmTime);
+        final alarmDateTimes = _repository.generateAlarmOccurrences(
+          startDateTime: baseDateTime,
+          selectedRepeat: selectedRepeat,
+          customRepeatCount: customRepeatCount,
+          customRepeatUnit: customRepeatUnit,
+          selectedDays: selectedDays,
+          repeatEndType: repeatEndType,
+          customEndDate: customEndDate,
+          customOccurrences: customOccurrences,
+        );
+
+        // Schedule alarms and local notifications for all occurrences
+        await AlarmHelper.scheduleEventAlarm(eventModel, alarmDateTimes);
+
         try {
-          final alarmDateTime = DateTime.tryParse(
-              resultMap['alarm_time'].toString().replaceAll('Z', ''));
-          if (alarmDateTime != null) {
+          for (int i = 0; i < alarmDateTimes.length; i++) {
+            final alarmDt = alarmDateTimes[i];
             await NotificationService.scheduleNotification(
-              id: eventModel.id,
+              id: eventModel.id * 100 + i,
               title: eventModel.title,
               body: eventModel.description,
-              alarmTime: alarmDateTime,
+              alarmTime: alarmDt,
               payload: eventModel.id.toString(),
             );
           }
@@ -349,7 +378,7 @@ class AddEventController extends ChangeNotifier {
     parsedDate ??= DateTime.tryParse(cleanDate) ?? DateTime.now();
 
     final timeParts = cleanTime.split(':');
-    final hour = timeParts.length > 0 ? int.tryParse(timeParts[0]) ?? 0 : 0;
+    final hour = timeParts.isNotEmpty ? int.tryParse(timeParts[0]) ?? 0 : 0;
     final minute = timeParts.length > 1 ? int.tryParse(timeParts[1]) ?? 0 : 0;
 
     return DateTime(parsedDate.year, parsedDate.month, parsedDate.day, hour, minute);
@@ -379,7 +408,10 @@ class AddEventController extends ChangeNotifier {
 
   String _formatErrorMessage(dynamic e) {
     if (e is DioException && e.response?.data is Map) {
-      return (e.response!.data as Map).entries.map((entry) => "${entry.key}: ${entry.value.toString().replaceAll('[', '').replaceAll(']', '')}").join("\n");
+      return (e.response!.data as Map)
+          .entries
+          .map((entry) => "${entry.key}: ${entry.value.toString().replaceAll('[', '').replaceAll(']', '')}")
+          .join("\n");
     } else if (e is DioException) {
       return e.response?.data?.toString() ?? e.message ?? "Unknown server error";
     }

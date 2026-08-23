@@ -119,8 +119,8 @@ class CalendarController extends ChangeNotifier {
         date: formatEventDate(rawStart),
         startTime: extractTime(rawStart),
         endTime: extractTime(rawEnd),
-        location: json['location'] ?? '',
-        alarmTime: '',
+        location: json['google_id'] ?? json['location'] ?? '', // Preserve raw Google Event ID
+        alarmTime: json['alarm_time'] ?? '',
         isCompleted: false,
         createdAt: DateTime.now().toIso8601String(),
         user: int.tryParse(UserSession().userId ?? '0') ?? 0,
@@ -176,16 +176,11 @@ class CalendarController extends ChangeNotifier {
         }).toList();
       }
 
-      // Fetch Google Calendar events ONLY if user signed in with Google
       final googleEvents = await _fetchGoogleCalendarEvents(filterDate: targetDate);
-
-      // Deduplicate backend and Google Calendar events based on title, date, and start time
       final Map<String, EventModel> uniqueEvents = {};
 
       for (var event in [...apiEvents, ...googleEvents]) {
         final key = '${event.title.trim().toLowerCase()}_${event.date}_${_normalizeTime(event.startTime)}';
-        
-        // Keep backend event if already added, otherwise add Google event
         if (!uniqueEvents.containsKey(key)) {
           uniqueEvents[key] = event;
         }
@@ -203,13 +198,35 @@ class CalendarController extends ChangeNotifier {
   }
 
   //!------------------ Remove event from API and list ------------------ //
-  Future<bool> deleteEvent(int eventId) async {
+  Future<bool> deleteEvent(EventModel event) async {
     try {
+      // 1. If it's a Google Calendar event, delete via Google API
+      if (event.category == 'Google Calendar') {
+        final accessToken = GoogleServices().accessToken;
+        if (accessToken == null || accessToken.isEmpty) {
+          debugPrint('⚠️ No access token available for Google Calendar delete');
+          return false;
+        }
+
+        final googleEventId = event.location;
+        final success = await GoogleServices().deleteGoogleCalendarEvent(
+          accessToken: accessToken,
+          eventId: googleEventId,
+        );
+
+        if (success) {
+          _events.removeWhere((e) => e.id == event.id);
+          notifyListeners();
+        }
+        return success;
+      }
+
+      // 2. Otherwise, delete via Backend API
       final token = await AuthService().getToken();
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
       final response = await _dio.delete(
-        '${baseUrl}api/v1/evenet/delete/$eventId/',
+        '${baseUrl}api/v1/evenet/delete/${event.id}/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -218,27 +235,30 @@ class CalendarController extends ChangeNotifier {
         ),
       );
 
-      return response.statusCode == 200 || response.statusCode == 204;
+      final isSuccess = response.statusCode == 200 || response.statusCode == 204;
+      if (isSuccess) {
+        _events.removeWhere((e) => e.id == event.id);
+        notifyListeners();
+      }
+      return isSuccess;
     } catch (e) {
       debugPrint('⚠️ Error deleting event: $e');
       return false;
     }
   }
 
-  Future<bool> removeEventFromList(int eventId) async {
-    final success = await deleteEvent(eventId);
+  Future<bool> removeEventFromList(EventModel event) async {
+    final success = await deleteEvent(event);
     if (success) {
-      _events.removeWhere((event) => event.id == eventId);
-      debugPrint('✅ Event removed from list: $eventId');
-      notifyListeners();
+      debugPrint('✅ Event removed from list: ${event.id}');
       try {
-        await Alarm.stop(eventId);
+        await Alarm.stop(event.id);
       } catch (_) {}
       return true;
     }
     return false;
   }
-
+  
   Future<T?> runWithLoaderAndTimer<T>({
     required BuildContext context,
     required Future<T> Function() task,

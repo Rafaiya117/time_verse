@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/calender/controller/add_event_controller.dart';
 
 void showCustomRepeatDialog(BuildContext context, AddEventController controller) {
@@ -9,7 +10,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
   String tempUnit = controller.customRepeatUnit;
   List<String> tempDays = List.from(controller.selectedDays);
   String tempEndType = controller.repeatEndType;
-  DateTime tempEndDate = controller.customEndDate; // Dynamically computed initial date
+  DateTime tempEndDate = controller.customEndDate;
   int tempOccurrences = controller.customOccurrences;
 
   final weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -19,12 +20,18 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
     builder: (BuildContext ctx) {
       return StatefulBuilder(
         builder: (context, setDialogState) {
-          const textColor = Color(0xFF3C4043);
-          const activeColor = Color(0xFF4285F4);
-          const borderColor = Color(0xFFDADCE0);
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+
+          // Dynamic colors mapped to AppColors
+          final dialogBgColor = isDark ? AppColors.containers_bgd : const Color(0xFFF8F9FA);
+          final titleColor = isDark ? AppColors.text_color : AppColors.l_text_clr;
+          final subTextColor = isDark ? AppColors.secendary_text_color : AppColors.l_text_clr2;
+          final activeColor = isDark ? AppColors.button_color : AppColors.save_color;
+          final borderColor = isDark ? AppColors.secendary_text_color.withValues(alpha: 0.3) : AppColors.container;
+          final dropdownBgColor = isDark ? AppColors.containers_bgd : Colors.white;
 
           return Dialog(
-            backgroundColor: const Color(0xFFF8F9FA),
+            backgroundColor: dialogBgColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -39,7 +46,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                   Text(
                     'Custom recurrence',
                     style: GoogleFonts.inter(
-                      color: textColor,
+                      color: titleColor,
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -50,7 +57,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                   Text(
                     'Repeats every',
                     style: GoogleFonts.inter(
-                      color: Colors.grey.shade700,
+                      color: subTextColor,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -69,7 +76,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                           initialValue: '$tempCount',
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(color: textColor, fontSize: 14.sp),
+                          style: GoogleFonts.inter(color: titleColor, fontSize: 14.sp),
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.zero,
@@ -90,8 +97,8 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: tempUnit,
-                            dropdownColor: Colors.white,
-                            style: GoogleFonts.inter(color: textColor, fontSize: 14.sp),
+                            dropdownColor: dropdownBgColor,
+                            style: GoogleFonts.inter(color: titleColor, fontSize: 14.sp),
                             items: ['day', 'week', 'month', 'year'].map((String unit) {
                               return DropdownMenuItem<String>(
                                 value: unit,
@@ -110,7 +117,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                   ),
 
                   SizedBox(height: 20.h),
-                  Divider(color: Colors.grey.shade300, height: 1),
+                  Divider(color: borderColor, height: 1),
                   SizedBox(height: 16.h),
 
                   // Repeats on
@@ -118,7 +125,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                     Text(
                       'Repeats on',
                       style: GoogleFonts.inter(
-                        color: Colors.grey.shade700,
+                        color: subTextColor,
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                       ),
@@ -145,16 +152,16 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                             height: 34.h,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isSelected ? const Color(0xFF4A5D8E) : Colors.transparent,
+                              color: isSelected ? activeColor : Colors.transparent,
                               border: Border.all(
-                                color: isSelected ? const Color(0xFF4A5D8E) : borderColor,
+                                color: isSelected ? activeColor : borderColor,
                               ),
                             ),
                             child: Center(
                               child: Text(
                                 dayLabel,
                                 style: GoogleFonts.inter(
-                                  color: isSelected ? Colors.white : textColor,
+                                  color: isSelected ? Colors.white : titleColor,
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -165,7 +172,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                       }),
                     ),
                     SizedBox(height: 20.h),
-                    Divider(color: Colors.grey.shade300, height: 1),
+                    Divider(color: borderColor, height: 1),
                     SizedBox(height: 16.h),
                   ],
 
@@ -173,7 +180,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                   Text(
                     'Ends',
                     style: GoogleFonts.inter(
-                      color: Colors.grey.shade700,
+                      color: subTextColor,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -193,7 +200,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                             activeColor: activeColor,
                             onChanged: (val) => setDialogState(() => tempEndType = val!),
                           ),
-                          Text('Never', style: GoogleFonts.inter(color: textColor, fontSize: 14.sp)),
+                          Text('Never', style: GoogleFonts.inter(color: titleColor, fontSize: 14.sp)),
                         ],
                       ),
                     ),
@@ -212,7 +219,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                             activeColor: activeColor,
                             onChanged: (val) => setDialogState(() => tempEndType = val!),
                           ),
-                          Text('On', style: GoogleFonts.inter(color: textColor, fontSize: 14.sp)),
+                          Text('On', style: GoogleFonts.inter(color: titleColor, fontSize: 14.sp)),
                           SizedBox(width: 12.w),
                           GestureDetector(
                             onTap: () async {
@@ -237,7 +244,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                               ),
                               child: Text(
                                 DateFormat('MMM d, yyyy').format(tempEndDate),
-                                style: GoogleFonts.inter(color: textColor, fontSize: 13.sp),
+                                style: GoogleFonts.inter(color: titleColor, fontSize: 13.sp),
                               ),
                             ),
                           ),
@@ -259,7 +266,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                             activeColor: activeColor,
                             onChanged: (val) => setDialogState(() => tempEndType = val!),
                           ),
-                          Text('After', style: GoogleFonts.inter(color: textColor, fontSize: 14.sp)),
+                          Text('After', style: GoogleFonts.inter(color: titleColor, fontSize: 14.sp)),
                           SizedBox(width: 12.w),
                           Container(
                             width: 50.w,
@@ -272,7 +279,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                               initialValue: '$tempOccurrences',
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(color: textColor, fontSize: 13.sp),
+                              style: GoogleFonts.inter(color: titleColor, fontSize: 13.sp),
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.zero,
@@ -286,7 +293,7 @@ void showCustomRepeatDialog(BuildContext context, AddEventController controller)
                           SizedBox(width: 10.w),
                           Text(
                             tempOccurrences > 1 ? 'occurrences' : 'occurrence',
-                            style: GoogleFonts.inter(color: textColor, fontSize: 14.sp),
+                            style: GoogleFonts.inter(color: titleColor, fontSize: 14.sp),
                           ),
                         ],
                       ),

@@ -63,7 +63,7 @@ class AllEvents extends StatelessWidget {
                             onConfirm: () async {
                               final success = await controller.runWithLoaderAndTimer(
                                 context: context,
-                                task: () => controller.removeEventFromList(event.id,),);
+                                task: () => controller.removeEventFromList(event),);
                               if (success != true) {
                                 debugPrint('❌ Failed to delete event');
                               }
@@ -92,7 +92,7 @@ class AllEvents extends StatelessWidget {
                                 onConfirm: () async {
                                   final success = await controller.runWithLoaderAndTimer(
                                     context: context,
-                                    task: () => controller.removeEventFromList(event.id),);
+                                    task: () => controller.removeEventFromList(event),);
                                   if (success != true) {
                                     debugPrint('❌ Failed to delete event');
                                   }
