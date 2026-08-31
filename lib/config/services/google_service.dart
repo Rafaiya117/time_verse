@@ -32,55 +32,62 @@ class GoogleServices {
   }
 
   Future<bool> signIn() async {
-    try {
-      if (_accessToken != null) {
-        debugPrint("🔵 Reusing existing Access Token: $_accessToken");
-        return true;
-      }
+  try {
+    if (_accessToken != null) {
+      debugPrint("🔵 Reusing existing Access Token: $_accessToken");
+      return true;
+    }
 
-      final user = await _googleSignIn.authenticate();
-      _currentUser = user;
+    final user = await _googleSignIn.authenticate();
+    _currentUser = user;
 
-      if (_currentUser != null) {
-        final authentication = await _currentUser!.authentication;
-        final idToken = authentication.idToken;
-        debugPrint("🆔 ID TOKEN: $idToken");
+    if (_currentUser != null) {
+      final authentication = await _currentUser!.authentication;
+      final idToken = authentication.idToken;
+      debugPrint("🆔 ID TOKEN: $idToken");
 
-        // Request Access Token for local Google API calls
-        final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
-        _accessToken = auth.accessToken;
-        debugPrint("🔑 ACCESS TOKEN: $_accessToken");
+      // Request Access Token for local Google API calls
+      final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
+      _accessToken = auth.accessToken;
+      debugPrint("🔑 ACCESS TOKEN: $_accessToken");
 
-        // Get serverAuthCode for backend
-        final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
-        final String? serverAuthCode = serverAuth?.serverAuthCode;
-        debugPrint("🎟️ AUTH CODE: $serverAuthCode");
+      // Get serverAuthCode for backend
+      final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
+      final String? serverAuthCode = serverAuth?.serverAuthCode;
+      debugPrint("🎟️ AUTH CODE: $serverAuthCode");
 
-        UserSession().username = _currentUser!.displayName;
-        UserSession().profileImageUrl = _currentUser!.photoUrl;
+      UserSession().username = _currentUser!.displayName;
+      UserSession().profileImageUrl = _currentUser!.photoUrl;
 
-        await AppPrefs.saveGoogleUser(
-          _currentUser!.displayName ?? '',
-          _currentUser!.email,
-          photoUrl: _currentUser!.photoUrl,
+      await AppPrefs.saveGoogleUser(
+        _currentUser!.displayName ?? '',
+        _currentUser!.email,
+        photoUrl: _currentUser!.photoUrl,
+      );
+
+      if (idToken != null && serverAuthCode != null) {
+        await sendTokensToApi(
+          idToken: idToken,
+          serverAuthCode: serverAuthCode,
         );
-
-        if (idToken != null && serverAuthCode != null) {
-          await sendTokensToApi(
-            idToken: idToken,
-            serverAuthCode: serverAuthCode,
-          );
-        }
-
-        debugPrint("✅ Google Sign-In Success for: ${_currentUser!.displayName}");
-        return true;
       }
-      return false;
-    } catch (e) {
-      debugPrint("❌ Google Sign-In error: $e");
+
+      debugPrint("✅ Google Sign-In Success for: ${_currentUser!.displayName}");
+      return true;
+    }
+    return false;
+  } catch (e) {
+    // Gracefully check for user cancellation
+    final errorStr = e.toString().toLowerCase();
+    if (errorStr.contains('cancelled by user') || errorStr.contains('16:')) {
+      debugPrint("ℹ️ Google Sign-In was canceled by the user.");
       return false;
     }
+
+    debugPrint("❌ Google Sign-In error: $e");
+    return false;
   }
+}
 
   Future<void> sendTokensToApi({required String idToken, required String serverAuthCode}) async {
     try {
@@ -172,11 +179,80 @@ class GoogleServices {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({
-    required String accessToken,
-    DateTime? timeMin,
-    DateTime? timeMax,
-  }) async {
+  // Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({
+  //   required String accessToken,
+  //   DateTime? timeMin,
+  //   DateTime? timeMax,
+  // }) async {
+  //   final dio = Dio();
+
+  //   final startStr = (timeMin ?? DateTime.now()).toUtc().toIso8601String();
+
+  //   Map<String, dynamic> queryParameters = {
+  //     'timeMin': startStr,
+  //     'singleEvents': true,
+  //     'orderBy': 'startTime',
+  //   };
+
+  //   if (timeMax != null) {
+  //     queryParameters['timeMax'] = timeMax.toUtc().toIso8601String();
+  //   }
+
+  //   try {
+  //     final response = await dio.get(
+  //       "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+  //       queryParameters: queryParameters,
+  //       options: Options(
+  //         headers: {
+  //           "Authorization": "Bearer $accessToken",
+  //           "Content-Type": "application/json",
+  //         },
+  //       ),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final List items = response.data['items'] ?? [];
+  //       debugPrint("✅ Fetched ${items.length} events from Google Calendar");
+
+  //       // Transform response into structured event list compatible with EventModel
+  //       return items.map((event) {
+  //         final startRaw = event['start']?['dateTime'] ?? event['start']?['date'] ?? '';
+  //         final endRaw = event['end']?['dateTime'] ?? event['end']?['date'] ?? '';
+
+  //         DateTime? startDt = DateTime.tryParse(startRaw);
+
+  //         // Calculate default alarmTime as 15 minutes before event start time
+  //         String alarmISO = '';
+  //         if (startDt != null) {
+  //           alarmISO = startDt.subtract(const Duration(minutes: 15)).toIso8601String();
+  //         }
+
+  //         // Generate stable integer ID for AlarmHelper / Notifications
+  //         final int eventId = event['id'].toString().hashCode.abs() % 1000000;
+
+  //         return {
+  //           'id': eventId,
+  //           'google_id': event['id'],
+  //           'title': event['summary'] ?? 'No Title',
+  //           'description': event['description'] ?? '',
+  //           'location': event['location'] ?? '',
+  //           'startTime': startRaw,
+  //           'endTime': endRaw,
+  //           'date': startDt != null ? "${startDt.year}-${startDt.month.toString().padLeft(2, '0')}-${startDt.day.toString().padLeft(2, '0')}" : '',
+  //           'alarm_time': alarmISO, // Populates alarmTime so AlarmHelper.scheduleEventAlarm works!
+  //         };
+  //       }).toList();
+  //     } else {
+  //       debugPrint("⚠️ Google Calendar fetch error: ${response.data}");
+  //       return [];
+  //     }
+  //   } catch (e) {
+  //     debugPrint("❌ Google Calendar Fetch Exception: $e");
+  //     return [];
+  //   }
+  // }
+
+  Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({required String accessToken,DateTime? timeMin,DateTime? timeMax,}) async {
     final dio = Dio();
 
     final startStr = (timeMin ?? DateTime.now()).toUtc().toIso8601String();
@@ -185,6 +261,7 @@ class GoogleServices {
       'timeMin': startStr,
       'singleEvents': true,
       'orderBy': 'startTime',
+      'showDeleted': false,
     };
 
     if (timeMax != null) {
@@ -205,24 +282,17 @@ class GoogleServices {
 
       if (response.statusCode == 200) {
         final List items = response.data['items'] ?? [];
-        debugPrint("✅ Fetched ${items.length} events from Google Calendar");
-
-        // Transform response into structured event list compatible with EventModel
-        return items.map((event) {
+        final activeItems = items.where((event) => event['status'] != 'cancelled').toList();
+        return activeItems.map((event) {
           final startRaw = event['start']?['dateTime'] ?? event['start']?['date'] ?? '';
           final endRaw = event['end']?['dateTime'] ?? event['end']?['date'] ?? '';
-
           DateTime? startDt = DateTime.tryParse(startRaw);
-
-          // Calculate default alarmTime as 15 minutes before event start time
           String alarmISO = '';
+
           if (startDt != null) {
             alarmISO = startDt.subtract(const Duration(minutes: 15)).toIso8601String();
           }
-
-          // Generate stable integer ID for AlarmHelper / Notifications
           final int eventId = event['id'].toString().hashCode.abs() % 1000000;
-
           return {
             'id': eventId,
             'google_id': event['id'],
@@ -231,14 +301,12 @@ class GoogleServices {
             'location': event['location'] ?? '',
             'startTime': startRaw,
             'endTime': endRaw,
-            'date': startDt != null ? "${startDt.year}-${startDt.month.toString().padLeft(2, '0')}-${startDt.day.toString().padLeft(2, '0')}" : '',
-            'alarm_time': alarmISO, // Populates alarmTime so AlarmHelper.scheduleEventAlarm works!
+            'date': startDt != null? "${startDt.year}-${startDt.month.toString().padLeft(2, '0')}-${startDt.day.toString().padLeft(2, '0')}": '',
+            'alarm_time': alarmISO,
           };
         }).toList();
-      } else {
-        debugPrint("⚠️ Google Calendar fetch error: ${response.data}");
-        return [];
       }
+      return [];
     } catch (e) {
       debugPrint("❌ Google Calendar Fetch Exception: $e");
       return [];

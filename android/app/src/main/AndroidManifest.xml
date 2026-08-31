@@ -18,6 +18,8 @@
         android:label="InfiniQoute"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupOnly="false"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true">
 
@@ -33,13 +35,11 @@
             
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"
-              />
+              android:resource="@style/NormalTheme"/>
 
              <!-- Deep link -->
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                
+                <action android:name="android.intent.action.VIEW" />                
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 

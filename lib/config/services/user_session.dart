@@ -41,12 +41,21 @@ class UserSession {
   String? profileImageUrl;
 
   /// Loads saved Google user details into memory on startup
+  // Future<void> initFromPrefs() async {
+  //   final isGoogle = await AppPrefs.isGoogleLogin();
+  //   if (isGoogle) {
+  //     final googleUser = await AppPrefs.getGoogleUser();
+  //     username = googleUser['name'] ?? username;
+  //     profileImageUrl = googleUser['photo'] ?? profileImageUrl;
+  //   }
+  // }
+
   Future<void> initFromPrefs() async {
     final isGoogle = await AppPrefs.isGoogleLogin();
     if (isGoogle) {
       final googleUser = await AppPrefs.getGoogleUser();
       username = googleUser['name'] ?? username;
-      profileImageUrl = googleUser['photo'] ?? profileImageUrl;
+      profileImageUrl = googleUser['photoUrl'] ?? profileImageUrl;
     }
   }
 

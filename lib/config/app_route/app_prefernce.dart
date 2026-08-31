@@ -54,11 +54,20 @@ class AppPrefs {
   }
 
   /// ✅ ADDED: Get Google user info
+  // static Future<Map<String, String?>> getGoogleUser() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   return {
+  //     'name': prefs.getString(_googleUserNameKey),
+  //     'email': prefs.getString(_googleUserEmailKey),
+  //   };
+  // }
+
   static Future<Map<String, String?>> getGoogleUser() async {
     final prefs = await SharedPreferences.getInstance();
     return {
       'name': prefs.getString(_googleUserNameKey),
       'email': prefs.getString(_googleUserEmailKey),
+      'photoUrl': prefs.getString(_googleUserPhotoKey),
     };
   }
 
@@ -79,26 +88,23 @@ class AppPrefs {
   }
 
   /// Save Google server token
-static Future<void> saveGoogleToken(String token) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('google_token', token);
-}
+  static Future<void> saveGoogleToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('google_token', token);
+  }
 
-static Future<String?> getGoogleToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('google_token');
-}
+  static Future<String?> getGoogleToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('google_token');
+  }
 
-static Future<void> clearGoogleToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('google_token');
-}
+  static Future<void> clearGoogleToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('google_token');
+  }
+
   /// ✅ Remember Me
-  static Future<void> saveRememberMe(
-    bool remember,
-    String email,
-    String password,
-  ) async {
+  static Future<void> saveRememberMe(bool remember,String email,String password,) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_rememberMeKey, remember);
 

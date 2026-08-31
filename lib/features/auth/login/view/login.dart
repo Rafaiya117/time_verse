@@ -335,9 +335,7 @@ class LoginPage extends StatelessWidget {
                           style: GoogleFonts.outfit(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.normal,
-                            color: isDarkMode
-                              ? AppColors.third_color
-                              : AppColors.heading_color,
+                            color: isDarkMode? AppColors.third_color: AppColors.heading_color,
                             ),
                           recognizer: TapGestureRecognizer()..onTap = () {
                             context.push('/signup');

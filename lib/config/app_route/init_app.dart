@@ -7,6 +7,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 import 'package:time_verse/config/services/firebase/fire_base_service.dart';
 import 'package:time_verse/config/services/firebase/firebase_forground.dart';
+import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/firebase_options.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -37,6 +38,7 @@ Future<void> initApp() async {
   );
   debugPrint("RevenueCat initialized");
 
+  await UserSession().initFromPrefs();
   await _initBackgroundServices();
 }
 
