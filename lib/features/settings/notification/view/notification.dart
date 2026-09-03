@@ -56,7 +56,12 @@ class NotificationsScreen extends StatelessWidget {
                         subtitle: 'Trigger full screen exact time alarms',
                         value: controller.allowAlarms,
                         icon: Icons.alarm,
-                        onChanged: controller.setAllowAlarms,
+                        onChanged: (val) async {
+                          controller.setAllowAlarms(val);
+                          if (val) {
+                            await controller.checkAndRequestExactAlarmPermission();
+                          }
+                        }
                       ),
                       SizedBox(height: 12.h),
                       _buildSwitchTile(

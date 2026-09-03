@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:time_verse/features/settings/notification/model/notification_model.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -47,10 +48,22 @@ class NotificationSettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void setSnoozeDuration(int minutes) {
     snoozeDurationMinutes = minutes;
     notifyListeners();
+  }
+
+  // Request Android 12+ Exact Alarm Intent Permission
+  Future<void> checkAndRequestExactAlarmPermission() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.scheduleExactAlarm.status;
+      if (status.isDenied || status.isPermanentlyDenied) {
+        const intent = AndroidIntent(
+          action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
+        );
+        await intent.launch();
+      }
+    }
   }
 
   Future<void> openDeviceSoundSettings() async {

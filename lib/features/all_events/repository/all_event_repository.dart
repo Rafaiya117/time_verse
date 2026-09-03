@@ -15,9 +15,7 @@ class AllEventRepository {
     if (startDateTime == null) return '';
 
     final now = DateTime.now();
-    if (startDateTime.year == now.year &&
-        startDateTime.month == now.month &&
-        startDateTime.day == now.day) {
+    if (startDateTime.year == now.year && startDateTime.month == now.month && startDateTime.day == now.day) {
       return 'Today';
     } else {
       return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);

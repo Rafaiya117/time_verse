@@ -15,11 +15,26 @@ import 'package:time_verse/core/theme/theme_provider.dart';
 
 void main() async {
   await initApp();
-  runApp(const MyApp());
+  AlarmSettings? ringingAlarm;
+  try {
+    final alarms = await Alarm.getAlarms();
+    for (final alarm in alarms) {
+      if (await Alarm.isRinging(alarm.id)) {
+        ringingAlarm = alarm;
+        break;
+      }
+    }
+  } catch (_) {
+    ringingAlarm = null;
+  }
+
+  runApp(MyApp(initialRingingAlarm: ringingAlarm));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final AlarmSettings? initialRingingAlarm;
+
+  const MyApp({super.key, this.initialRingingAlarm});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -34,9 +49,21 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _checkConnectivity();
-    
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((status) {
-      if (!mounted) return; 
+
+    if (widget.initialRingingAlarm != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final currentRoute = appRouter.routerDelegate.currentConfiguration.uri.toString();
+        if (currentRoute != '/alarm') {
+          appRouter.push('/alarm', extra: widget.initialRingingAlarm);
+        }
+      });
+    }
+
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      status,
+    ) {
+      if (!mounted) return;
       setState(() {
         hasConnection = !status.contains(ConnectivityResult.none);
       });
@@ -45,7 +72,7 @@ class _MyAppState extends State<MyApp> {
     _ringSubscription = Alarm.ringStream.stream.listen((alarmSettings) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        
+
         final currentRoute = appRouter.routerDelegate.currentConfiguration.uri.toString();
         if (currentRoute != '/alarm') {
           appRouter.push('/alarm', extra: alarmSettings);
@@ -63,7 +90,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkConnectivity() async {
     final status = await Connectivity().checkConnectivity();
-    if (!mounted) return; 
+    if (!mounted) return;
     setState(() {
       hasConnection = status != ConnectivityResult.none;
     });
@@ -87,9 +114,7 @@ class _MyAppState extends State<MyApp> {
                 themeMode: themeProvider.themeMode,
                 routerConfig: appRouter,
                 builder: (context, child) {
-                  return hasConnection
-                      ? child!
-                      : const NoInternetWidget();
+                  return hasConnection ? child! : const NoInternetWidget();
                 },
               );
             },

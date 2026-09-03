@@ -14,7 +14,7 @@ class AllEventsController extends ChangeNotifier {
   List<EventModel> get events => List.unmodifiable(_events);
 
   AllEventsController({AllEventRepository? repository})
-      : _repository = repository ?? AllEventRepository() {
+  : _repository = repository ?? AllEventRepository() {
     fetchAllEvents();
   }
 
@@ -102,10 +102,7 @@ class AllEventsController extends ChangeNotifier {
     return false;
   }
 
-  Future<T?> runWithLoaderAndTimer<T>({
-    required BuildContext context,
-    required Future<T> Function() task,
-  }) async {
+  Future<T?> runWithLoaderAndTimer<T>({required BuildContext context,required Future<T> Function() task,}) async {
     final startTime = DateTime.now();
 
     showDialog(
