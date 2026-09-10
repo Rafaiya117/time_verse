@@ -26,11 +26,11 @@ class SocialAuthButton extends StatelessWidget {
           height: 52.h,
           decoration: BoxDecoration(
             // Translucent dark background matching the image
-            color: Colors.black.withOpacity(0.4), 
+            color: Colors.black.withValues(alpha: 0.4), 
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(
               // Slim, subtle tinted border border
-              color: const Color(0xFFC5A880).withOpacity(0.25), 
+              color: const Color(0xFFC5A880).withValues(alpha: 0.25), 
               width: 1,
             ),
           ),

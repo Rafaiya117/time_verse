@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -381,7 +383,7 @@ Future<Map<String, dynamic>> forgotPassword(String email) async {
   }
 }
 
-Future<Map<String, dynamic>> resendOtp(String email) async {
+  Future<Map<String, dynamic>> resendOtp(String email) async {
     try {
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
@@ -473,12 +475,10 @@ Future<Map<String, dynamic>> resendOtp(String email) async {
       }
     }
   }
-  if (e.type == DioExceptionType.connectionTimeout ||
-      e.type == DioExceptionType.receiveTimeout) {
+  if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
     return 'Connection timeout. Try again.';
   }
-  if (e.type == DioExceptionType.badResponse &&
-      e.response?.statusCode == 401) {
+  if (e.type == DioExceptionType.badResponse && e.response?.statusCode == 401) {
     return 'Unauthorized. Please log in again.';
   }
   return e.message ?? 'Something went wrong. Please try later.';

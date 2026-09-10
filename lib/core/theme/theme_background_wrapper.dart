@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ThemedBackgroundWrapper extends StatelessWidget {
   final Widget child;

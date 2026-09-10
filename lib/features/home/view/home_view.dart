@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member, deprecated_member_use
 
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -764,7 +764,7 @@ class HomeView extends StatelessWidget {
                   builder: (context, homeController, child) {
                     final currentIdx = homeController.currentQuoteIndex;
                     final String quoteKeyStr = 'quote_capture_${currentIdx % (homeController.inspirationalQuotes.isNotEmpty ? homeController.inspirationalQuotes.length : 1)}';
-                    final GlobalKey _inspirationQuoteKey = GlobalObjectKey(quoteKeyStr,);
+                    final GlobalKey inspirationQuoteKey = GlobalObjectKey(quoteKeyStr,);
 
                     final currentQuote = homeController.inspirationalQuotes.isNotEmpty
                     ? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]: null;
@@ -890,7 +890,7 @@ class HomeView extends StatelessWidget {
                                             children: [
                                               Flexible(
                                                 child: RepaintBoundary(
-                                                  key: _inspirationQuoteKey,
+                                                  key: inspirationQuoteKey,
                                                   child: Container(
                                                     padding: EdgeInsets.symmetric(horizontal: 6.w,),
                                                     decoration:const BoxDecoration(),
@@ -985,7 +985,7 @@ class HomeView extends StatelessWidget {
                                   child: GestureDetector(
                                     onTap: () async {
                                       final success = await homeController.saveQuoteImageToGallery(
-                                        _inspirationQuoteKey,
+                                        inspirationQuoteKey,
                                         bgAssetPath: currentBgPath,
                                       );
                                       if (success) {
@@ -1036,7 +1036,7 @@ class HomeView extends StatelessWidget {
                                   child: GestureDetector(
                                     onTap: () => homeController.shareQuoteAsImage(
                                       context,
-                                      _inspirationQuoteKey,
+                                      inspirationQuoteKey,
                                       bgAssetPath: currentBgPath,
                                     ),
                                     child: Column(

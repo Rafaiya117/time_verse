@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,7 +37,6 @@ class FCMService {
 
     try {
       _token = await _messaging.getToken();
-      print('!------------------FCM Token--------------: $_token');
 
       if (_token != null) {
         await postTokenToBackend(_token!);

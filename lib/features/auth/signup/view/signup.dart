@@ -14,7 +14,6 @@ import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_drop_down.dart';
 import 'package:time_verse/core/components/custom_image_uploader.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
-import 'package:time_verse/core/components/prograss_bar.dart';
 import 'package:time_verse/core/components/social_action_button.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/signup/controller/signup_controller.dart';

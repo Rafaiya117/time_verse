@@ -106,8 +106,8 @@ class CalenderView extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
                   return ListView.builder(
-                    shrinkWrap: true, 
-                    physics: const NeverScrollableScrollPhysics(),  
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: controller.events.length,
                     itemBuilder: (context, index) {
                       final EventModel event = controller.events[index];
@@ -119,20 +119,25 @@ class CalenderView extends StatelessWidget {
                           sub_title: event.description,
                           date: event.date,
                           time: '${event.startTime}-${event.endTime}',
-                          location: event.location,
+                          location: event.category == 'Google Calendar'
+                          ? '': event.location,
                           isDarkMode: isDarkMode,
                           onEdit: () {
                             context.push('/edit_event', extra: event);
                           },
-                          onDelete: () async {
+                          onDelete: () {
                             showRemoveEventDialog(
                               context,
-                                onConfirm: () async {
-                                  final success = await controller.runWithLoaderAndTimer(
-                                    context: context,
-                                    task: () => controller.removeEventFromList(event),);
-                                  if (success != true) {
-                                    debugPrint('❌ Failed to delete event');
+                              onConfirm: () async {
+                                final success = await controller.runWithLoaderAndTimer<bool>(
+                                  context: context,
+                                  task: () => controller.removeEventFromList(
+                                  event,
+                                  deleteType:'single', // Hardcoded parameter since dialog callback doesn't provide one
+                                  ),
+                                );
+                                if (success != true) {
+                                  debugPrint('❌ Failed to delete event');
                                 }
                               },
                             );

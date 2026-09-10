@@ -7,8 +7,6 @@ import 'package:time_verse/core/utils/colors.dart';
 
 class DatePickerDialog extends StatefulWidget {
   final TextEditingController controller;
-
-  // ✅ NEW: receive selected date from main calendar
   final DateTime? initialDate;
 
   const DatePickerDialog({
@@ -23,7 +21,6 @@ class DatePickerDialog extends StatefulWidget {
 
 class _DatePickerDialogState extends State<DatePickerDialog> {
   final DateTime _today = DateTime.now();
-
   late DateTime _focusedDay;
   DateTime? _selectedDay;
 
@@ -33,28 +30,22 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
 
     // ✅ Normalize to remove time component
     final initial = widget.initialDate != null
-        ? DateTime(
-            widget.initialDate!.year,
-            widget.initialDate!.month,
-            widget.initialDate!.day,
-          )
-        : DateTime(_today.year, _today.month, _today.day);
+    ? DateTime(
+      widget.initialDate!.year,
+      widget.initialDate!.month,
+      widget.initialDate!.day,
+    ): DateTime(_today.year, _today.month, _today.day);
 
     _selectedDay = initial;
-    _focusedDay = initial; // ✅ MUST match selected day
+    _focusedDay = initial; 
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode =
-        Theme.of(context).brightness == Brightness.dark;
-
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
-      backgroundColor: isDarkMode
-          ? AppColors.containers_bgd
-          : AppColors.background_color,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: isDarkMode ? AppColors.containers_bgd : AppColors.background_color,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -63,8 +54,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
             padding: EdgeInsets.symmetric(vertical: 10.h),
             color: AppColors.third_color,
             child: Text(
-              DateFormat('EEE, MMMM d')
-                  .format(_selectedDay ?? _focusedDay),
+              DateFormat('EEE, MMMM d').format(_selectedDay ?? _focusedDay),
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 color: Colors.white,
@@ -73,51 +63,31 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
               ),
             ),
           ),
-
           const SizedBox(height: 8),
-
           TableCalendar(
             firstDay: DateTime(_today.year, 1, 1),
             lastDay: DateTime(_today.year, 12, 31),
             focusedDay: _focusedDay,
-            selectedDayPredicate: (day) =>
-                isSameDay(_selectedDay, day),
-
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             enabledDayPredicate: (day) {
-              return !day.isBefore(
-                      DateTime(_today.year, 1, 1)) &&
-                  !day.isAfter(
-                      DateTime(_today.year, 12, 31));
+              return !day.isBefore(DateTime(_today.year, 1, 1)) && !day.isAfter(DateTime(_today.year, 12, 31));
             },
-
             onDaySelected: (selectedDay, focusedDay) {
-              final today = DateTime(
-                _today.year,
-                _today.month,
-                _today.day,
-              );
-
+              final today = DateTime(_today.year,_today.month,_today.day,);
               if (selectedDay.isBefore(today)) return;
-
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
+              widget.controller.text = DateFormat('yyyy-MM-dd').format(selectedDay);
 
-              widget.controller.text =
-                  DateFormat('yyyy-MM-dd').format(selectedDay);
-
-              debugPrint(
-                  "Selected date: ${widget.controller.text}");
-
+              debugPrint("Selected date: ${widget.controller.text}");
               Navigator.pop(context);
             },
 
             calendarStyle: CalendarStyle(
               selectedDecoration: BoxDecoration(
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode? AppColors.fourth_color: AppColors.heading_color,
                 shape: BoxShape.circle,
               ),
               selectedTextStyle: const TextStyle(
@@ -125,55 +95,38 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
                 fontWeight: FontWeight.bold,
               ),
               defaultTextStyle: TextStyle(
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode? AppColors.fourth_color: AppColors.heading_color,
               ),
               weekendTextStyle: TextStyle(
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode? AppColors.fourth_color: AppColors.heading_color,
               ),
               outsideTextStyle: TextStyle(
-                color: const Color(0xFFD3C29F)
-                    .withOpacity(0.2),
+                color: const Color(0xFFD3C29F).withValues(alpha: 0.2),
               ),
             ),
-
             headerStyle: HeaderStyle(
               formatButtonVisible: false,
               titleCentered: true,
               titleTextStyle: TextStyle(
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
               leftChevronIcon: Icon(
                 Icons.chevron_left,
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode ? AppColors.fourth_color: AppColors.heading_color,
               ),
               rightChevronIcon: Icon(
                 Icons.chevron_right,
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
               ),
             ),
-
             daysOfWeekStyle: DaysOfWeekStyle(
               weekdayStyle: TextStyle(
-                color: isDarkMode
-                    ? AppColors.fourth_color
-                    : AppColors.heading_color,
+                color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
               ),
               weekendStyle: TextStyle(
-                color: isDarkMode
-                  ? AppColors.fourth_color
-                  : AppColors.heading_color,
+                color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
               ),
             ),
           ),

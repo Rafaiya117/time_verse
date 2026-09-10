@@ -80,8 +80,8 @@ class AlarmHelper {
     EventModel event, [
     List<DateTime>? occurrences,
   ]) async {
-    final timesToSchedule = occurrences ?? [];
 
+    final timesToSchedule = occurrences ?? [];
     // Fallback to primary event alarm time if no occurrences list is provided
     if (timesToSchedule.isEmpty && event.alarmTime.isNotEmpty) {
       final cleanIso = event.alarmTime.trim().replaceAll(RegExp(r'Z$'), '');

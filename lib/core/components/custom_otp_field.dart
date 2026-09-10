@@ -107,7 +107,7 @@ class _CircularOtpFieldState extends State<CircularOtpField> {
                 : AppColors.background_color,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: AppColors.fourth_color.withOpacity(0.6), 
+              color: AppColors.fourth_color.withValues(alpha: 0.6), 
               width: 1,
             ),
           ),

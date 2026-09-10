@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -18,9 +20,6 @@ class ResetPassword extends StatelessWidget {
     final routerState = GoRouterState.of(context);
     final email = Uri.decodeComponent(routerState.uri.queryParameters['email'] ?? '');
     final otp = Uri.decodeComponent(routerState.uri.queryParameters['otp'] ?? '');
-    final Color secondaryTextColor = isDarkMode 
-      ? AppColors.fourth_color 
-      : AppColors.heading_color;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(
@@ -73,7 +72,7 @@ class ResetPassword extends StatelessWidget {
                 color: isDarkMode?AppColors.containers_bgd: AppColors.container,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isDarkMode?AppColors.fourth_color.withOpacity(0.5): AppColors.new_clr,
+                  color: isDarkMode?AppColors.fourth_color.withValues(alpha: 0.5): AppColors.new_clr,
                   width: 0.5,
                 ),
               ),

@@ -247,7 +247,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: widget.borderColor ?? const Color(0xFFDF951F).withOpacity(0.4),
+              color: widget.borderColor ?? const Color(0xFFDF951F).withValues(alpha: 0.4),
               width: 1.w,
             ),
             gradient: LinearGradient(

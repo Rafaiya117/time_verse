@@ -68,9 +68,7 @@ class CalendarController extends ChangeNotifier {
     if (startDateTime == null) return '';
 
     final now = DateTime.now();
-    if (startDateTime.year == now.year &&
-        startDateTime.month == now.month &&
-        startDateTime.day == now.day) {
+    if (startDateTime.year == now.year && startDateTime.month == now.month && startDateTime.day == now.day) {
       return 'Today';
     } else {
       return DateFormat('EEEE, MMM d, yyyy').format(startDateTime);
@@ -198,17 +196,17 @@ class CalendarController extends ChangeNotifier {
   }
 
   //!------------------ Remove event from API and list ------------------ //
-  Future<bool> deleteEvent(EventModel event) async {
+  Future<bool> deleteEvent(EventModel event, {String deleteType = 'single'}) async {
     try {
       // 1. If it's a Google Calendar event, delete via Google API
       if (event.category == 'Google Calendar') {
-        final accessToken = GoogleServices().accessToken;
+        final accessToken = await GoogleServices().getValidAccessToken();
         if (accessToken == null || accessToken.isEmpty) {
           debugPrint('⚠️ No access token available for Google Calendar delete');
           return false;
         }
 
-        final googleEventId = event.location;
+        final googleEventId = event.location.isNotEmpty ? event.location : event.createdAt;
         final success = await GoogleServices().deleteGoogleCalendarEvent(
           accessToken: accessToken,
           eventId: googleEventId,
@@ -226,7 +224,7 @@ class CalendarController extends ChangeNotifier {
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
       final response = await _dio.delete(
-        '${baseUrl}api/v1/evenet/delete/${event.id}/',
+        '${baseUrl}api/v1/event/delete/${event.id}/?delete_type=$deleteType',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -247,8 +245,8 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
-  Future<bool> removeEventFromList(EventModel event) async {
-    final success = await deleteEvent(event);
+  Future<bool> removeEventFromList(EventModel event, {String deleteType = 'single'}) async {
+    final success = await deleteEvent(event, deleteType: deleteType);
     if (success) {
       debugPrint('✅ Event removed from list: ${event.id}');
       try {
@@ -258,7 +256,7 @@ class CalendarController extends ChangeNotifier {
     }
     return false;
   }
-  
+
   Future<T?> runWithLoaderAndTimer<T>({
     required BuildContext context,
     required Future<T> Function() task,

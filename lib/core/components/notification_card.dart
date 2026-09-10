@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,12 +26,12 @@ class TappableNotificationCard extends StatelessWidget {
         color: isDarkMode ? const Color(0xFF0B1528) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: isDarkMode ? const Color(0xFFFFB703).withOpacity(0.15) : const Color(0xFFE5E7EB),
+          color: isDarkMode ? const Color(0xFFFFB703).withValues(alpha: 0.15) : const Color(0xFFE5E7EB),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -42,7 +41,7 @@ class TappableNotificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         child: InkWell(
           onTap: onTap,
-          splashColor: const Color(0xFFFFB703).withOpacity(0.1),
+          splashColor: const Color(0xFFFFB703).withValues(alpha: 0.1),
           highlightColor: Colors.transparent,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),

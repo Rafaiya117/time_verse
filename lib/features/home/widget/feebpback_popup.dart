@@ -76,7 +76,7 @@ void showFeedbackDialog(BuildContext context,bool isDarkMode,HomeController home
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
                           borderSide: BorderSide(
-                            color: const Color(0xFFFFB800).withOpacity(isDarkMode ? 0.5 : 1.0),
+                            color: const Color(0xFFFFB800).withValues(alpha: isDarkMode ? 0.5 : 1.0),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(

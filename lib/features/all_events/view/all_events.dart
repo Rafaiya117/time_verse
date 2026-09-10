@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_verse/core/components/bottom_card_controller/bottom_card_controller.dart';
 import 'package:time_verse/core/components/custom_bottomnav.dart';
@@ -38,15 +39,24 @@ class AllEvents extends StatelessWidget {
               rightSpacing: 70
             ),
             //SizedBox(height: 20.h,),
-            Consumer<AllEventsController>(
-              builder: (context, controller, _) {
-                final todayEvents = controller.events.where((e) => e.date == 'Today').toList().reversed.toList();
+           Consumer<AllEventsController>(
+            builder: (context, controller, _) {
+              final now = DateTime.now();
+              final todayEvents = controller.events.where((e) {
+                DateTime? parsedDate = DateTime.tryParse(e.createdAt);
+                if (parsedDate == null && e.date.isNotEmpty) {
+                  try {
+                    parsedDate = DateFormat('EEEE, MMM d, yyyy',).parse(e.date);
+                  } catch (_) {}
+                }
+                if (parsedDate == null) return false;
+                  return parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
+                }).toList().reversed.toList();
                 return Expanded(
                   child: ListView.builder(
                     itemCount: todayEvents.length,
                     itemBuilder: (context, index) {
                       final EventModel event = todayEvents[index];
-
                       return Dismissible(
                         key: ValueKey(event.id),
                         direction: DismissDirection.endToStart,
@@ -60,14 +70,19 @@ class AllEvents extends StatelessWidget {
                           final completer = Completer<bool>();
                           showRemoveEventDialog(
                             context,
-                            onConfirm: () async {
-                              final success = await controller.runWithLoaderAndTimer(
+                            onConfirm: () {
+                              controller.runWithLoaderAndTimer<bool>(
                                 context: context,
-                                task: () => controller.removeEventFromList(event),);
-                              if (success != true) {
-                                debugPrint('❌ Failed to delete event');
-                              }
-                              completer.complete(success == true);
+                                task: () => controller.removeEventFromList(
+                                  event,
+                                  deleteType: 'single',
+                                ),
+                              ).then((success) {
+                                if (success != true) {
+                                  debugPrint('❌ Failed to delete event');
+                                }
+                                completer.complete(success == true);
+                              });
                             },
                           );
                           return await completer.future.catchError(
@@ -77,29 +92,35 @@ class AllEvents extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 20.0),
                           child: EventCard(
+                            id: event.id,
                             title: event.title,
                             sub_title: event.description,
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
-                            location: event.location,
+                            location: event.category == 'Google Calendar'
+                            ? '' : event.location,
                             isDarkMode: isDarkMode,
                             onEdit: () {
                               context.push('/edit_event', extra: event);
                             },
-                            onDelete: () async {
+                            onDelete: () {
                               showRemoveEventDialog(
                                 context,
-                                onConfirm: () async {
-                                  final success = await controller.runWithLoaderAndTimer(
-                                    context: context,
-                                    task: () => controller.removeEventFromList(event),);
+                                onConfirm: () {
+                                  controller.runWithLoaderAndTimer<bool>(
+                                  context: context,
+                                  task: () =>controller.removeEventFromList(
+                                    event,
+                                    deleteType: 'single',
+                                    ),
+                                  ).then((success) {
                                   if (success != true) {
-                                    debugPrint('❌ Failed to delete event');
-                                  }
+                                    debugPrint('❌ Failed to delete event',);
+                                    }
+                                  });
                                 },
                               );
                             },
-                            id: event.id,
                           ),
                         ),
                       );
@@ -108,7 +129,6 @@ class AllEvents extends StatelessWidget {
                 );
               },
             ),
-            
           ],
         ),
       ),
@@ -119,19 +139,19 @@ class AllEvents extends StatelessWidget {
   }
 }
 // SizedBox(height: 10.h),
-            //   Center(
-            //     child: CustomButton(
-            //       text: "Add New Event",
-            //       onPressed: () {
-            //         //context.push('/signup');
-            //         context.push('/add');
-            //       },
-            //       gradient: AppGradientColors.button_gradient,
-            //       textColor: AppColors.text_color,
-            //       fontFamily: 'outfit',
-            //       fontSize: 16.sp,
-            //       fontWeight: FontWeight.normal,
-            //       height: 51.h,
-            //       width: double.infinity,
-            //   ),
-            // ),
+  //   Center(
+  //     child: CustomButton(
+  //       text: "Add New Event",
+  //       onPressed: () {
+  //         //context.push('/signup');
+  //         context.push('/add');
+  //       },
+  //       gradient: AppGradientColors.button_gradient,
+  //       textColor: AppColors.text_color,
+  //       fontFamily: 'outfit',
+  //       fontSize: 16.sp,
+  //       fontWeight: FontWeight.normal,
+  //       height: 51.h,
+  //       width: double.infinity,
+  //   ),
+  // ),

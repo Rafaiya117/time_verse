@@ -17,9 +17,6 @@ class ForgotPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     final forgotpasswordController = Provider.of<ForgotPasswordController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color secondaryTextColor = isDarkMode 
-      ? AppColors.fourth_color 
-      : AppColors.heading_color;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body:Padding(

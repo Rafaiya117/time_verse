@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, duplicate_ignore, deprecated_member_use
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +13,6 @@ import 'package:time_verse/core/components/custom_button.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
 import 'package:time_verse/core/components/custom_input_field.dart';
 import 'package:time_verse/core/components/mood_tracker/mood_tracker_popup.dart';
-import 'package:time_verse/core/components/prograss_bar.dart';
 import 'package:time_verse/core/components/social_action_button.dart';
 import 'package:time_verse/core/utils/colors.dart';
 import 'package:time_verse/features/auth/login/controller/login_controller.dart';

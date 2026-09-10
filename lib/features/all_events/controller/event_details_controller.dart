@@ -1,8 +1,6 @@
 // ignore_for_file: deprecated_member_use
-
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +67,7 @@ class EventController extends ChangeNotifier {
     final file = await File('${tempDir.path}/$uniqueFileName').create();
     await file.writeAsBytes(pngBytes);
 
-    final sharedContent = explicitText ?? quoteText;
+    //final sharedContent = explicitText ?? quoteText;
 
     debugPrint('📸 Generated pure local share file path: ${file.path}');
     await Share.shareXFiles(

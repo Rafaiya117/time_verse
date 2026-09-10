@@ -13,8 +13,7 @@ class AllEventsController extends ChangeNotifier {
   final List<EventModel> _events = [];
   List<EventModel> get events => List.unmodifiable(_events);
 
-  AllEventsController({AllEventRepository? repository})
-  : _repository = repository ?? AllEventRepository() {
+  AllEventsController({AllEventRepository? repository}) : _repository = repository ?? AllEventRepository() {
     fetchAllEvents();
   }
 
@@ -76,9 +75,9 @@ class AllEventsController extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteEvent(EventModel event) async {
+  Future<bool> deleteEvent(EventModel event, {String deleteType = 'single'}) async {
     try {
-      final success = await _repository.deleteEvent(event);
+      final success = await _repository.deleteEvent(event, deleteType: deleteType);
       if (success) {
         _events.removeWhere((e) => e.id == event.id);
         notifyListeners();
@@ -90,8 +89,8 @@ class AllEventsController extends ChangeNotifier {
     }
   }
 
-  Future<bool> removeEventFromList(EventModel event) async {
-    final success = await deleteEvent(event);
+  Future<bool> removeEventFromList(EventModel event, {String deleteType = 'single'}) async {
+    final success = await deleteEvent(event, deleteType: deleteType);
     if (success) {
       debugPrint('✅ Event removed from list: ${event.id}');
       try {
@@ -102,7 +101,10 @@ class AllEventsController extends ChangeNotifier {
     return false;
   }
 
-  Future<T?> runWithLoaderAndTimer<T>({required BuildContext context,required Future<T> Function() task,}) async {
+  Future<T?> runWithLoaderAndTimer<T>({
+    required BuildContext context,
+    required Future<T> Function() task,
+  }) async {
     final startTime = DateTime.now();
 
     showDialog(

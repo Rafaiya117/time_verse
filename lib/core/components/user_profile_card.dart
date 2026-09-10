@@ -30,14 +30,12 @@ class UserProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           // Subtle Amber-gold transparent luxury border ring seen in dark mockup view
-          color: isDarkMode 
-              ? const Color(0xFFFFB703).withOpacity(0.2) 
-              : const Color(0xFFE5E7EB),
+          color: isDarkMode ? const Color(0xFFFFB703).withValues(alpha: 0.2) : const Color(0xFFE5E7EB),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -47,7 +45,7 @@ class UserProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         child: InkWell(
           onTap: onTap,
-          splashColor: const Color(0xFFFFB703).withOpacity(0.1),
+          splashColor: const Color(0xFFFFB703).withValues(alpha: 0.1),
           highlightColor: Colors.transparent,
           child: Padding(
             padding: EdgeInsets.all(14.w),
