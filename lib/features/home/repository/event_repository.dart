@@ -58,6 +58,69 @@ class EventRepository {
   }
 
   /// Fetch all events to generate latest inspirational quote
+  // Future<List<QuoteData>?> fetchInspirationalQuotes(String currentUserId) async {
+  //   try {
+  //     final token = await AuthService().getToken();
+  //     final response = await _dio.get(
+  //       'api/v1/event/',
+  //       options: Options(
+  //         headers: {
+  //           'Authorization': 'Bearer $token',
+  //           'Content-Type': 'application/json',
+  //         },
+  //       ),
+  //     );
+
+  //     debugPrint("📡 Response Status: ${response.statusCode}");
+  //     debugPrint("📦 Raw Response Type: ${response.data.runtimeType}");
+
+  //     if (response.statusCode == 200) {
+  //       final List data = response.data is List ? response.data : [response.data];
+  //       debugPrint("📊 Total Events From API: ${data.length}");
+
+  //       final userEvents = data.where((event) {
+  //         debugPrint("🔎 Checking Event User: ${event['user']}");
+  //         return event['user'].toString() == currentUserId.toString();
+  //       }).toList();
+
+  //       debugPrint("🎯 User Events After Filter: ${userEvents.length}");
+
+  //       if (userEvents.isEmpty) {
+  //         debugPrint("⚠️ No user events found. Restoring default quote.");
+  //         return null;
+  //       }
+
+  //       userEvents.sort((a, b) {
+  //         final aTime = DateTime.parse(a['created_at']);
+  //         final bTime = DateTime.parse(b['created_at']);
+  //         return aTime.compareTo(bTime);
+  //       });
+
+  //       final latest = userEvents.last;
+
+  //       debugPrint("🏆 Latest Event ID: ${latest['id']}");
+  //       debugPrint("🏆 Alarm time ${latest['alarm_time']}");
+  //       debugPrint("📝 Description: ${latest['description']}");
+  //       debugPrint("📌 Type Description: ${latest['type_event_description']}");
+
+  //       final quoteText = (latest['description']?.toString().trim().isNotEmpty == true)
+  //       ? latest['description'].toString(): latest['type_event_description']?.toString() ?? '';
+  //       debugPrint("✨ Final Quote Text: $quoteText");
+  //       return [
+  //         QuoteData(
+  //           id: latest['id'],
+  //           name: latest['category_name']?.toString() ?? '', // 👈 Fixed: handles null safely
+  //           quote: quoteText,
+  //           reference: latest['title']?.toString() ?? '',
+  //         ),
+  //       ];
+  //     }
+  //   } catch (e) {
+  //     debugPrint('⚠️ Error fetching events: $e');
+  //   }
+  //   return null;
+  // }
+
   Future<List<QuoteData>?> fetchInspirationalQuotes(String currentUserId) async {
     try {
       final token = await AuthService().getToken();
@@ -71,22 +134,20 @@ class EventRepository {
         ),
       );
 
-      debugPrint("📡 Response Status: ${response.statusCode}");
-      debugPrint("📦 Raw Response Type: ${response.data.runtimeType}");
-
       if (response.statusCode == 200) {
         final List data = response.data is List ? response.data : [response.data];
-        debugPrint("📊 Total Events From API: ${data.length}");
+        final now = DateTime.now();
+        final todayFormatted = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
+        // Filter events belonging to current user AND scheduled for today
         final userEvents = data.where((event) {
-          debugPrint("🔎 Checking Event User: ${event['user']}");
-          return event['user'].toString() == currentUserId.toString();
+          final isUser = event['user'].toString() == currentUserId.toString();
+          final eventDateStr = event['date']?.toString().trim() ?? '';
+          return isUser && eventDateStr == todayFormatted;
         }).toList();
 
-        debugPrint("🎯 User Events After Filter: ${userEvents.length}");
-
         if (userEvents.isEmpty) {
-          debugPrint("⚠️ No user events found. Restoring default quote.");
+          debugPrint("⚠️ No user events for today. Restoring default quote.");
           return null;
         }
 
@@ -97,19 +158,13 @@ class EventRepository {
         });
 
         final latest = userEvents.last;
+        final quoteText = (latest['description']?.toString().trim().isNotEmpty == true) ? latest['description'].toString(): latest['type_event_description']?.toString() ?? '';
+        if (quoteText.trim().isEmpty) return null;
 
-        debugPrint("🏆 Latest Event ID: ${latest['id']}");
-        debugPrint("🏆 Alarm time ${latest['alarm_time']}");
-        debugPrint("📝 Description: ${latest['description']}");
-        debugPrint("📌 Type Description: ${latest['type_event_description']}");
-
-        final quoteText = (latest['description']?.toString().trim().isNotEmpty == true)
-        ? latest['description'].toString(): latest['type_event_description']?.toString() ?? '';
-        debugPrint("✨ Final Quote Text: $quoteText");
         return [
           QuoteData(
             id: latest['id'],
-            name: latest['category_name']?.toString() ?? '', // 👈 Fixed: handles null safely
+            name: latest['category_name']?.toString() ?? '',
             quote: quoteText,
             reference: latest['title']?.toString() ?? '',
           ),

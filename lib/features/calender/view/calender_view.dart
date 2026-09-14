@@ -40,12 +40,10 @@ class CalenderView extends StatelessWidget {
                 leftSpacing: 80.w,
                 rightSpacing: 57.w,
               ),
-              SizedBox(height: 16.h),
-              
+              SizedBox(height: 16.h),              
               // 2. Main Premium Calendar Widget Layer
               FancyCalendarView(),
-              SizedBox(height: 28.h),
-              
+              SizedBox(height: 28.h),              
               // 3. Upcoming Events Section Title Bar with "View all" Button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -111,16 +109,18 @@ class CalenderView extends StatelessWidget {
                     itemCount: controller.events.length,
                     itemBuilder: (context, index) {
                       final EventModel event = controller.events[index];
+                      final bool isToday = event.date.trim().toLowerCase() == 'today';
+
                       return Padding(
                         padding: EdgeInsets.only(bottom: 16.0.h),
                         child: EventCard(
                           id: event.id,
                           title: event.title,
-                          sub_title: event.description,
+                          // Show sub_title ONLY if the event is today
+                          sub_title: isToday ? event.description : '',
                           date: event.date,
                           time: '${event.startTime}-${event.endTime}',
-                          location: event.category == 'Google Calendar'
-                          ? '': event.location,
+                          location: event.category == 'Google Calendar'? '': event.location,
                           isDarkMode: isDarkMode,
                           onEdit: () {
                             context.push('/edit_event', extra: event);
@@ -131,9 +131,9 @@ class CalenderView extends StatelessWidget {
                               onConfirm: () async {
                                 final success = await controller.runWithLoaderAndTimer<bool>(
                                   context: context,
-                                  task: () => controller.removeEventFromList(
+                                  task: () =>controller.removeEventFromList(
                                   event,
-                                  deleteType:'single', // Hardcoded parameter since dialog callback doesn't provide one
+                                  deleteType: 'single',
                                   ),
                                 );
                                 if (success != true) {

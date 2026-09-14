@@ -39,24 +39,34 @@ class AllEvents extends StatelessWidget {
               rightSpacing: 70
             ),
             //SizedBox(height: 20.h,),
-           Consumer<AllEventsController>(
-            builder: (context, controller, _) {
-              final now = DateTime.now();
-              final todayEvents = controller.events.where((e) {
-                DateTime? parsedDate = DateTime.tryParse(e.createdAt);
-                if (parsedDate == null && e.date.isNotEmpty) {
-                  try {
-                    parsedDate = DateFormat('EEEE, MMM d, yyyy',).parse(e.date);
-                  } catch (_) {}
-                }
-                if (parsedDate == null) return false;
-                  return parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
-                }).toList().reversed.toList();
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: todayEvents.length,
-                    itemBuilder: (context, index) {
+            Consumer<AllEventsController>(
+              builder: (context, controller, _) {
+                final now = DateTime.now();
+                final todayEvents = controller.events.where((e) {
+                  DateTime? parsedDate = DateTime.tryParse(e.createdAt);
+                  if (parsedDate == null && e.date.isNotEmpty) {
+                    try {
+                      parsedDate = DateFormat('EEEE, MMM d, yyyy').parse(e.date);
+                    } catch (_) {}
+                  }
+                  if (parsedDate == null) return false;
+                    return parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
+                  }).toList().reversed.toList();
+
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: todayEvents.length,
+                      itemBuilder: (context, index) {
                       final EventModel event = todayEvents[index];
+
+                      // Parse event date to verify if it is today
+                      DateTime? parsedDate = DateTime.tryParse(event.createdAt);
+                      if (parsedDate == null && event.date.isNotEmpty) {
+                        try {
+                          parsedDate = DateFormat('EEEE, MMM d, yyyy',).parse(event.date);
+                        } catch (_) {}
+                      }
+                      final bool isToday = parsedDate != null && parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
                       return Dismissible(
                         key: ValueKey(event.id),
                         direction: DismissDirection.endToStart,
@@ -94,11 +104,11 @@ class AllEvents extends StatelessWidget {
                           child: EventCard(
                             id: event.id,
                             title: event.title,
-                            sub_title: event.description,
+                            // Show sub_title ONLY if the event is today
+                            sub_title: isToday ? event.description : '',
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
-                            location: event.category == 'Google Calendar'
-                            ? '' : event.location,
+                            location: event.category == 'Google Calendar'? '': event.location,
                             isDarkMode: isDarkMode,
                             onEdit: () {
                               context.push('/edit_event', extra: event);
@@ -109,13 +119,13 @@ class AllEvents extends StatelessWidget {
                                 onConfirm: () {
                                   controller.runWithLoaderAndTimer<bool>(
                                   context: context,
-                                  task: () =>controller.removeEventFromList(
+                                  task: () => controller.removeEventFromList(
                                     event,
                                     deleteType: 'single',
                                     ),
                                   ).then((success) {
                                   if (success != true) {
-                                    debugPrint('❌ Failed to delete event',);
+                                    debugPrint('❌ Failed to delete event');
                                     }
                                   });
                                 },
@@ -138,7 +148,8 @@ class AllEvents extends StatelessWidget {
     );
   }
 }
-// SizedBox(height: 10.h),
+
+  // SizedBox(height: 10.h),
   //   Center(
   //     child: CustomButton(
   //       text: "Add New Event",

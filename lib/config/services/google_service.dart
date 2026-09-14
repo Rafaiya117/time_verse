@@ -139,6 +139,56 @@ class GoogleServices {
     }
   }
 
+  // Future<void> createGoogleCalendarEvent({
+  //   required String accessToken,
+  //   required String title,
+  //   required String date,
+  //   required String startTime,
+  //   required String endTime,
+  //   String? description,
+  //   String? location,
+  //   String? alarmTimeISO,
+  // }) async {
+  //   final dio = Dio();
+
+  //   final startDateTime = "${date}T$startTime";
+  //   final endDateTime = "${date}T$endTime";
+
+  //   final body = {
+  //     "summary": title,
+  //     "description": description ?? "",
+  //     "location": location ?? "",
+  //     "start": {"dateTime": startDateTime, "timeZone": "Asia/Dhaka"},
+  //     "end": {"dateTime": endDateTime, "timeZone": "Asia/Dhaka"},
+  //     "reminders": {
+  //       "useDefault": false,
+  //       "overrides": [
+  //         {"method": "popup", "minutes": 15}
+  //       ],
+  //     },
+  //   };
+
+  //   try {
+  //     final response = await dio.post(
+  //       "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+  //       data: body,
+  //       options: Options(
+  //         headers: {
+  //           "Authorization": "Bearer $accessToken",
+  //           "Content-Type": "application/json",
+  //         },
+  //       ),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       debugPrint("✅ Event added to Google Calendar");
+  //     } else {
+  //       debugPrint("⚠️ Google Calendar error: ${response.data}");
+  //     }
+  //   } catch (e) {
+  //     debugPrint("❌ Google Calendar Exception: $e");
+  //   }
+  // }
   Future<void> createGoogleCalendarEvent({
     required String accessToken,
     required String title,
@@ -151,8 +201,12 @@ class GoogleServices {
   }) async {
     final dio = Dio();
 
-    final startDateTime = "${date}T$startTime";
-    final endDateTime = "${date}T$endTime";
+    // Ensure start and end times include seconds for valid ISO 8601 formatting
+    final cleanStart = startTime.split(':').length == 2 ? "$startTime:00" : startTime;
+    final cleanEnd = endTime.split(':').length == 2 ? "$endTime:00" : endTime;
+
+    final startDateTime = "${date}T$cleanStart";
+    final endDateTime = "${date}T$cleanEnd";
 
     final body = {
       "summary": title,
@@ -180,7 +234,7 @@ class GoogleServices {
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         debugPrint("✅ Event added to Google Calendar");
       } else {
         debugPrint("⚠️ Google Calendar error: ${response.data}");
@@ -189,7 +243,7 @@ class GoogleServices {
       debugPrint("❌ Google Calendar Exception: $e");
     }
   }
-
+  
   Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({
     required String accessToken,
     DateTime? timeMin,
