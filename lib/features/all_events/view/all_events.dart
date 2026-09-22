@@ -44,58 +44,50 @@ class AllEvents extends StatelessWidget {
                 final now = DateTime.now();
                 final todayEvents = controller.events.where((e) {
                   DateTime? parsedDate = DateTime.tryParse(e.createdAt);
-                  if (parsedDate == null && e.date.isNotEmpty) {
-                    try {
-                      parsedDate = DateFormat('EEEE, MMM d, yyyy').parse(e.date);
-                    } catch (_) {}
-                  }
-                  if (parsedDate == null) return false;
-                    return parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
-                  }).toList().reversed.toList();
-
-                  return Expanded(
-                    child: ListView.builder(
-                      itemCount: todayEvents.length,
-                      itemBuilder: (context, index) {
-                      final EventModel event = todayEvents[index];
-
-                      // Parse event date to verify if it is today
-                      DateTime? parsedDate = DateTime.tryParse(event.createdAt);
-                      if (parsedDate == null && event.date.isNotEmpty) {
-                        try {
-                          parsedDate = DateFormat('EEEE, MMM d, yyyy',).parse(event.date);
+                    if (parsedDate == null && e.date.isNotEmpty) {
+                      try {
+                        parsedDate = DateFormat('EEEE, MMM d, yyyy',).parse(e.date);
                         } catch (_) {}
                       }
-                      final bool isToday = parsedDate != null && parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
-                      return Dismissible(
-                        key: ValueKey(event.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          color: Colors.red,
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        confirmDismiss: (_) async {
-                          final completer = Completer<bool>();
-                          showRemoveEventDialog(
-                            context,
-                            onConfirm: () {
-                              controller.runWithLoaderAndTimer<bool>(
-                                context: context,
-                                task: () => controller.removeEventFromList(
-                                  event,
-                                  deleteType: 'single',
-                                ),
-                              ).then((success) {
-                                if (success != true) {
-                                  debugPrint('❌ Failed to delete event');
-                                }
-                                completer.complete(success == true);
-                              });
-                            },
-                          );
-                          return await completer.future.catchError(
+                      if (parsedDate == null) return false;
+                      return parsedDate.year == now.year && parsedDate.month == now.month && parsedDate.day == now.day;
+                    }).toList().reversed.toList();
+
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: todayEvents.length,
+                        itemBuilder: (context, index) {
+                        final EventModel event = todayEvents[index];
+
+                        return Dismissible(
+                          key: ValueKey(event.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            color: Colors.red,
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          confirmDismiss: (_) async {
+                            final completer = Completer<bool>();
+                            showRemoveEventDialog(
+                              context,
+                              onConfirm: () {
+                                controller.runWithLoaderAndTimer<bool>(
+                                  context: context,
+                                    task: () => controller.removeEventFromList(
+                                      event,
+                                      deleteType: 'single',
+                                    ),
+                                  ).then((success) {
+                                    if (success != true) {
+                                      debugPrint('❌ Failed to delete event');
+                                    }
+                                    completer.complete(success == true);
+                                  });
+                                },
+                              );
+                            return await completer.future.catchError(
                             (_) => false,
                           );
                         },
@@ -104,8 +96,8 @@ class AllEvents extends StatelessWidget {
                           child: EventCard(
                             id: event.id,
                             title: event.title,
-                            // Show sub_title ONLY if the event is today
-                            sub_title: isToday ? event.description : '',
+                            // Directly pass description regardless of date condition
+                            sub_title: event.description,
                             date: event.date,
                             time: '${event.startTime}-${event.endTime}',
                             location: event.category == 'Google Calendar'? '': event.location,
@@ -118,14 +110,14 @@ class AllEvents extends StatelessWidget {
                                 context,
                                 onConfirm: () {
                                   controller.runWithLoaderAndTimer<bool>(
-                                  context: context,
-                                  task: () => controller.removeEventFromList(
-                                    event,
-                                    deleteType: 'single',
+                                    context: context,
+                                    task: () => controller.removeEventFromList(
+                                      event,
+                                      deleteType: 'single',
                                     ),
                                   ).then((success) {
                                   if (success != true) {
-                                    debugPrint('❌ Failed to delete event');
+                                    debugPrint('❌ Failed to delete event',);
                                     }
                                   });
                                 },

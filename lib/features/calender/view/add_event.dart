@@ -321,12 +321,40 @@ class AddEventPage extends StatelessWidget {
               SizedBox(height: 12.h),
               Consumer<TimePickerController>(
                 builder: (context, timeController, _) {
-                  final selectedReminderOption = timeController.selectedReminderOption;
-                  final options = ['5 min before','10 min before','30 min before','1 hr before',];
+                  final selectedReminderOption =
+                      timeController.selectedReminderOption;
+                  final options = [
+                    '5 min before',
+                    '10 min before',
+                    '30 min before',
+                    '1 hr before',
+                    'Custom',
+                  ];
 
                   return PopupMenuButton<String>(
-                    onSelected: (option) {
-                      timeController.setReminderOption(option);
+                    onSelected: (option) async {
+                      if (option == 'Custom') {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (picked != null && context.mounted) {
+                          final localizations = MaterialLocalizations.of(
+                            context,
+                          );
+                          final formattedTime = localizations.formatTimeOfDay(
+                            picked,
+                            alwaysUse24HourFormat: false,
+                          );
+                          // Updated to pass both display string and TimeOfDay
+                          timeController.setCustomReminderOption(
+                            formattedTime,
+                            picked,
+                          );
+                        }
+                      } else {
+                        timeController.setReminderOption(option);
+                      }
                     },
                     color: isDarkMode ? const Color(0xFF131B26) : Colors.white,
                     shape: RoundedRectangleBorder(
@@ -343,8 +371,14 @@ class AddEventPage extends StatelessWidget {
                             Text(
                               option,
                               style: GoogleFonts.inter(
-                                color: isSelected? const Color(0xFFFFB703): (isDarkMode ? Colors.white : Colors.black),
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                color: isSelected
+                                    ? const Color(0xFFFFB703)
+                                    : (isDarkMode
+                                          ? Colors.white
+                                          : Colors.black),
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                                 fontSize: 14.sp,
                               ),
                             ),
@@ -378,7 +412,9 @@ class AddEventPage extends StatelessWidget {
                                 Text(
                                   'Remind me',
                                   style: GoogleFonts.inter(
-                                    color: isDarkMode ? Colors.white : Colors.black,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w500,
                                   ),

@@ -548,40 +548,100 @@ class EditEventPage extends StatelessWidget {
               SizedBox(height: 28.h),
 
               // --- UPDATE BUTTON ---
-              CustomButton(
-                text: "Update",
-                onPressed: () async {
-                  final timeController = Provider.of<TimePickerController>(
-                    context,
-                    listen: false,
-                  );
+              Consumer<TimePickerController>(
+                builder: (context, timeController, _) {
+                  final selectedReminderOption = timeController.selectedReminderOption;
+                  final options = ['5 min before','10 min before','30 min before','1 hr before','Custom'];
 
-                  await editEventController.updateEvent(
-                    context: context,
-                    eventId: eventId,
-                    rawStart: timeController.formatTime(
-                      timeController.getTime('start'),
-                    ),
-                    rawEnd: timeController.formatTime(
-                      timeController.getTime('end'),
-                    ),
-                    rawAlarm: timeController.formatTime(
-                      timeController.getTime('alarm'),
-                    ),
-                    onSuccess: () {
-                      if (context.mounted) {
-                        context.go('/home'); 
+                  return PopupMenuButton<String>(
+                    onSelected: (option) async {
+                      if (option == 'Custom') {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (picked != null && context.mounted) {
+                          final formattedCustom = picked.format(context);
+                          timeController.setCustomReminderOption(
+                            formattedCustom,
+                            picked,
+                          );
+                        }
+                      } else {
+                        timeController.setReminderOption(option);
                       }
                     },
+                    color: isDarkMode ? const Color(0xFF131B26) : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    offset: Offset(0, 50.h),
+                    itemBuilder: (context) => options.map((option) {
+                      final isSelected = option == selectedReminderOption;
+                      return PopupMenuItem<String>(
+                        value: option,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              option,
+                              style: GoogleFonts.inter(
+                                color: isSelected ? const Color(0xFFFFB703): (isDarkMode ? Colors.white : Colors.black),
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                            if (isSelected)
+                            Icon(
+                              Icons.check_rounded,
+                              color: const Color(0xFFFFB703),
+                              size: 18.sp,
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    child: _buildFormContainer(
+                      context,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(top: 2.h, right: 12.w),
+                            child: Text(
+                              '🔔',
+                              style: TextStyle(fontSize: 18.sp),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Remind me',
+                                  style: GoogleFonts.inter(
+                                    color: isDarkMode ? Colors.white : Colors.black,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  selectedReminderOption,
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFFFFB703),
+                                    fontSize: 13.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
-                gradient: AppGradientColors.button_gradient,
-                textColor: AppColors.text_color,
-                fontFamily: 'outfit',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.normal,
-                height: 51.h,
-                width: double.infinity,
               ),
               SizedBox(height: 20.h),
             ],

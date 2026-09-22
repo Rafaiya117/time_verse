@@ -35,7 +35,7 @@ class AllEventsController extends ChangeNotifier {
     return _repository.formatEventDate(rawDate);
   }
 
-  Future<void> fetchAllEvents() async {
+  Future<void> fetchAllEvents([BuildContext? context]) async {
     try {
       final apiEvents = await _repository.fetchApiEvents();
       final googleEvents = await _repository.fetchGoogleCalendarEvents();
@@ -58,7 +58,9 @@ class AllEventsController extends ChangeNotifier {
 
           if (parsedAlarm != null && parsedAlarm.isAfter(nowWithBuffer)) {
             try {
-              await AlarmHelper.scheduleEventAlarm(event);
+              if (context != null) {
+                await AlarmHelper.scheduleEventAlarm(context, event);
+              }
               debugPrint("⏰ Successfully scheduled alarm for: ${event.title} at $parsedAlarm");
             } catch (alarmError) {
               debugPrint("❌ Failed to set alarm for ${event.title}: $alarmError");

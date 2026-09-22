@@ -98,7 +98,7 @@ class HomeController extends ChangeNotifier {
   }
 
   /// -------------------- Initialization -------------------- ///
-  void initOnce(ProfileController profileController) {
+  void initOnce(ProfileController profileController, [BuildContext? context]) {
     if (_isInitialized) return;
     _isInitialized = true;
     profileController.loadUserProfile().then((_) async {
@@ -118,7 +118,9 @@ class HomeController extends ChangeNotifier {
           final parsedAlarm = DateTime.tryParse(cleanIso);
 
           if (parsedAlarm != null && parsedAlarm.isAfter(now)) {
-            await AlarmHelper.scheduleEventAlarm(event);
+            if (context != null) {
+              await AlarmHelper.scheduleEventAlarm(context, event);
+            }
           }
         }
       }

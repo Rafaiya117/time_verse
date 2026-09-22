@@ -251,14 +251,22 @@ class NotificationsScreen extends StatelessWidget {
     final controller = context.read<NotificationSettingsController>();
 
     return InkWell(
-      onTap: () => controller.openDeviceSoundSettings(),
+      onTap: () async {
+        await controller.openDeviceSoundSettings();
+        await Future.delayed(const Duration(milliseconds: 800));
+        debugPrint(
+          '🔄 App regained focus. Fetching active system alarm configuration track...',
+        );
+        await controller.fetchAndSyncSystemRingtone();
+        debugPrint(
+          '🎯 Current Active Track resolved: ${controller.selectedRingtone}',
+        );
+      },
       borderRadius: BorderRadius.circular(14.r),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
-          color: isDarkMode
-              ? const Color(0xFF091222).withOpacity(0.85)
-              : Colors.white,
+          color: isDarkMode ? const Color(0xFF091222).withOpacity(0.85) : Colors.white,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
             color: const Color(0xFFFFB703).withOpacity(0.3),
@@ -282,13 +290,19 @@ class NotificationsScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 2.h),
-                  Text(
-                    'Configure in Device Settings',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF9CA3AF),
-                    ),
+                  // 🛠️ CHANGED: Use a consumer or tracking label block to dynamically show the path string state
+                  Consumer<NotificationSettingsController>(
+                    builder: (context, settings, child) {
+                      final String currentSound = settings.selectedRingtone;
+                      return Text(
+                        currentSound.contains('content://') ? 'System Alarm Active' : 'Configure in Device Settings',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: currentSound.contains('content://') ? const Color(0xFFFFB703) : const Color(0xFF9CA3AF),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

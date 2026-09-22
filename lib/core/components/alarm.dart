@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -102,27 +103,69 @@ class ExampleAlarmRingScreen extends StatefulWidget {
 class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
   StreamSubscription<AlarmSet>? _subscription;
 
+  // 🛠️ LINK TO YOUR NATIVE CHANNEL ARCHITECTURE
+  static const MethodChannel _ringtoneChannel = MethodChannel(
+    'com.infiniquote.app/ringtone',
+  );
+
   @override
   void initState() {
     super.initState();
     debugPrint('********${widget.alarmSettings}********');
+
+    // Tiny frame separation to guarantee audio routing separation
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) {
+        _startForegroundRingtone();
+      }
+    });
+
     _subscription = Alarm.ringing.listen((alarms) {
       if (alarms.containsId(widget.alarmSettings.id)) return;
-      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        _stopAudioAndPop();
+      }
     });
+  }
+
+  // 🛠️ COMMAND NATIVE LAYER TO LOOP THE AUDIO PATH
+  Future<void> _startForegroundRingtone() async {
+    try {
+      await _ringtoneChannel.invokeMethod('playRingtone', {
+        'uri': widget.alarmSettings.assetAudioPath,
+      });
+      debugPrint("Native hardware media channel engaged successfully.");
+    } catch (e) {
+      debugPrint("Error routing call request down channel pipe: $e");
+    }
+  }
+
+  // 🛠️ DISENGAGE PLAYER VIA METHOD CHANNEL
+  Future<void> _stopAudioAndPop() async {
+    try {
+      await _ringtoneChannel.invokeMethod('stopRingtone');
+    } catch (e) {
+      debugPrint("Error passing termination packet downstream: $e");
+    }
+    if (mounted) Navigator.pop(context);
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _ringtoneChannel.invokeMethod('stopRingtone'); // Safe cleanup on close
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final notification = widget.alarmSettings.notificationSettings;
-    final String formattedTime = DateFormat('HH:mm').format(widget.alarmSettings.dateTime);
-    final String formattedDateStr = DateFormat('EEE d MMMM').format(widget.alarmSettings.dateTime);
+    final String formattedTime = DateFormat(
+      'HH:mm',
+    ).format(widget.alarmSettings.dateTime);
+    final String formattedDateStr = DateFormat(
+      'EEE d MMMM',
+    ).format(widget.alarmSettings.dateTime);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Stack(
@@ -134,50 +177,43 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    //SizedBox(height: 16.h),
-                    // Bell Header Icon
-                    // Icon(
-                    //   Icons.notifications_active,
-                    //   color: const Color(0xFFFFB703),
-                    //   size: 40.sp,
-                    // ),
-                    // SizedBox(height: 12.h),
-                    // Subtitle Title Text Layer
-                    // Text(
-                    //   'ALARM RINGING FOR',
-                    //   style: GoogleFonts.cormorant(
-                    //     color: const Color(0xFFFFB703),
-                    //     fontSize: 15.sp,
-                    //     fontWeight: FontWeight.w600,
-                    //     letterSpacing: 5.5,
-                    //   ),
-                    // ),
                     SizedBox(height: 12.h),
-                    // Heading Main dynamic Title
                     Text(
                       notification.title ?? 'Alarm Ringing',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.playfairDisplay(
-                        color: isDarkMode?AppColors.button_color:Colors.white,
+                        color: isDarkMode
+                            ? AppColors.button_color
+                            : Colors.white,
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     SizedBox(height: 12.h),
-                    // Divider graphics accent pattern with a single bright central diamond asset
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(width: 40.w, height: 1.h, color: Colors.white24),
+                        Container(
+                          width: 40.w,
+                          height: 1.h,
+                          color: Colors.white24,
+                        ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.w),
-                          child: Icon(Icons.star, color: const Color(0xFFFFB703), size: 12.sp),
+                          child: Icon(
+                            Icons.star,
+                            color: const Color(0xFFFFB703),
+                            size: 12.sp,
+                          ),
                         ),
-                        Container(width: 40.w, height: 1.h, color: Colors.white24),
+                        Container(
+                          width: 40.w,
+                          height: 1.h,
+                          color: Colors.white24,
+                        ),
                       ],
                     ),
                     SizedBox(height: 20.h),
-                    // Big Clock Render digits text stack block element
                     Text(
                       formattedTime,
                       style: GoogleFonts.playfairDisplay(
@@ -188,7 +224,6 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    // Date element tag layer display row item properties
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -204,12 +239,14 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                       ],
                     ),
                     SizedBox(height: 32.h),
-                    // Context description element details card component box
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 24.h,
+                      ),
                       decoration: BoxDecoration(
-                        color:  Colors.transparent,
+                        color: Colors.transparent,
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -225,7 +262,8 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                             ),
                           ),
                           Text(
-                            notification.body ?? 'Every journey leads ahead, stepping into the potential trapped beneath your dreams.',
+                            notification.body ??
+                                'Every journey leads ahead, stepping into the potential trapped beneath your dreams.',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.cormorant(
                               color: Colors.white.withOpacity(0.9),
@@ -237,8 +275,7 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                         ],
                       ),
                     ),
-                    
-                    SizedBox(height: 24.h), 
+                    SizedBox(height: 24.h),
                     Container(
                       width: 90.w,
                       height: 90.h,
@@ -287,110 +324,126 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 24.h), 
+                    SizedBox(height: 24.h),
                     Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 50.h,
-                            child: OutlinedButton(
-                              onPressed: () async {
-                                final snoozeMinutes = context.read<NotificationSettingsController>().snoozeDurationMinutes;
-                                await Alarm.set(
-                                  alarmSettings: widget.alarmSettings.copyWith(
-                                    dateTime: DateTime.now().add(
-                                      Duration(
-                                        minutes: snoozeMinutes,
-                                      ), // Uses dynamic configured duration
-                                    ),
-                                  ),
-                                );
-                                if (!mounted) return;
-                                appRouter.go('/home');
-                              },
-                              // onPressed: () async {
-                              //   await Alarm.set(
-                              //     alarmSettings: widget.alarmSettings.copyWith(
-                              //       dateTime: DateTime.now().add(
-                              //         const Duration(minutes: 1),
-                              //       ),
-                              //     ),
-                              //   );
-                              //   if (!mounted) return;
-                              //   appRouter.go('/home');
-                              // },
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: isDarkMode ? Colors.white30 : const Color(0xFFFFB800),
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '😴 ',
-                                    style: TextStyle(fontSize: 14.sp),
-                                  ),
-                                  Text(
-                                    'Snooze',
-                                    style: GoogleFonts.inter(
-                                      // 🛠️ FIX 2: Set text color to golden when it is not dark mode
-                                      color: isDarkMode ? Colors.white: const Color(0xFFFFB800),
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: SizedBox(
-                            height: 50.h,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                await Alarm.stop(widget.alarmSettings.id);
-                                if (!mounted) return;
-                                appRouter.go('/home');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFE6A100),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.stop, color: Colors.black, size: 18.sp),
-                                  SizedBox(width: 6.w),
-                                  Text(
-                                    'Stop',
-                                    style: GoogleFonts.inter(
-                                      color: Colors.black,
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+  children: [
+    Expanded(
+      child: SizedBox(
+        height: 50.h,
+        child: OutlinedButton(
+          onPressed: () async {
+            await _ringtoneChannel.invokeMethod('stopRingtone');
+            final snoozeMinutes = context
+                .read<NotificationSettingsController>()
+                .snoozeDurationMinutes;
+            await Alarm.set(
+              alarmSettings: widget.alarmSettings.copyWith(
+                dateTime: DateTime.now().add(
+                  Duration(minutes: snoozeMinutes),
+                ),
+              ),
+            );
+
+            if (!mounted) return;
+
+            // Dismiss the overlay/modal route if popped, otherwise use GoRouter
+            if (Navigator.of(context, rootNavigator: true).canPop()) {
+              Navigator.of(context, rootNavigator: true).pop();
+            } else {
+              appRouter.go('/home');
+            }
+          },
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(
+              color: isDarkMode
+                  ? Colors.white30
+                  : const Color(0xFFFFB800),
+              width: 1.5,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '😴 ',
+                style: TextStyle(fontSize: 14.sp),
+              ),
+              Text(
+                'Snooze',
+                style: GoogleFonts.inter(
+                  color: isDarkMode
+                      ? Colors.white
+                      : const Color(0xFFFFB800),
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+    SizedBox(width: 16.w),
+    Expanded(
+      child: SizedBox(
+        height: 50.h,
+        child: ElevatedButton(
+          onPressed: () async {
+            await _ringtoneChannel.invokeMethod('stopRingtone');
+            await Alarm.stop(widget.alarmSettings.id);
+
+            if (!mounted) return;
+
+            // Dismiss the overlay/modal route if popped, otherwise use GoRouter
+            if (Navigator.of(context, rootNavigator: true).canPop()) {
+              Navigator.of(context, rootNavigator: true).pop();
+            } else {
+              appRouter.go('/home');
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE6A100),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            elevation: 0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.stop,
+                color: Colors.black,
+                size: 18.sp,
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                'Stop',
+                style: GoogleFonts.inter(
+                  color: Colors.black,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  ],
+),
                     SizedBox(height: 12.h),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.keyboard_arrow_up_rounded, color: Colors.white38, size: 20.sp),
+                        Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          color: Colors.white38,
+                          size: 20.sp,
+                        ),
                         Text(
                           'Swipe Up to dismiss',
                           style: GoogleFonts.inter(

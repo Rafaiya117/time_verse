@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:time_verse/config/app_route/app_prefernce.dart';
-import 'package:time_verse/core/components/mood_tracker/mood_tracker_popup.dart'; 
+//import 'package:time_verse/core/components/mood_tracker/mood_tracker_popup.dart'; 
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -38,6 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
       await AppPrefs.setFirstLaunch(false);
       context.push('/landing');
     } else if (isLoggedIn && isSessionValid) {
+      /* 
       final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
 
       if (!mounted) return;
@@ -57,6 +58,8 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         context.push('/home');
       }
+      */
+      context.push('/home');
     } else {
       await AppPrefs.setGoogleLogin(false);
       await AppPrefs.clearGoogleToken();

@@ -241,6 +241,7 @@ class AddEventRepository {
       "start_time": startTime,
       "end_time": endTime,
       "alarm_time": alarmTime,
+      "is_alarm_sent": true, 
       "repeat": isCustom ? "custom" : (repeat ?? "1 day"),
 
       if (isCustom && customRepeat != null) "custom_repeat": customRepeat,
@@ -250,7 +251,7 @@ class AddEventRepository {
         "category_name": categoryName!.trim(),
       if (note?.trim().isNotEmpty ?? false)
         "type_event_description": note!.trim(),
-      };
+    };
 
     final response = await _dio.post(
       url,
@@ -266,105 +267,109 @@ class AddEventRepository {
   }
 
   List<DateTime> generateAlarmOccurrences({
-  required DateTime startDateTime,
-  required String? selectedRepeat,
-  required int customRepeatCount,
-  required String customRepeatUnit,
-  required List<String> selectedDays,
-  required String repeatEndType,
-  required DateTime customEndDate,
-  required int customOccurrences,
-  int maxLimit = 30,
-}) {
-  List<DateTime> occurrences = [];
+    required DateTime startDateTime,
+    required String? selectedRepeat,
+    required int customRepeatCount,
+    required String customRepeatUnit,
+    required List<String> selectedDays,
+    required String repeatEndType,
+    required DateTime customEndDate,
+    required int customOccurrences,
+    int maxLimit = 30,
+  }) {
+    List<DateTime> occurrences = [];
 
-  int intervalCount = 1;
-  String intervalUnit = 'none';
+    int intervalCount = 1;
+    String intervalUnit = 'none';
 
-  if (selectedRepeat == 'Custom') {
-    intervalCount = customRepeatCount > 0 ? customRepeatCount : 1;
-    intervalUnit = customRepeatUnit.toLowerCase();
-  } else if (selectedRepeat != null && selectedRepeat != "Don't repeat") {
-    if (selectedRepeat == 'Every 1 day') {
-      intervalUnit = 'day';
-    } else if (selectedRepeat == 'Every 1 week') {
-      intervalUnit = 'week';
-    } else if (selectedRepeat == 'Every 1 month') {
-      intervalUnit = 'month';
-    } else if (selectedRepeat == 'Every 1 year') {
-      intervalUnit = 'year';
+    if (selectedRepeat == 'Custom') {
+      intervalCount = customRepeatCount > 0 ? customRepeatCount : 1;
+      intervalUnit = customRepeatUnit.toLowerCase();
+    } else if (selectedRepeat != null && selectedRepeat != "Don't repeat") {
+      if (selectedRepeat == 'Every 1 day') {
+        intervalUnit = 'day';
+      } else if (selectedRepeat == 'Every 1 week') {
+        intervalUnit = 'week';
+      } else if (selectedRepeat == 'Every 1 month') {
+        intervalUnit = 'month';
+      } else if (selectedRepeat == 'Every 1 year') {
+        intervalUnit = 'year';
+      }
     }
-  }
 
-  if (intervalUnit == 'none') {
-    occurrences.add(startDateTime);
-    return occurrences;
-  }
+    if (intervalUnit == 'none') {
+      occurrences.add(startDateTime);
+      return occurrences;
+    }
 
-  DateTime current = startDateTime;
-  int count = 0;
+    DateTime current = startDateTime;
+    int count = 0;
 
-  final selectedDayIndices = selectedDays.map((d) {
-    final parts = d.split('-');
+    final selectedDayIndices = selectedDays.map((d) {
+      final parts = d.split('-');
       return parts.length > 1 ? int.tryParse(parts[1]) ?? -1 : -1;
     }).where((idx) => idx != -1).toList();
 
-  while (count < maxLimit) {
-    if (repeatEndType == 'On' && current.isAfter(customEndDate)) {
-      break;
-    }
-    if (repeatEndType == 'After' && count >= customOccurrences) {
-      break;
-    }
+    while (count < maxLimit) {
+      if (repeatEndType == 'On' && current.isAfter(customEndDate)) {
+        break;
+      }
+      if (repeatEndType == 'After' && count >= customOccurrences) {
+        break;
+      }
 
-    if (intervalUnit == 'week' && selectedDayIndices.isNotEmpty) {
-      final currentDayIndex = current.weekday == 7 ? 0 : current.weekday;
-      if (selectedDayIndices.contains(currentDayIndex)) {
+      if (intervalUnit == 'week' && selectedDayIndices.isNotEmpty) {
+        final currentDayIndex = current.weekday == 7 ? 0 : current.weekday;
+        if (selectedDayIndices.contains(currentDayIndex)) {
+          occurrences.add(current);
+          count++;
+        }
+        if (current.weekday == DateTime.sunday && intervalCount > 1) {
+          current = current.add(Duration(days: 1 + 7 * (intervalCount - 1)));
+        } else {
+          current = current.add(const Duration(days: 1));
+        }
+      } else {
         occurrences.add(current);
         count++;
-      }
-      if (current.weekday == DateTime.sunday && intervalCount > 1) {
-        current = current.add(Duration(days: 1 + 7 * (intervalCount - 1)));
-      } else {
-        current = current.add(const Duration(days: 1));
-      }
-    } else {
-      occurrences.add(current);
-      count++;
 
-      if (intervalUnit == 'day') {
-        current = current.add(Duration(days: intervalCount));
-      } else if (intervalUnit == 'week') {
-        current = current.add(Duration(days: 7 * intervalCount));
-      } else if (intervalUnit == 'month') {
-        // Safe Month incrementing
-        int newYear = current.year;
-        int newMonth = current.month + intervalCount;
+        if (intervalUnit == 'day') {
+          current = current.add(Duration(days: intervalCount));
+        } else if (intervalUnit == 'week') {
+          current = current.add(Duration(days: 7 * intervalCount));
+        } else if (intervalUnit == 'month') {
+          int newYear = current.year;
+          int newMonth = current.month + intervalCount;
 
-        while (newMonth > 12) {
-          newYear++;
-          newMonth -= 12;
+          while (newMonth > 12) {
+            newYear++;
+            newMonth -= 12;
+          }
+
+          int lastDayOfTargetMonth = DateTime(newYear, newMonth + 1, 0).day;
+          int newDay = current.day > lastDayOfTargetMonth ? lastDayOfTargetMonth : current.day;
+
+          current = DateTime(
+            newYear,
+            newMonth,
+            newDay,
+            current.hour,
+            current.minute,
+          );
+        } else if (intervalUnit == 'year') {
+          current = DateTime(
+            current.year + intervalCount,
+            current.month,
+            current.day,
+            current.hour,
+            current.minute,
+          );
         }
-
-        // Clamp day value for shorter months (e.g., Jan 31 -> Feb 28)
-        int lastDayOfTargetMonth = DateTime(newYear, newMonth + 1, 0).day;
-        int newDay = current.day > lastDayOfTargetMonth ? lastDayOfTargetMonth : current.day;
-
-        current = DateTime(newYear,newMonth,newDay,current.hour,current.minute,);
-      } else if (intervalUnit == 'year') {
-        current = DateTime(
-          current.year + intervalCount,
-          current.month,
-          current.day,
-          current.hour,
-          current.minute,
-        );
       }
     }
-  }
 
-  return occurrences;
-}
+    return occurrences;
+  }
 
   Future<Map<String, dynamic>?> createTaskRaw(Map<String, dynamic> body) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';

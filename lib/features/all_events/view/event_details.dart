@@ -54,25 +54,16 @@ class EventDetails extends StatelessWidget {
                 );
               }
 
-              // final eventDetail = snapshot.data!;
-              // final currentQuoteText = eventDetail.description.isEmpty
-              // ? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.'
-              // : eventDetail.description;
               final eventDetail = snapshot.data!;
-              final DateTime? eventDate = DateTime.tryParse(eventDetail.date.trim());
-              final DateTime now = DateTime.now();
+              final String currentQuoteText = eventDetail.description.isNotEmpty ? eventDetail.description
+              : 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.';
 
-              // 2. Compare year, month, and day safely
-              final bool isToday = eventDate != null && eventDate.year == now.year &&
-              eventDate.month == now.month && eventDate.day == now.day;
-              final String currentQuoteText = isToday ? (eventDetail.description.isEmpty ? 'Every journey towards family weaves new tales in the tapestry of our souls, binding us closer with each step.'
-              : eventDetail.description): '';
-              
+              // 2. Deterministic background selection using the quote hash
               final int randomSeed = currentQuoteText.hashCode;
               final int randomImageNum = (Random(randomSeed).nextInt(11)) + 1;
               final String prefix = isDarkMode ? 'db_' : 'wb_';
               final String currentBgPath = 'assets/ai_generated_img/$prefix$randomImageNum.png';
-
+              
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 40.0.h),
                 child: Column(
@@ -176,7 +167,7 @@ class EventDetails extends StatelessWidget {
                               RepaintBoundary(
                                 key: eventController.quoteShareKey,
                                 child: Text(
-                                  currentQuoteText.isNotEmpty ? '“ $currentQuoteText ”': '',
+                                  currentQuoteText.isNotEmpty ? '“ $currentQuoteText ”' : '',
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.cormorant(
                                     fontSize: 24.sp,

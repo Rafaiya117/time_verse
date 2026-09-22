@@ -161,7 +161,7 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h),
-              Center(
+             Center(
                 child: CustomButton(
                   text: "Continue",
                   onPressed: () async {
@@ -181,22 +181,24 @@ class LoginPage extends StatelessWidget {
                         await AppPrefs.setFirstLaunch(false);
                         await context.read<ProfileController>().loadUserProfile();
                         if (context.mounted) {
+                          /* 
                           final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
                           if (shouldShowMood) {
                             await AppPrefs.markMoodTrackerShownToday();
                             if (!context.mounted) return;
-
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              barrierColor: Colors.black.withOpacity(0.5),
-                              builder: (dialogContext) => const MoodTrackerPopup(),
-                            ).then((_) {
-                              if (context.mounted) context.push('/home');
-                            });
-                          } else {
-                            context.push('/home');
-                          }
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                barrierColor: Colors.black.withOpacity(0.5),
+                                builder: (dialogContext) => const MoodTrackerPopup(),
+                              ).then((_) {
+                                if (context.mounted) context.push('/home');
+                              });
+                            } else {
+                              context.push('/home');
+                            }
+                          */
+                          context.push('/home');
                         }
                       } else {
                         if (context.mounted) {
@@ -286,22 +288,25 @@ class LoginPage extends StatelessWidget {
                       await AppPrefs.setFirstLaunch(false);
 
                       if (context.mounted) {
-                        final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
-                        if (shouldShowMood) {
-                          await AppPrefs.markMoodTrackerShownToday();
-                          if (!context.mounted) return;
+                        /* 
+                          final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
+                          if (shouldShowMood) {
+                            await AppPrefs.markMoodTrackerShownToday();
+                            if (!context.mounted) return;
 
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            barrierColor: Colors.black.withOpacity(0.5),
-                            builder: (dialogContext) => const MoodTrackerPopup(),
-                          ).then((_) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              barrierColor: Colors.black.withOpacity(0.5),
+                              builder: (dialogContext) => const MoodTrackerPopup(),
+                            ).then((_) {
                             if (context.mounted) context.push('/home');
                           });
                         } else {
                           context.push('/home');
                         }
+                        */
+                        context.push('/home');
                       }
                     } else {
                       if (context.mounted) {
