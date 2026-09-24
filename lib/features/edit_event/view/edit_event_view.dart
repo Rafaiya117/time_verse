@@ -644,6 +644,40 @@ class EditEventPage extends StatelessWidget {
                 },
               ),
               SizedBox(height: 20.h),
+              CustomButton(
+                text: "Update",
+                onPressed: () async {
+                  final timeController = Provider.of<TimePickerController>(
+                    context,
+                    listen: false,
+                  );
+                  await editEventController.updateEvent(
+                    context: context,
+                    eventId: eventId,
+                    rawStart: timeController.formatTime(
+                      timeController.getTime('start'),
+                    ),
+                    rawEnd: timeController.formatTime(
+                      timeController.getTime('end'),
+                    ),
+                    rawAlarm: timeController.formatTime(
+                      timeController.getTime('alarm'),
+                    ),
+                    onSuccess: () {
+                      if (context.mounted) {
+                        context.go('/home'); 
+                      }
+                    },
+                  );
+                },
+                gradient: AppGradientColors.button_gradient,
+                textColor: AppColors.text_color,
+                fontFamily: 'outfit',
+                fontSize: 16.sp,
+                fontWeight: FontWeight.normal,
+                height: 51.h,
+                width: double.infinity,
+              ),
             ],
           ),
         ),

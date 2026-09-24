@@ -33,10 +33,43 @@ class FancyCalendarView extends StatelessWidget {
         selectedDayPredicate: (day) => isSameDay(controller.selectedDay, day),
         onDaySelected: controller.onDaySelected,
 
+        // eventLoader: (day) {
+        //   return controller.events.where((event) {
+        //     final eventDate = DateTime.tryParse(event.createdAt); 
+        //     return eventDate != null && isSameDay(eventDate, day);
+        //   }).toList();
+        // },
+
         eventLoader: (day) {
           return controller.events.where((event) {
-            final eventDate = DateTime.tryParse(event.createdAt); 
-            return eventDate != null && isSameDay(eventDate, day);
+            final rawDateStr = event.createdAt.isNotEmpty ? event.createdAt: event.date;
+            final startDate = DateTime.tryParse(rawDateStr);
+            if (startDate == null) return false;
+
+            final start = DateTime(startDate.year, startDate.month, startDate.day,);
+            final current = DateTime(day.year, day.month, day.day);
+
+            if (current.isBefore(start)) return false;
+            if (isSameDay(start, current)) return true;
+
+            final repeatRule = event.repeat?.toLowerCase().trim() ?? '';
+
+            switch (repeatRule) {
+              case '1 day':
+              case 'every 1 day':
+                return true;
+              case '1 week':
+              case 'every 1 week':
+                return current.difference(start).inDays % 7 == 0;
+              case '1 month':
+              case 'every 1 month':
+                return current.day == start.day;
+              case '1 year':
+              case 'every 1 year':
+                return current.month == start.month && current.day == start.day;
+              default:
+                return false;
+            }
           }).toList();
         },
 

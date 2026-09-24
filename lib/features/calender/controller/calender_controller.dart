@@ -170,6 +170,7 @@ class CalendarController extends ChangeNotifier {
             user: json['user'] ?? 0,
             category: json['category']?.toString(),
             isFavorite: json['is_favorite'] ?? false,
+            repeat: json['repeat']?.toString(),
           );
         }).toList();
       }
