@@ -378,11 +378,29 @@ class Signup extends StatelessWidget {
                     final success = await googleServices.signIn();
                     if (success) {
                       await AppPrefs.setLoggedIn(true);
-                      await AppPrefs.setGoogleLogin(
-                        false,
-                      ); // Retained your new preference flag cleanly
                       await AppPrefs.setFirstLaunch(false);
-                      if (context.mounted) context.push('/home');
+
+                      if (context.mounted) {
+                        /* 
+                          final shouldShowMood = await AppPrefs.shouldShowMoodTrackerToday();
+                          if (shouldShowMood) {
+                            await AppPrefs.markMoodTrackerShownToday();
+                            if (!context.mounted) return;
+
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              barrierColor: Colors.black.withOpacity(0.5),
+                              builder: (dialogContext) => const MoodTrackerPopup(),
+                            ).then((_) {
+                            if (context.mounted) context.push('/home');
+                          });
+                        } else {
+                          context.push('/home');
+                        }
+                        */
+                        context.push('/home');
+                      }
                     } else {
                       if (context.mounted) {
                         await showMessageDialog(

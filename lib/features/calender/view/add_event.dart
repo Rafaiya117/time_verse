@@ -518,8 +518,7 @@ class AddEventPage extends StatelessWidget {
                                     padding: EdgeInsets.all(20.w),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment:CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Repeat',
@@ -596,9 +595,7 @@ class AddEventPage extends StatelessWidget {
                                 Text(
                                   'Repeat',
                                   style: GoogleFonts.inter(
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
+                                    color: isDarkMode ? Colors.white : Colors.black,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -607,9 +604,8 @@ class AddEventPage extends StatelessWidget {
                                 Text(
                                   currentRepeat,
                                   style: GoogleFonts.inter(
-                                    color: isDarkMode
-                                        ? Colors.grey.shade500
-                                        : Colors.grey.shade400,
+                                    color: isDarkMode ? Colors.grey.shade500
+                                      : Colors.grey.shade400,
                                     fontSize: 13.sp,
                                   ),
                                 ),

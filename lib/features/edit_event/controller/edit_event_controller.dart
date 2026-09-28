@@ -1,4 +1,4 @@
-// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: use_build_context_synchronously, curly_braces_in_flow_control_structures
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

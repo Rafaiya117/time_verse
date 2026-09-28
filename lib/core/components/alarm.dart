@@ -1,4 +1,4 @@
-// ignore_for_file: dead_null_aware_expression, deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, dead_null_aware_expression, deprecated_member_use
 
 import 'dart:async';
 import 'package:alarm/alarm.dart';
@@ -326,115 +326,128 @@ class _ExampleAlarmRingScreenState extends State<ExampleAlarmRingScreen> {
                     ),
                     SizedBox(height: 24.h),
                     Row(
-  children: [
-    Expanded(
-      child: SizedBox(
-        height: 50.h,
-        child: OutlinedButton(
-          onPressed: () async {
-            await _ringtoneChannel.invokeMethod('stopRingtone');
-            final snoozeMinutes = context
-                .read<NotificationSettingsController>()
-                .snoozeDurationMinutes;
-            await Alarm.set(
-              alarmSettings: widget.alarmSettings.copyWith(
-                dateTime: DateTime.now().add(
-                  Duration(minutes: snoozeMinutes),
-                ),
-              ),
-            );
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 50.h,
+                            child: OutlinedButton(
+                              onPressed: () async {
+                                await _ringtoneChannel.invokeMethod(
+                                  'stopRingtone',
+                                );
+                                final snoozeMinutes = context
+                                    .read<NotificationSettingsController>()
+                                    .snoozeDurationMinutes;
+                                await Alarm.set(
+                                  alarmSettings: widget.alarmSettings.copyWith(
+                                    dateTime: DateTime.now().add(
+                                      Duration(minutes: snoozeMinutes),
+                                    ),
+                                  ),
+                                );
 
-            if (!mounted) return;
+                                if (!mounted) return;
 
-            // Dismiss the overlay/modal route if popped, otherwise use GoRouter
-            if (Navigator.of(context, rootNavigator: true).canPop()) {
-              Navigator.of(context, rootNavigator: true).pop();
-            } else {
-              appRouter.go('/home');
-            }
-          },
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(
-              color: isDarkMode
-                  ? Colors.white30
-                  : const Color(0xFFFFB800),
-              width: 1.5,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '😴 ',
-                style: TextStyle(fontSize: 14.sp),
-              ),
-              Text(
-                'Snooze',
-                style: GoogleFonts.inter(
-                  color: isDarkMode
-                      ? Colors.white
-                      : const Color(0xFFFFB800),
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-    SizedBox(width: 16.w),
-    Expanded(
-      child: SizedBox(
-        height: 50.h,
-        child: ElevatedButton(
-          onPressed: () async {
-            await _ringtoneChannel.invokeMethod('stopRingtone');
-            await Alarm.stop(widget.alarmSettings.id);
-
-            if (!mounted) return;
-
-            // Dismiss the overlay/modal route if popped, otherwise use GoRouter
-            if (Navigator.of(context, rootNavigator: true).canPop()) {
-              Navigator.of(context, rootNavigator: true).pop();
-            } else {
-              appRouter.go('/home');
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFE6A100),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            elevation: 0,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.stop,
-                color: Colors.black,
-                size: 18.sp,
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                'Stop',
-                style: GoogleFonts.inter(
-                  color: Colors.black,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  ],
-),
+                                // Dismiss the overlay/modal route if popped, otherwise use GoRouter
+                                if (Navigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).canPop()) {
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pop();
+                                } else {
+                                  appRouter.go('/home');
+                                }
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: isDarkMode
+                                      ? Colors.white30
+                                      : const Color(0xFFFFB800),
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '😴 ',
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                  Text(
+                                    'Snooze',
+                                    style: GoogleFonts.inter(
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : const Color(0xFFFFB800),
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16.w),
+                        Expanded(
+                          child: SizedBox(
+                            height: 50.h,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await _ringtoneChannel.invokeMethod('stopRingtone');
+                                await Alarm.stop(widget.alarmSettings.id);
+                                if (!mounted) return;
+                                // Dismiss the overlay/modal route if popped, otherwise use GoRouter
+                                if (
+                                Navigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).canPop()) {
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pop();
+                                } else {
+                                  appRouter.go('/home');
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFE6A100),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.stop,
+                                    color: Colors.black,
+                                    size: 18.sp,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    'Stop',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.black,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 12.h),
                     Column(
                       mainAxisSize: MainAxisSize.min,

@@ -109,15 +109,12 @@ class CalenderView extends StatelessWidget {
                     itemCount: controller.events.length,
                     itemBuilder: (context, index) {
                       final EventModel event = controller.events[index];
-                      final bool isToday = event.date.trim().toLowerCase() == 'today';
-
                       return Padding(
                         padding: EdgeInsets.only(bottom: 16.0.h),
                         child: EventCard(
                           id: event.id,
                           title: event.title,
-                          // Show sub_title ONLY if the event is today
-                          sub_title: isToday ? event.description : '',
+                          sub_title: event.description,
                           date: event.date,
                           time: '${event.startTime}-${event.endTime}',
                           location: event.category == 'Google Calendar'? '': event.location,
