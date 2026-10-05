@@ -24,7 +24,9 @@ class AllEvents extends StatelessWidget {
     final controller = Provider.of<AllEventsController>(context, listen: false);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchAllEvents();
+      if (controller.events.isEmpty) {
+        controller.fetchAllEvents();
+      }
       context.read<BottomNavController>().updateIndexFromRoute(location);
     });
     return Scaffold(

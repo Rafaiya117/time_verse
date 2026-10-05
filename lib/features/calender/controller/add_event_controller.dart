@@ -80,13 +80,26 @@ class AddEventController extends ChangeNotifier {
     return selectedRepeat ?? "Don't repeat";
   }
 
+  // String? get apiRepeatValue {
+  //   if (selectedRepeat == 'Custom') {
+  //     final unitStr = customRepeatUnit.toLowerCase();
+  //     final plural = customRepeatCount > 1 ? 's' : '';
+  //     return '$customRepeatCount $unitStr$plural';
+  //   }
+  //   return _repeatMap[selectedRepeat] ?? (selectedRepeat?.replaceFirst(RegExp(r'^Every\s+', caseSensitive: false), '').trim());
+  // }
   String? get apiRepeatValue {
     if (selectedRepeat == 'Custom') {
       final unitStr = customRepeatUnit.toLowerCase();
       final plural = customRepeatCount > 1 ? 's' : '';
       return '$customRepeatCount $unitStr$plural';
     }
-    return _repeatMap[selectedRepeat] ?? (selectedRepeat?.replaceFirst(RegExp(r'^Every\s+', caseSensitive: false), '').trim());
+
+    if (selectedRepeat == null || selectedRepeat == "Don't repeat") {
+      return null;
+    }
+
+    return _repeatMap[selectedRepeat] ?? (selectedRepeat ?.replaceFirst(RegExp(r'^Every\s+', caseSensitive: false), '').trim());
   }
 
   Map<String, dynamic>? get customRepeatMap {
@@ -270,17 +283,23 @@ class AddEventController extends ChangeNotifier {
         final isCustom = apiRepeatValue?.toLowerCase() == 'custom';
         final offlineBody = {
           "title": titleController.text.trim(),
-          "date": EventDateTimeUtils.parseBackendDate(dateController.text.trim()),
+          "date": EventDateTimeUtils.parseBackendDate(dateController.text.trim(),
+          ),
           "start_time": start,
           "end_time": end,
           "alarm_time": formattedAlarmISO,
-          "repeat": isCustom ? "custom" : (apiRepeatValue ?? "1 day"),
-          if (isCustom && customRepeatMap != null) "custom_repeat": customRepeatMap,
+          if (apiRepeatValue != null)
+            "repeat": isCustom ? "custom" : apiRepeatValue,
+          if (isCustom && customRepeatMap != null)
+            "custom_repeat": customRepeatMap,
           "is_alarm_sent": true,
           "is_completed": false,
-          if (locationController.text.trim().isNotEmpty) "location": locationController.text.trim(),
-          if (selectedCategory?.isNotEmpty == true) "category_name": selectedCategory,
-          if (noteController.text.trim().isNotEmpty) "type_event_description": noteController.text.trim(),
+          if (locationController.text.trim().isNotEmpty)
+            "location": locationController.text.trim(),
+          if (selectedCategory?.isNotEmpty == true)
+            "category_name": selectedCategory,
+          if (noteController.text.trim().isNotEmpty)
+            "type_event_description": noteController.text.trim(),
         };
 
         await OfflineSyncService().saveToQueue(offlineBody);

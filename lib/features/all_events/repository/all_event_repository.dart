@@ -7,8 +7,6 @@ import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/auth/auth_service/auth_service.dart';
 
-
-
 class AllEventRepository {
   final Dio _dio = Dio();
 

@@ -52,15 +52,16 @@ class AddEventRepository {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
     final url = "${baseUrl}api/v1/event/create/";
     final bool isCustom = repeat?.toLowerCase() == 'custom';
+
     final Map<String, dynamic> body = {
       "title": title,
       "date": date,
       "start_time": startTime,
       "end_time": endTime,
       "alarm_time": alarmTime,
-      "is_alarm_sent": true, 
-      "repeat": isCustom ? "custom" : (repeat ?? "1 day"),
-
+      "is_alarm_sent": true,
+      if (repeat != null && repeat.isNotEmpty)
+        "repeat": isCustom ? "custom" : repeat,
       if (isCustom && customRepeat != null) "custom_repeat": customRepeat,
       "is_completed": isCompleted,
       if (location?.trim().isNotEmpty ?? false) "location": location!.trim(),
@@ -69,7 +70,7 @@ class AddEventRepository {
       if (note?.trim().isNotEmpty ?? false)
         "type_event_description": note!.trim(),
     };
-
+ 
     final response = await _dio.post(
       url,
       data: body,

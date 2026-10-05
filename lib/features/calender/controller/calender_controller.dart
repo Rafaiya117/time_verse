@@ -5,6 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:time_verse/config/app_route/nav_config.dart';
+import 'package:time_verse/config/services/alerm_notification_service.dart';
+import 'package:time_verse/config/services/alerm_service.dart';
 import 'package:time_verse/config/services/google_service.dart';
 import 'package:time_verse/config/services/user_session.dart';
 import 'package:time_verse/features/all_events/model/event_model.dart';
@@ -18,21 +20,10 @@ class CalendarController extends ChangeNotifier {
   DateTime? get selectedDay => model.selectedDay;
   final Dio _dio = Dio();
 
-  // void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-  //   model
-  //     ..selectedDay = selectedDay
-  //     ..focusedDay = focusedDay;
-
-  //   fetchUpcomingEvents(date: selectedDay);
-  //   notifyListeners();
-  // }
-
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     model
       ..selectedDay = selectedDay
       ..focusedDay = focusedDay;
-
-    _events.clear();
     notifyListeners();
 
     fetchUpcomingEvents(date: selectedDay);
@@ -85,6 +76,41 @@ class CalendarController extends ChangeNotifier {
     return rawTime;
   }
 
+  // Helper method: Check if a recurring event falls on target date
+  bool _isEventOccurringOnDate(EventModel event, DateTime targetDate) {
+    final rawDateStr = event.createdAt.isNotEmpty ? event.createdAt : event.date;
+    final startDate = DateTime.tryParse(rawDateStr);
+    if (startDate == null) return false;
+
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    final target = DateTime(targetDate.year, targetDate.month, targetDate.day);
+
+    if (target.isBefore(start)) return false;
+    if (start.year == target.year && start.month == target.month && start.day == target.day) {
+      return true;
+    }
+
+    final repeatRule = event.repeat?.toLowerCase().trim() ?? '';
+    if (repeatRule.isEmpty || repeatRule == "don't repeat") return false;
+
+    switch (repeatRule) {
+      case '1 day':
+      case 'every 1 day':
+        return true;
+      case '1 week':
+      case 'every 1 week':
+        return target.difference(start).inDays % 7 == 0;
+      case '1 month':
+      case 'every 1 month':
+        return target.day == start.day;
+      case '1 year':
+      case 'every 1 year':
+        return target.month == start.month && target.day == start.day;
+      default:
+        return false;
+    }
+  }
+
   // Helper method: Fetch Google Calendar events ONLY if signed in with Google
   Future<List<EventModel>> _fetchGoogleCalendarEvents({DateTime? filterDate}) async {
     final accessToken = GoogleServices().accessToken;
@@ -134,13 +160,12 @@ class CalendarController extends ChangeNotifier {
       final token = await authService.getToken();
 
       final targetDate = date ?? selectedDay ?? DateTime.now();
-      final String formattedQueryDate = DateFormat('yyyy-MM-dd').format(targetDate);
 
       final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
+      // Fetch all upcoming user events
       final response = await _dio.get(
         '${baseUrl}api/v1/up-comming/events/',
-        queryParameters: {'date': formattedQueryDate},
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -153,24 +178,45 @@ class CalendarController extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List data = response.data;
-        apiEvents = data.map((json) {
-          final formattedDate = formatEventDate(json['date'] ?? '');
+        final rawEvents = data.map((json) {
+          final rawDate = json['date']?.toString() ?? '';
           return EventModel(
             id: json['id'] ?? 0,
             userName: json['user_name']?.toString() ?? '',
             title: json['title']?.toString() ?? '',
-            description: json['description']?.toString() ?? '',
-            date: formattedDate,
+            description: json['description']?.toString() ?? json['type_event_description']?.toString() ?? '',
+            date: rawDate,
             startTime: _normalizeTime(json['start_time']?.toString() ?? ''),
             endTime: _normalizeTime(json['end_time']?.toString() ?? ''),
             location: json['location']?.toString() ?? '',
             alarmTime: json['alarm_time']?.toString() ?? '',
             isCompleted: json['is_completed'] ?? false,
-            createdAt: json['created_at']?.toString() ?? '',
+            createdAt: json['created_at']?.toString() ?? rawDate,
             user: json['user'] ?? 0,
-            category: json['category']?.toString(),
+            category: json['category_name']?.toString() ?? json['category']?.toString(),
             isFavorite: json['is_favorite'] ?? false,
             repeat: json['repeat']?.toString(),
+          );
+        }).toList();
+
+        // Filter non-Google backend events matching target date or repeat schedule
+        apiEvents = rawEvents.where((e) => _isEventOccurringOnDate(e, targetDate)).map((e) {
+          return EventModel(
+            id: e.id,
+            userName: e.userName,
+            title: e.title,
+            description: e.description,
+            date: formatEventDate(DateFormat('yyyy-MM-dd').format(targetDate)),
+            startTime: e.startTime,
+            endTime: e.endTime,
+            location: e.location,
+            alarmTime: e.alarmTime,
+            isCompleted: e.isCompleted,
+            createdAt: e.createdAt,
+            user: e.user,
+            category: e.category,
+            isFavorite: e.isFavorite,
+            repeat: e.repeat,
           );
         }).toList();
       }
@@ -192,7 +238,7 @@ class CalendarController extends ChangeNotifier {
       debugPrint('!--------Upcoming events-----------${_events.length}');
       notifyListeners();
     } catch (e) {
-      debugPrint('⚠️ Error fetching events: $e');
+      debugPrint('⚠️️ Error fetching events: $e');
     }
   }
 
@@ -247,16 +293,20 @@ class CalendarController extends ChangeNotifier {
   }
 
   Future<bool> removeEventFromList(EventModel event, {String deleteType = 'single'}) async {
-    final success = await deleteEvent(event, deleteType: deleteType);
-    if (success) {
-      debugPrint('✅ Event removed from list: ${event.id}');
-      try {
-        await Alarm.stop(event.id);
-      } catch (_) {}
-      return true;
+  final success = await deleteEvent(event, deleteType: deleteType);
+  if (success) {
+    debugPrint('✅ Event removed from list: ${event.id}');
+    try {
+      await NotificationService.cancelNotification(event.id);
+      await AlarmHelper.stopAlarm(event.id);
+      await Alarm.stop(event.id);
+    } catch (e) {
+      debugPrint('⚠️ Error canceling alarm/notification: $e');
     }
-    return false;
+    return true;
   }
+  return false;
+}
 
   Future<T?> runWithLoaderAndTimer<T>({
     required BuildContext context,

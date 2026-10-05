@@ -160,7 +160,7 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h),
-             Center(
+              Center(
                 child: CustomButton(
                   text: "Continue",
                   onPressed: () async {

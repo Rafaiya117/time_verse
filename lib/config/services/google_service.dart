@@ -349,7 +349,7 @@ class GoogleServices {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
-   GoogleSignInAccount? _currentUser; //266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com
+  GoogleSignInAccount? _currentUser; //266848129575-j21g213vsnsai5k8jneg66j93nvua5vn.apps.googleusercontent.com
   final String serverClientId = '468767271373-igakn4plmbu2io7ocqph0miemm38lumq.apps.googleusercontent.com';
   String? _accessToken;
   String? get accessToken => _accessToken;
@@ -368,28 +368,27 @@ class GoogleServices {
     );
   }
 
+  /// Silent token retrieval that will NEVER trigger an unexpected UI popup
   Future<String?> getValidAccessToken() async {
     if (_accessToken != null && _accessToken!.isNotEmpty) {
       return _accessToken;
     }
     try {
-      final user = await _googleSignIn.authenticate();
-      final auth = await user.authorizationClient.authorizeScopes(scopes);
-      _accessToken = auth.accessToken;
-      return _accessToken;
+      if (_currentUser != null) {
+        final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
+        _accessToken = auth.accessToken;
+        return _accessToken;
+      }
+      return null;
     } catch (e) {
       debugPrint("❌ Error retrieving access token: $e");
       return null;
     }
   }
 
+  /// Explicit user-initiated Google Sign-In only
   Future<bool> signIn() async {
     try {
-      if (_accessToken != null) {
-        debugPrint("🔵 Reusing existing Access Token: $_accessToken");
-        return true;
-      }
-
       final user = await _googleSignIn.authenticate();
       _currentUser = user;
 
@@ -404,7 +403,7 @@ class GoogleServices {
 
         final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
         final String? serverAuthCode = serverAuth?.serverAuthCode;
-        debugPrint("🎟️ AUTH CODE: $serverAuthCode");
+        debugPrint("🎟️️ AUTH CODE: $serverAuthCode");
 
         UserSession().username = _currentUser!.displayName;
         UserSession().profileImageUrl = _currentUser!.photoUrl;
@@ -435,6 +434,16 @@ class GoogleServices {
 
       debugPrint("❌ Google Sign-In error: $e");
       return false;
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _googleSignIn.signOut();
+      _currentUser = null;
+      _accessToken = null;
+    } catch (e) {
+      debugPrint("Error signing out Google: $e");
     }
   }
 
@@ -469,7 +478,7 @@ class GoogleServices {
 
         debugPrint('✅ Google login successful $response');
       } else {
-        debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
+        debugPrint('⚠️️ Unexpected status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
       debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
@@ -477,91 +486,86 @@ class GoogleServices {
   }
 
   Future<void> createGoogleCalendarEvent({
-  required String accessToken,
-  required String title,
-  required String date,
-  required String startTime,
-  required String endTime,
-  String? description,
-  String? location,
-  String? alarmTimeISO,
-}) async {
-  final dio = Dio();
+    required String accessToken,
+    required String title,
+    required String date,
+    required String startTime,
+    required String endTime,
+    String? description,
+    String? location,
+    String? alarmTimeISO,
+  }) async {
+    final dio = Dio();
 
-  final cleanStart = startTime.split(':').length == 2 ? "$startTime:00" : startTime;
-  var cleanEnd = endTime.split(':').length == 2 ? "$endTime:00" : endTime;
+    final cleanStart = startTime.split(':').length == 2 ? "$startTime:00" : startTime;
+    var cleanEnd = endTime.split(':').length == 2 ? "$endTime:00" : endTime;
 
-  // 1. Get exact IANA timezone string (e.g. "Asia/Dhaka")
-  String userTimeZone = 'Asia/Dhaka'; // Default fallback matching your app's location
-  try {
-    userTimeZone = (await FlutterTimezone.getLocalTimezone()).identifier;
-  } catch (e) {
-    debugPrint("⚠️ Could not fetch IANA timezone: $e");
-  }
-
-  // 2. Fix overnight end times (e.g., 21:00 to 00:00)
-  final dateParts = date.split('-').map(int.parse).toList();
-  final startParts = cleanStart.split(':').map(int.parse).toList();
-  final endParts = cleanEnd.split(':').map(int.parse).toList();
-
-  final startDt = DateTime(dateParts[0], dateParts[1], dateParts[2], startParts[0], startParts[1]);
-  var endDt = DateTime(dateParts[0], dateParts[1], dateParts[2], endParts[0], endParts[1]);
-
-  var finalEndDate = date;
-  if (endDt.isBefore(startDt) || endDt.isAtSameMomentAs(startDt)) {
-    endDt = endDt.add(const Duration(days: 1));
-    finalEndDate = "${endDt.year}-${endDt.month.toString().padLeft(2, '0')}-${endDt.day.toString().padLeft(2, '0')}";
-  }
-
-  // 3. Format raw ISO strings without offset letters (e.g., "2026-09-17T21:00:00")
-  // Google Calendar uses 'timeZone' parameter to anchor plain ISO dates to local wall-clock time
-  final startIso = "${date}T$cleanStart";
-  final endIso = "${finalEndDate}T$cleanEnd";
-
-  debugPrint("Sending to Google Calendar -> Start: $startIso | TimeZone: $userTimeZone");
-
-  final body = {
-    "summary": title,
-    "description": description ?? "",
-    "location": location ?? "",
-    "start": {
-      "dateTime": startIso,
-      "timeZone": userTimeZone,
-    },
-    "end": {
-      "dateTime": endIso,
-      "timeZone": userTimeZone,
-    },
-    "reminders": {
-      "useDefault": false,
-      "overrides": [
-        {"method": "popup", "minutes": 15},
-      ],
-    },
-  };
-
-  try {
-    final response = await dio.post(
-      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-      data: body,
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $accessToken",
-          "Content-Type": "application/json",
-        },
-      ),
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      debugPrint("✅ Event successfully added to Google Calendar!");
-    } else {
-      debugPrint("⚠️ Google Calendar error: ${response.data}");
+    String userTimeZone = 'Asia/Dhaka';
+    try {
+      userTimeZone = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      debugPrint("⚠️ Could not fetch IANA timezone: $e");
     }
-  } catch (e) {
-    debugPrint("❌ Google Calendar Exception: $e");
-  }
-}
 
+    final dateParts = date.split('-').map(int.parse).toList();
+    final startParts = cleanStart.split(':').map(int.parse).toList();
+    final endParts = cleanEnd.split(':').map(int.parse).toList();
+
+    final startDt = DateTime(dateParts[0], dateParts[1], dateParts[2], startParts[0], startParts[1]);
+    var endDt = DateTime(dateParts[0], dateParts[1], dateParts[2], endParts[0], endParts[1]);
+
+    var finalEndDate = date;
+    if (endDt.isBefore(startDt) || endDt.isAtSameMomentAs(startDt)) {
+      endDt = endDt.add(const Duration(days: 1));
+      finalEndDate = "${endDt.year}-${endDt.month.toString().padLeft(2, '0')}-${endDt.day.toString().padLeft(2, '0')}";
+    }
+
+    final startIso = "${date}T$cleanStart";
+    final endIso = "${finalEndDate}T$cleanEnd";
+
+    debugPrint("Sending to Google Calendar -> Start: $startIso | TimeZone: $userTimeZone");
+
+    final body = {
+      "summary": title,
+      "description": description ?? "",
+      "location": location ?? "",
+      "start": {
+        "dateTime": startIso,
+        "timeZone": userTimeZone,
+      },
+      "end": {
+        "dateTime": endIso,
+        "timeZone": userTimeZone,
+      },
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          {"method": "popup", "minutes": 15},
+        ],
+      },
+    };
+
+    try {
+      final response = await dio.post(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        data: body,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint("✅ Event successfully added to Google Calendar!");
+      } else {
+        debugPrint("⚠️ Google Calendar error: ${response.data}");
+      }
+    } catch (e) {
+      debugPrint("❌ Google Calendar Exception: $e");
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({
     required String accessToken,

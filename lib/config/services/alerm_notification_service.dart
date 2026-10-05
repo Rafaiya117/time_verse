@@ -216,6 +216,7 @@ class NotificationService {
           presentSound: true,
         ),
       ),
+      payload: payload.toString(),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
 
@@ -224,6 +225,12 @@ class NotificationService {
 
   static Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
+    debugPrint('🛑 Notification cancelled for event ID: $id');
+  }
+
+  static Future<void> cancelAllNotifications() async {
+    await _notifications.cancelAll();
+    debugPrint('🛑 All local notifications cancelled');
   }
 
   static Future<bool> _hasExactAlarmPermission() async {

@@ -33,26 +33,31 @@ class FancyCalendarView extends StatelessWidget {
         selectedDayPredicate: (day) => isSameDay(controller.selectedDay, day),
         onDaySelected: controller.onDaySelected,
 
-        // eventLoader: (day) {
-        //   return controller.events.where((event) {
-        //     final eventDate = DateTime.tryParse(event.createdAt); 
-        //     return eventDate != null && isSameDay(eventDate, day);
-        //   }).toList();
-        // },
-
         eventLoader: (day) {
+          final current = DateTime(day.year, day.month, day.day);
+
           return controller.events.where((event) {
-            final rawDateStr = event.createdAt.isNotEmpty ? event.createdAt: event.date;
+            final rawDateStr = event.createdAt.isNotEmpty
+                ? event.createdAt
+                : event.date;
             final startDate = DateTime.tryParse(rawDateStr);
             if (startDate == null) return false;
 
-            final start = DateTime(startDate.year, startDate.month, startDate.day,);
-            final current = DateTime(day.year, day.month, day.day);
+            final start = DateTime(
+              startDate.year,
+              startDate.month,
+              startDate.day,
+            );
 
             if (current.isBefore(start)) return false;
-            if (isSameDay(start, current)) return true;
+            if (start.year == current.year &&
+                start.month == current.month &&
+                start.day == current.day) {
+              return true;
+            }
 
             final repeatRule = event.repeat?.toLowerCase().trim() ?? '';
+            if (repeatRule.isEmpty) return false;
 
             switch (repeatRule) {
               case '1 day':
@@ -73,19 +78,21 @@ class FancyCalendarView extends StatelessWidget {
           }).toList();
         },
 
-        // --- HEADER STYLE ---
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
-          leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFFF5B301), size: 28.sp), 
-          rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFFF5B301), size: 28.sp), 
+          leftChevronIcon: Icon(Icons.chevron_left, color: const Color(0xFFF5B301), size: 28.sp), 
+          rightChevronIcon: Icon(Icons.chevron_right, color: const Color(0xFFF5B301), size: 28.sp), 
           headerPadding: EdgeInsets.symmetric(vertical: 12.h),
           titleTextStyle: const TextStyle(height: 0), 
           titleTextFormatter: (date, locale) => '', 
         ),
 
-        // --- CUSTOM BUILDERS (HEADER & WEEKDAYS) ---
         calendarBuilders: CalendarBuilders(
+          markerBuilder: (context, date, events) {
+            return const SizedBox.shrink();
+          },
+
           headerTitleBuilder: (context, date) {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -95,11 +102,10 @@ class FancyCalendarView extends StatelessWidget {
                   initialDate: controller.focusedDay,
                   firstDate: DateTime(2020, 1, 1),
                   lastDate: DateTime(2030, 12, 31),
-                  initialDatePickerMode: DatePickerMode.year, // Defaults to year/month view directly
+                  initialDatePickerMode: DatePickerMode.year,
                 );
 
                 if (selectedDate != null) {
-                  // Update focusedDay via controller so TableCalendar updates its view
                   controller.onDaySelected(selectedDate, selectedDate);
                 }
               },
@@ -156,7 +162,6 @@ class FancyCalendarView extends StatelessWidget {
           },
         ),
 
-        // --- CALENDAR GRID NUMBERS STYLE ---
         calendarStyle: CalendarStyle(
           isTodayHighlighted: true,
           markerDecoration: const BoxDecoration(
@@ -165,7 +170,7 @@ class FancyCalendarView extends StatelessWidget {
           ),
           selectedDecoration: BoxDecoration(
             color: goldColor, 
-            shape: BoxShape.rectangle, // Explicitly rectangular
+            shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(12.r), 
           ),
           selectedTextStyle: GoogleFonts.outfit(
@@ -175,7 +180,7 @@ class FancyCalendarView extends StatelessWidget {
           ),
           todayDecoration: BoxDecoration(
             color: goldColor.withOpacity(0.3), 
-            shape: BoxShape.rectangle, // Explicitly rectangular
+            shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(12.r),
           ),
           todayTextStyle: GoogleFonts.outfit(
@@ -183,8 +188,6 @@ class FancyCalendarView extends StatelessWidget {
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
           ),
-          
-          // 💡 Fix: Explicitly turned unselected shapes into rectangles to prevent shape conflicts during selections
           defaultDecoration: const BoxDecoration(
             shape: BoxShape.rectangle,
           ),
@@ -194,7 +197,6 @@ class FancyCalendarView extends StatelessWidget {
           outsideDecoration: const BoxDecoration(
             shape: BoxShape.rectangle,
           ),
-          
           defaultTextStyle: GoogleFonts.outfit(
             color: isDarkMode ? whiteColor : AppColors.heading_color, 
             fontSize: 14.sp,
@@ -233,8 +235,6 @@ class FancyCalendarView extends StatelessWidget {
                 ),
             ],
           ),
-          markersAlignment: Alignment.bottomCenter,
-          cellMargin: EdgeInsets.all(5.w),
         ),
       ),
     );
