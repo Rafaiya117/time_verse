@@ -1,6 +1,5 @@
 import 'package:alarm/alarm.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' hide NotificationSettings;
-import 'package:flutter/material.dart';
 import 'package:time_verse/config/services/alerm_notification_service.dart';
 
 // @pragma('vm:entry-point')
@@ -35,22 +34,16 @@ import 'package:time_verse/config/services/alerm_notification_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
-  final String title = message.notification?.title ?? 
-                       message.data['title'] ?? 
-                       message.data['event_title'] ?? 
-                       '';
-  final String body = message.notification?.body ?? 
-                     message.data['body'] ?? 
-                     message.data['message'] ?? 
-                     message.data['description'] ?? 
-                     '';
+  final String title = message.notification?.title ?? message.data['title'] ?? 
+  message.data['event_title'] ?? '';
+  final String body = message.notification?.body ??  message.data['body'] ?? 
+  message.data['message'] ??  message.data['description'] ??  '';
 
   if (title.isEmpty && body.isEmpty) return;
 
   // Extract real eventId from FCM data payload, fallback to timestamp if missing
   final rawEventId = message.data['eventId'] ?? message.data['id'];
-  final int alarmId = int.tryParse(rawEventId?.toString() ?? '') ?? 
-                      (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+  final int alarmId = int.tryParse(rawEventId?.toString() ?? '') ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
 
   final String payload = rawEventId?.toString() ?? '/home';
 
