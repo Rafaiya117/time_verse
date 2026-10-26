@@ -30,19 +30,17 @@ class FancyCalendarView extends StatelessWidget {
         firstDay: DateTime.utc(2020, 1, 1),
         lastDay: DateTime.utc(2030, 12, 31),
         focusedDay: controller.focusedDay,
-        selectedDayPredicate: (day) => isSameDay(controller.selectedDay, day),
-        onDaySelected: controller.onDaySelected,
+        selectedDayPredicate: (day) => controller.isSameDay(controller.selectedDay, day),
+        onDaySelected: (selectedDay, focusedDay) {
+          controller.handleDayTap(context, selectedDay, focusedDay);
+        },
 
         eventLoader: (day) {
           final current = DateTime(day.year, day.month, day.day);
-
           return controller.events.where((event) {
-            final rawDateStr = event.createdAt.isNotEmpty
-                ? event.createdAt
-                : event.date;
+            final rawDateStr = event.createdAt.isNotEmpty ? event.createdAt : event.date;
             final startDate = DateTime.tryParse(rawDateStr);
             if (startDate == null) return false;
-
             final start = DateTime(
               startDate.year,
               startDate.month,
