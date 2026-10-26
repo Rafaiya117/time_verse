@@ -1,8 +1,13 @@
 // ignore_for_file: use_build_context_synchronously, curly_braces_in_flow_control_structures
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:time_verse/config/services/alerm_service.dart';
+import 'package:time_verse/config/services/offline_service.dart';
 import 'package:time_verse/core/components/custom_dialogue.dart';
+import 'package:time_verse/features/all_events/model/event_model.dart';
 import 'package:time_verse/features/calender/controller/time_controller.dart';
 import 'package:time_verse/features/calender/model/event_category_model.dart';
 import 'package:time_verse/features/calender/repository/add_event_repository.dart';
@@ -68,7 +73,8 @@ class AddEventController extends ChangeNotifier {
   DateTime get customEndDate {
     if (_customEndDate != null) return _customEndDate!;
     if (dateController.text.isNotEmpty) {
-      final parsedDate = DateTime.tryParse(dateController.text);
+      final raw = dateController.text.trim();
+      final parsedDate = DateTime.tryParse(raw) ?? DateFormat('MMMM d, yyyy').tryParse(raw);
       if (parsedDate != null) {
         return parsedDate.add(const Duration(days: 30));
       }
@@ -128,14 +134,14 @@ class AddEventController extends ChangeNotifier {
 
   Map<String, dynamic>? get customRepeatMap {
     if (selectedRepeat != 'Custom') return null;
-    final formattedDays = selectedDays.map((d) => d.split('-').first).toList();
+    final formattedDays = selectedDays.map((d) => d.split('-').first.trim().toUpperCase()).toList();
     return {
       "repeat_every": customRepeatCount,
       "repeat_unit": customRepeatUnit.toLowerCase(),
       "repeat_days": formattedDays,
       "ends": repeatEndType.toLowerCase(),
-      "end_date": repeatEndType == 'On' ? DateFormat('yyyy-MM-dd').format(customEndDate) : null,
-      "end_count": repeatEndType == 'After' ? customOccurrences : null,
+      "end_date": repeatEndType.toLowerCase() == 'on' ? DateFormat('yyyy-MM-dd').format(customEndDate) : null,
+      "end_count": repeatEndType.toLowerCase() == 'after' ? customOccurrences : null,
     };
   }
 
@@ -217,14 +223,14 @@ class AddEventController extends ChangeNotifier {
 
     try {
       final eventModel = await _eventService.createAndSyncEvent(
-        title: titleController.text,
-        dateText: dateController.text,
+        title: titleController.text.trim(),
+        dateText: dateController.text.trim(),
         startTime: start,
         endTime: end,
         alarmISO: formattedAlarmISO,
-        location: locationController.text,
+        location: locationController.text.trim(),
         categoryName: selectedCategory,
-        note: noteController.text,
+        note: noteController.text.trim(),
         apiRepeatValue: apiRepeatValue,
         customRepeatMap: customRepeatMap,
       );
@@ -234,7 +240,6 @@ class AddEventController extends ChangeNotifier {
       if (eventModel != null) {
         final baseDateTime = EventDateTimeUtils.parseDateTime(dateController.text, calculatedAlarmTime);
 
-        // Schedule alarms and local notifications via EventAlarmService
         await _alarmService.scheduleReminders(
           context: context,
           event: eventModel,
@@ -260,14 +265,111 @@ class AddEventController extends ChangeNotifier {
             iconColor: Colors.green,
           );
           await context.read<HomeController>().fetchEvents();
+          if (context.mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                context.push('/event_details', extra: eventModel.id);
+              }
+            });
+          }
+        }
+      }
+    } on DioException catch (e) {
+      if (context.mounted) Navigator.pop(context);
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        final isCustom = apiRepeatValue?.toLowerCase() == 'custom';
+        final offlineBody = {
+          "title": titleController.text.trim(),
+          "date": EventDateTimeUtils.parseBackendDate(dateController.text.trim()),
+          "start_time": start,
+          "end_time": end,
+          "alarm_time": formattedAlarmISO,
+          if (apiRepeatValue != null)
+            "repeat": isCustom ? "custom" : apiRepeatValue,
+          if (isCustom && customRepeatMap != null)
+            "custom_repeat": customRepeatMap,
+          "is_alarm_sent": true,
+          "is_completed": false,
+          if (locationController.text.trim().isNotEmpty)
+            "location": locationController.text.trim(),
+          if (selectedCategory?.isNotEmpty == true)
+            "category_name": selectedCategory,
+          if (noteController.text.trim().isNotEmpty)
+            "type_event_description": noteController.text.trim(),
+        };
+
+        await OfflineSyncService().saveToQueue(offlineBody);
+
+        final baseDateTime = EventDateTimeUtils.parseDateTime(dateController.text, calculatedAlarmTime);
+        final alarmDateTimes = _repository.generateAlarmOccurrences(
+          startDateTime: baseDateTime,
+          selectedRepeat: selectedRepeat,
+          customRepeatCount: customRepeatCount,
+          customRepeatUnit: customRepeatUnit,
+          selectedDays: selectedDays,
+          repeatEndType: repeatEndType,
+          customEndDate: customEndDate,
+          customOccurrences: customOccurrences,
+        );
+
+        final mockId = DateTime.now().millisecondsSinceEpoch % 100000;
+        final mockEventModel = EventModel(
+          id: mockId,
+          title: titleController.text.trim(),
+          description: noteController.text.trim(),
+          alarmTime: formattedAlarmISO,
+          date: EventDateTimeUtils.parseBackendDate(dateController.text.trim()),
+          startTime: start,
+          endTime: end,
+          location: locationController.text.trim(),
+          isCompleted: false,
+          isFavorite: false,
+          createdAt: DateTime.now().toIso8601String(),
+          user: 0,
+          userName: '',
+        );
+
+        await AlarmHelper.scheduleEventAlarm(context, mockEventModel, alarmDateTimes);
+        clearFields();
+        onSuccess();
+
+        if (context.mounted) {
+          await showMessageDialog(
+            context,
+            'Saved offline! Event will sync once connection is restored.',
+            title: 'Offline Mode',
+            icon: Icons.wifi_off_outlined,
+            iconColor: Colors.orange,
+          );
+          if (context.mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                context.push('/event_details', extra: mockEventModel.id);
+              }
+            });
+          }
+        }
+      } else {
+        if (context.mounted) {
+          await showMessageDialog(
+            context,
+            'Failed to save event:\n${EventDateTimeUtils.formatErrorMessage(e)}',
+            title: 'Error',
+            icon: Icons.error_outline,
+            iconColor: Colors.red,
+          );
         }
       }
     } catch (e) {
+      if (context.mounted) Navigator.pop(context);
       if (context.mounted) {
-        Navigator.pop(context);
         await showMessageDialog(
           context,
-          'Failed to save event:\n${e.toString()}',
+          'Failed to save event:\n${EventDateTimeUtils.formatErrorMessage(e)}',
           title: 'Error',
           icon: Icons.error_outline,
           iconColor: Colors.red,
@@ -289,6 +391,7 @@ class AddEventController extends ChangeNotifier {
     }
     selectedCategory = null;
     selectedRepeat = null;
+    _customEndDate = null;
     notifyListeners();
   }
 

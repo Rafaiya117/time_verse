@@ -19,7 +19,7 @@ class GoogleServices {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   GoogleSignInAccount? _currentUser;
-  final String serverClientId = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+  final String serverClientId = '468767271373-igakn4plmbu2io7ocqph0miemm38lumq.apps.googleusercontent.com';
   String? _accessToken;
   String? get accessToken => _accessToken;
 
@@ -33,11 +33,10 @@ class GoogleServices {
 
   void init() {
     _googleSignIn.initialize(
-      //serverClientId: serverClientId,
+      serverClientId: serverClientId,
     );
   }
 
-  /// Silent token retrieval that will NEVER trigger an unexpected UI popup
   Future<String?> getValidAccessToken() async {
     if (_accessToken != null && _accessToken!.isNotEmpty) {
       return _accessToken;
@@ -55,32 +54,22 @@ class GoogleServices {
     }
   }
 
-  /// Explicit user-initiated Google Sign-In only
-
   Future<bool> signIn() async {
     try {
-      // 1. Clear any stale cached session state before authenticating
       await signOut();
 
-      // 2. Single interactive sign-in call
       final user = await _googleSignIn.authenticate();
       _currentUser = user;
 
       if (_currentUser != null) {
-        // 3. Extract authentication tokens cleanly
         final authentication = await _currentUser!.authentication;
         final idToken = authentication.idToken;
-        debugPrint("🆔 ID TOKEN: $idToken");
 
-        // 4. Retrieve access token via authorizeScopes
         final auth = await _currentUser!.authorizationClient.authorizeScopes(scopes);
         _accessToken = auth.accessToken;
-        debugPrint("🔑 ACCESS TOKEN: $_accessToken");
 
-        // 5. Fetch server auth code cleanly
         final serverAuth = await _currentUser!.authorizationClient.authorizeServer(scopes);
         final String? serverAuthCode = serverAuth?.serverAuthCode;
-        debugPrint("🎟 AUTH CODE: $serverAuthCode");
 
         UserSession().username = _currentUser!.displayName;
         UserSession().profileImageUrl = _currentUser!.photoUrl;
@@ -157,7 +146,7 @@ class GoogleServices {
 
         debugPrint('✅ Google login successful $response');
       } else {
-        debugPrint('⚠️️ Unexpected status code: ${response.statusCode}');
+        debugPrint('⚠ Unexpected status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
       debugPrint('❌ Error sending tokens: ${e.response?.data ?? e.message}');
@@ -169,10 +158,14 @@ class GoogleServices {
 
     final rule = repeat.toLowerCase().trim();
 
-    if (rule == 'every 1 day' || rule == '1 day') return 'RRULE:FREQ=DAILY';
-    if (rule == 'every 1 week' || rule == '1 week') return 'RRULE:FREQ=WEEKLY';
-    if (rule == 'every 1 month' || rule == '1 month') return 'RRULE:FREQ=MONTHLY';
-    if (rule == 'every 1 year' || rule == '1 year') return 'RRULE:FREQ=YEARLY';
+    // if (rule == 'every 1 day' || rule == '1 day') return 'RRULE:FREQ=DAILY';
+    // if (rule == 'every 1 week' || rule == '1 week') return 'RRULE:FREQ=WEEKLY';
+    // if (rule == 'every 1 month' || rule == '1 month') return 'RRULE:FREQ=MONTHLY';
+    // if (rule == 'every 1 year' || rule == '1 year') return 'RRULE:FREQ=YEARLY';
+     if (rule == 'every 1 day' || rule == '1 day') return 'RRULE:FREQ=DAILY;COUNT=7';     // Stops after 7 days
+  if (rule == 'every 1 week' || rule == '1 week') return 'RRULE:FREQ=WEEKLY;COUNT=4';   // Stops after 4 weeks
+  if (rule == 'every 1 month' || rule == '1 month') return 'RRULE:FREQ=MONTHLY;COUNT=12'; // Stops after 12 months
+  if (rule == 'every 1 year' || rule == '1 year') return 'RRULE:FREQ=YEARLY;COUNT=5';   // Stops after 5 years
 
     if (rule == 'custom' && customRepeat != null) {
       final unit = customRepeat['repeat_unit']?.toString().toUpperCase() ?? 'WEEKLY';
@@ -187,15 +180,21 @@ class GoogleServices {
 
       final days = customRepeat['repeat_days'] as List?;
       if (days != null && days.isNotEmpty) {
-        final dayMap = {'S': 'SU', 'M': 'MO', 'T': 'TU', 'W': 'WE', 'F': 'FR'};
-        final mappedDays = days.map((d) => dayMap[d] ?? 'MO').join(',');
+        final dayMap = {
+          'S': 'SU', 'M': 'MO', 'T': 'TU', 'W': 'WE', 'TH': 'TH', 'F': 'FR', 'SAT': 'SA',
+          '0': 'SU', '1': 'MO', '2': 'TU', '3': 'WE', '4': 'TH', '5': 'FR', '6': 'SA', '7': 'SU'
+        };
+        final mappedDays = days.map((d) => dayMap[d.toString().trim().toUpperCase()] ?? 'MO').join(',');
         rrule += ';BYDAY=$mappedDays';
       }
 
       if (customRepeat['ends'] == 'on' && customRepeat['end_date'] != null) {
-        final endDate = DateTime.tryParse(customRepeat['end_date'].toString());
-        if (endDate != null) {
-          final formattedEnd = DateFormat("yyyyMMdd'T'HHmmss'Z'").format(endDate.toUtc());
+        final rawEndDateStr = customRepeat['end_date'].toString();
+        final parsed = DateTime.tryParse(rawEndDateStr);
+        if (parsed != null) {
+          // Format UNTIL strictly at end-of-day UTC (23:59:59Z) to cover local time boundaries
+          final endOfDayUtc = DateTime.utc(parsed.year, parsed.month, parsed.day, 23, 59, 59);
+          final formattedEnd = DateFormat("yyyyMMdd'T'HHmmss'Z'").format(endOfDayUtc);
           rrule += ';UNTIL=$formattedEnd';
         }
       } else if (customRepeat['ends'] == 'after' && customRepeat['end_count'] != null) {
@@ -208,7 +207,7 @@ class GoogleServices {
     return null;
   }
 
-  Future<void> createGoogleCalendarEvent({
+         Future<void> createGoogleCalendarEvent({
     required String accessToken,
     required String title,
     required String date,
@@ -223,28 +222,40 @@ class GoogleServices {
     final cleanStart = startTime.split(':').length == 2 ? "$startTime:00" : startTime;
     var cleanEnd = endTime.split(':').length == 2 ? "$endTime:00" : endTime;
 
-    String userTimeZone = 'Asia/Dhaka';
+    // 💡 1. Fetch dynamic IANA timezone directly from the device
+    String userTimeZone = 'UTC';
     try {
-      userTimeZone = (await FlutterTimezone.getLocalTimezone()).identifier;
+      final tz = await FlutterTimezone.getLocalTimezone();
+      if (tz.identifier.contains('/')) {
+        userTimeZone = tz.identifier;
+      } else {
+        userTimeZone = DateTime.now().timeZoneName;
+      }
     } catch (e) {
       debugPrint("⚠️ Could not fetch IANA timezone: $e");
+      userTimeZone = DateTime.now().timeZoneName;
     }
 
-    final DateTime? parsedDate = DateTime.tryParse(date) ?? DateFormat('MMMM d, yyyy').tryParse(date);
-    if (parsedDate == null) return;
+    final parts = date.split('-');
+    final int year = parts.length == 3 ? int.parse(parts[0]) : DateTime.now().year;
+    final int month = parts.length == 3 ? int.parse(parts[1]) : DateTime.now().month;
+    final int day = parts.length == 3 ? int.parse(parts[2]) : DateTime.now().day;
 
     final startParts = cleanStart.split(':').map(int.parse).toList();
     final endParts = cleanEnd.split(':').map(int.parse).toList();
 
-    final startDt = DateTime(parsedDate.year, parsedDate.month, parsedDate.day, startParts[0], startParts[1]);
-    var endDt = DateTime(parsedDate.year, parsedDate.month, parsedDate.day, endParts[0], endParts[1]);
+    // 💡 2. FIXED: Use DateTime.utc to lock coordinates completely in place
+    // This stops the system from adding or subtracting timezone hours automatically.
+    final startDt = DateTime.utc(year, month, day, startParts[0], startParts[1]);
+    var endDt = DateTime.utc(year, month, day, endParts[0], endParts[1]);
 
     if (endDt.isBefore(startDt) || endDt.isAtSameMomentAs(startDt)) {
-      endDt = endDt.add(const Duration(days: 1));
+      endDt = startDt.add(const Duration(minutes: 30));
     }
 
-    final startIso = "${DateFormat('yyyy-MM-dd').format(startDt)}T$cleanStart";
-    final endIso = "${DateFormat('yyyy-MM-dd').format(endDt)}T$cleanEnd";
+    // 💡 3. Format with a trailing 'Z' to explicitly indicate a locked UTC string payload
+    final String startIso = "${DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(startDt)}Z";
+    final String endIso = "${DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(endDt)}Z";
 
     final rrule = _buildGoogleRRule(repeat, customRepeat);
 
@@ -253,8 +264,8 @@ class GoogleServices {
       "description": description ?? "",
       "location": location ?? "",
       "start": {
-        "dateTime": startIso,
-        "timeZone": userTimeZone,
+        "dateTime": startIso,       // e.g. "2026-10-28T21:00:00Z"
+        "timeZone": userTimeZone,   // Tells Google exactly how to translate it to your local grid
       },
       "end": {
         "dateTime": endIso,
@@ -272,7 +283,7 @@ class GoogleServices {
     try {
       final dio = Dio();
       final response = await dio.post(
-        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "https://googleapis.com",
         data: body,
         options: Options(
           headers: {
@@ -283,15 +294,16 @@ class GoogleServices {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        debugPrint("✅ Event with recurrence successfully added to Google Calendar!");
-      } else {
-        debugPrint("⚠️ Google Calendar error: ${response.data}");
+        debugPrint("✅ Google Calendar recurring event locked perfectly!");
       }
     } catch (e) {
       debugPrint("❌ Google Calendar Exception: $e");
     }
   }
 
+
+
+  
   Future<List<Map<String, dynamic>>> getGoogleCalendarEvents({
     required String accessToken,
     DateTime? timeMin,
@@ -326,31 +338,41 @@ class GoogleServices {
       if (response.statusCode == 200) {
         final List items = response.data['items'] ?? [];
         final activeItems = items.where((event) => event['status'] != 'cancelled').toList();
-        return activeItems.map((event) {
+
+        final Set<String> seenGoogleIds = {};
+        final List<Map<String, dynamic>> parsedEvents = [];
+
+        for (var event in activeItems) {
+          final String googleId = event['id'] ?? '';
+          if (googleId.isNotEmpty && seenGoogleIds.contains(googleId)) {
+            continue;
+          }
+          seenGoogleIds.add(googleId);
+
           final startRaw = event['start']?['dateTime'] ?? event['start']?['date'] ?? '';
           final endRaw = event['end']?['dateTime'] ?? event['end']?['date'] ?? '';
 
-          DateTime? startDt = DateTime.tryParse(startRaw)?.toLocal();
-          String alarmISO = '';
+          final DateTime? startDt = DateTime.tryParse(startRaw)?.toLocal();
+          final DateTime? endDt = DateTime.tryParse(endRaw)?.toLocal();
 
-          if (startDt != null) {
-            alarmISO = startDt.subtract(const Duration(minutes: 15)).toIso8601String();
-          }
-          final int eventId = event['id'].toString().hashCode.abs() % 1000000;
-          return {
+          if (startDt == null) continue;
+
+          final int eventId = googleId.hashCode.abs() % 1000000;
+
+          parsedEvents.add({
             'id': eventId,
-            'google_id': event['id'],
+            'google_id': googleId,
             'title': event['summary'] ?? 'No Title',
             'description': event['description'] ?? '',
             'location': event['location'] ?? '',
-            'startTime': startRaw,
-            'endTime': endRaw,
-            'date': startDt != null
-                ? "${startDt.year}-${startDt.month.toString().padLeft(2, '0')}-${startDt.day.toString().padLeft(2, '0')}"
-                : '',
-            'alarm_time': alarmISO,
-          };
-        }).toList();
+            'startTime': DateFormat('HH:mm').format(startDt),
+            'endTime': endDt != null ? DateFormat('HH:mm').format(endDt) : '',
+            'date': DateFormat('yyyy-MM-dd').format(startDt),
+            'alarm_time': startDt.subtract(const Duration(minutes: 15)).toIso8601String(),
+          });
+        }
+
+        return parsedEvents;
       }
       return [];
     } catch (e) {
