@@ -15,6 +15,7 @@ import 'package:time_verse/features/calender/repository/event_detail_utils.dart'
 import 'package:time_verse/features/calender/services/event_alarm_service.dart';
 import 'package:time_verse/features/calender/services/event_services.dart';
 import 'package:time_verse/features/home/controller/home_controller.dart';
+import 'package:time_verse/features/settings/profile/controller/profile_controller.dart';
 
 class AddEventController extends ChangeNotifier {
   final AddEventRepository _repository = AddEventRepository();
@@ -264,7 +265,9 @@ class AddEventController extends ChangeNotifier {
             icon: Icons.check_circle_outline,
             iconColor: Colors.green,
           );
-          await context.read<HomeController>().fetchEvents();
+          final homeController = context.read<HomeController>();
+          final profileController = context.read<ProfileController>();
+          await homeController.loadHomeScreenData(profileController);
           if (context.mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (context.mounted) {

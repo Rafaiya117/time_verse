@@ -32,25 +32,22 @@ class HomeView extends StatelessWidget {
       final currentRouteUri = GoRouterState.of(context).uri.toString();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        homeController.initOnce(profileController);
-        homeController.fetchAIMooodReflection();
+        homeController.initOnce(profileController, context);
         homeController.updateIndexFromRoute(currentRouteUri);
-        homeController.selectDate(DateTime.now(), profileController);
-        //homeController.todaysfetchEvents(profileController);
       });
     }
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
       body: RefreshIndicator(
         onRefresh: () async {
-          await Future.wait([
-            homeController.fetchEvents(),
-            homeController.fetchAIMooodReflection(),
-            homeController.todaysfetchEvents(profileController),
-          ]);
+          await homeController.loadHomeScreenData(
+            profileController,
+            date: homeController.selectedDate,
+          );
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -72,8 +69,7 @@ class HomeView extends StatelessWidget {
                             'assets/alphabet/$firstLetter.png',
                             width: 150.w,
                             height: 100.h,
-                            errorBuilder: (context, error, stackTrace) =>
-                            Image.asset(
+                            errorBuilder: (context, error, stackTrace) => Image.asset(
                               'assets/alphabet/a.png',
                               width: 150.w,
                               height: 100.h,
@@ -89,7 +85,7 @@ class HomeView extends StatelessWidget {
                             themeProvider.toggleTheme();
                           },
                           icon: SvgPicture.asset(
-                            isDarkMode ? 'assets/icons/theme_dark.svg': 'assets/icons/light_theme.svg',
+                            isDarkMode ? 'assets/icons/theme_dark.svg' : 'assets/icons/light_theme.svg',
                             width: 37.w,
                             height: 37.h,
                           ),
@@ -114,12 +110,14 @@ class HomeView extends StatelessWidget {
                                 child: Selector<ProfileController, String?>(
                                   selector: (_, controller) => controller.currentUser?.profilePicture,
                                   builder: (_, profilePicture, __) {
-                                    final String? activePhoto = (UserSession().profileImageUrl != null && UserSession().profileImageUrl!.isNotEmpty)
-                                    ? UserSession().profileImageUrl : profilePicture;
+                                    final String? activePhoto = (UserSession().profileImageUrl != null &&
+                                            UserSession().profileImageUrl!.isNotEmpty)
+                                        ? UserSession().profileImageUrl
+                                        : profilePicture;
 
                                     final imageProvider = (activePhoto != null && activePhoto.isNotEmpty)
-                                    ? NetworkImage(activePhoto) as ImageProvider<Object>
-                                    : const AssetImage('assets/images/profile_img.png',) as ImageProvider<Object>;
+                                        ? NetworkImage(activePhoto) as ImageProvider<Object>
+                                        : const AssetImage('assets/images/profile_img.png') as ImageProvider<Object>;
                                     return Image(
                                       image: imageProvider,
                                       fit: BoxFit.cover,
@@ -139,7 +137,7 @@ class HomeView extends StatelessWidget {
                   style: GoogleFonts.cormorant(
                     fontWeight: FontWeight.w700,
                     fontSize: 34.sp,
-                    color: isDarkMode ? AppColors.fourth_color : Color(0xFF403D3B),
+                    color: isDarkMode ? AppColors.fourth_color : const Color(0xFF403D3B),
                   ),
                 ),
                 Consumer<ProfileController>(
@@ -160,7 +158,7 @@ class HomeView extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.normal,
                     fontSize: 14.sp,
-                    color: isDarkMode ? Colors.white : Color(0xFF414141),
+                    color: isDarkMode ? Colors.white : const Color(0xFF414141),
                   ),
                 ),
                 SizedBox(height: 30.h),
@@ -173,7 +171,7 @@ class HomeView extends StatelessWidget {
                         Container(
                           height: 1.h,
                           width: double.infinity,
-                          color: isDarkMode ? const Color(0xFF3B3B3B): const Color(0xFFF1A80A).withOpacity(0.6),
+                          color: isDarkMode ? const Color(0xFF3B3B3B) : const Color(0xFFF1A80A).withOpacity(0.6),
                         ),
                         Center(
                           child: Container(
@@ -182,10 +180,10 @@ class HomeView extends StatelessWidget {
                               vertical: 10.h,
                             ),
                             decoration: BoxDecoration(
-                              color: isDarkMode ? const Color(0xFF060B13): Colors.white,
+                              color: isDarkMode ? const Color(0xFF060B13) : Colors.white,
                               borderRadius: BorderRadius.circular(30.r),
                               border: Border.all(
-                                color: isDarkMode ? const Color(0xFF3B3B3B): const Color(0xFFF1A80A).withOpacity(0.7),
+                                color: isDarkMode ? const Color(0xFF3B3B3B) : const Color(0xFFF1A80A).withOpacity(0.7),
                                 width: 1,
                               ),
                               boxShadow: [
@@ -206,11 +204,11 @@ class HomeView extends StatelessWidget {
                                 ),
                                 SizedBox(width: 8.w),
                                 Text(
-                                  DateFormat('EEEE, MMMM d').format(DateTime.now()),
+                                  DateFormat('EEEE, MMMM d').format(homeController.selectedDate),
                                   style: GoogleFonts.outfit(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 18.sp,
-                                    color: isDarkMode? Colors.white : Colors.black,
+                                    color: isDarkMode ? Colors.white : Colors.black,
                                   ),
                                 ),
                               ],
@@ -225,12 +223,12 @@ class HomeView extends StatelessWidget {
                       child: Consumer<HomeController>(
                         builder: (context, controller, _) {
                           final now = DateTime.now();
-                          final daysInMonth = DateTime(now.year,now.month + 1,0,).day;
+                          final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
                           final double itemWidth = 66.w;
                           final int todayIndex = now.day - 1;
                           final double initialOffset = (todayIndex - 2).clamp(0, daysInMonth) * itemWidth;
                           final ScrollController statelessScrollController =
-                          ScrollController(initialScrollOffset: initialOffset,);
+                              ScrollController(initialScrollOffset: initialOffset);
 
                           return ListView.builder(
                             controller: statelessScrollController,
@@ -238,8 +236,10 @@ class HomeView extends StatelessWidget {
                             itemCount: daysInMonth,
                             padding: EdgeInsets.symmetric(horizontal: 12.w),
                             itemBuilder: (context, index) {
-                              final date = DateTime(now.year,now.month,index + 1,);
-                              final isSelected = date.day == controller.selectedDate.day && date.month == controller.selectedDate.month && date.year == controller.selectedDate.year;
+                              final date = DateTime(now.year, now.month, index + 1);
+                              final isSelected = date.day == controller.selectedDate.day &&
+                                  date.month == controller.selectedDate.month &&
+                                  date.year == controller.selectedDate.year;
 
                               return GestureDetector(
                                 onTap: () {
@@ -247,27 +247,33 @@ class HomeView extends StatelessWidget {
                                 },
                                 onDoubleTap: () {
                                   controller.selectDate(date, profileController);
-                                  final todayStart = DateTime(now.year,now.month,now.day,);
-                                  final targetDateStart = DateTime(date.year,date.month,date.day,);
+                                  final todayStart = DateTime(now.year, now.month, now.day);
+                                  final targetDateStart = DateTime(date.year, date.month, date.day);
                                   if (!targetDateStart.isBefore(todayStart)) {
-                                    final String formattedParamDate = DateFormat('MMMM d, yyyy',).format(date);
-                                    context.push('/add?selectedDate=$formattedParamDate',);
+                                    final String formattedParamDate = DateFormat('MMMM d, yyyy').format(date);
+                                    context.push('/add?selectedDate=$formattedParamDate');
                                   }
                                 },
                                 child: Container(
                                   width: 54.w,
                                   margin: EdgeInsets.symmetric(horizontal: 6.w),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFFF1A80A): (isDarkMode? const Color(0xFF070F1A): Colors.white),
+                                    color: isSelected
+                                        ? const Color(0xFFF1A80A)
+                                        : (isDarkMode ? const Color(0xFF070F1A) : Colors.white),
                                     borderRadius: BorderRadius.circular(24.r),
                                     border: Border.all(
-                                      color: !isSelected ? (isDarkMode ? Colors.white : Colors.grey.shade300): Colors.transparent,
+                                      color: !isSelected
+                                          ? (isDarkMode ? Colors.white : Colors.grey.shade300)
+                                          : Colors.transparent,
                                       width: 0.2.sp,
                                     ),
                                     boxShadow: [
                                       if (!isSelected) ...[
                                         BoxShadow(
-                                          color: isDarkMode? Colors.white.withOpacity(0.3): Colors.black.withOpacity(0.05),
+                                          color: isDarkMode
+                                              ? Colors.white.withOpacity(0.3)
+                                              : Colors.black.withOpacity(0.05),
                                           blurRadius: 4,
                                           spreadRadius: 0,
                                         ),
@@ -288,7 +294,9 @@ class HomeView extends StatelessWidget {
                                         style: GoogleFonts.outfit(
                                           fontSize: 15.sp,
                                           fontWeight: FontWeight.w400,
-                                          color: isSelected ? const Color(0xFF060B13): (isDarkMode ? const Color(0xFF7A8B9E) : Colors.grey.shade600),
+                                          color: isSelected
+                                              ? const Color(0xFF060B13)
+                                              : (isDarkMode ? const Color(0xFF7A8B9E) : Colors.grey.shade600),
                                         ),
                                       ),
                                       SizedBox(height: 6.h),
@@ -297,7 +305,9 @@ class HomeView extends StatelessWidget {
                                         style: GoogleFonts.outfit(
                                           fontSize: 24.sp,
                                           fontWeight: FontWeight.w600,
-                                          color: isSelected? const Color(0xFF060B13): (isDarkMode? Colors.white : Colors.black),
+                                          color: isSelected
+                                              ? const Color(0xFF060B13)
+                                              : (isDarkMode ? Colors.white : Colors.black),
                                         ),
                                       ),
                                     ],
@@ -315,15 +325,22 @@ class HomeView extends StatelessWidget {
                 Consumer<HomeController>(
                   builder: (context, homeController, _) {
                     final now = DateTime.now();
-                    final isSelectedDateToday = homeController.selectedDate.year == now.year && homeController.selectedDate.month == now.month && homeController.selectedDate.day == now.day;
+                    final isSelectedDateToday = homeController.selectedDate.year == now.year &&
+                        homeController.selectedDate.month == now.month &&
+                        homeController.selectedDate.day == now.day;
                     if (!isSelectedDateToday) {
                       return const SizedBox.shrink();
                     }
-                    final aiReflectionText = homeController.currentReflection ?.aiReflection.isNotEmpty == true
-                    ? homeController.currentReflection!.aiReflection : 'Today feels centered around connection, gratitude and emotionally meaningful movement.';
+                    final aiReflectionText = homeController.currentReflection?.aiReflection.isNotEmpty == true
+                        ? homeController.currentReflection!.aiReflection
+                        : 'Today feels centered around connection, gratitude and emotionally meaningful movement.';
                     final activeBgImage = homeController.currentBgIndex != null
-                    ? (isDarkMode ? 'assets/ai_generated_img/db_${homeController.currentBgIndex}.png' : 'assets/ai_generated_img/wb_${homeController.currentBgIndex}.png')
-                    : (isDarkMode ? 'assets/images/container_bgimg.png' : 'assets/images/container_bgimg_light.png');
+                        ? (isDarkMode
+                            ? 'assets/ai_generated_img/db_${homeController.currentBgIndex}.png'
+                            : 'assets/ai_generated_img/wb_${homeController.currentBgIndex}.png')
+                        : (isDarkMode
+                            ? 'assets/images/container_bgimg.png'
+                            : 'assets/images/container_bgimg_light.png');
                     return Container(
                       width: 360.w,
                       decoration: BoxDecoration(
@@ -407,7 +424,9 @@ class HomeView extends StatelessWidget {
                                     ),
                                     SizedBox(height: 10.h),
                                     Container(
-                                      color: isDarkMode? const Color(0xFF051123,).withOpacity(0.2): Colors.transparent,
+                                      color: isDarkMode
+                                          ? const Color(0xFF051123).withOpacity(0.2)
+                                          : Colors.transparent,
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 16.w,
                                         vertical: 12.h,
@@ -430,7 +449,9 @@ class HomeView extends StatelessWidget {
                             SizedBox(height: 10.h),
                             Container(
                               decoration: BoxDecoration(
-                                color: isDarkMode ? Colors.black.withOpacity(0.35): Colors.white.withOpacity(0.5),
+                                color: isDarkMode
+                                    ? Colors.black.withOpacity(0.35)
+                                    : Colors.white.withOpacity(0.5),
                                 borderRadius: BorderRadius.only(
                                   bottomLeft: Radius.circular(12.r),
                                   bottomRight: Radius.circular(12.r),
@@ -457,11 +478,14 @@ class HomeView extends StatelessWidget {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
-                                            homeController.isReflectionFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                            color:homeController.isReflectionFavorite
-                                            ? Colors.red: (isDarkMode? Colors.white: AppColors.fourth_color),
+                                            homeController.isReflectionFavorite
+                                                ? Icons.favorite_rounded
+                                                : Icons.favorite_border_rounded,
+                                            color: homeController.isReflectionFavorite
+                                                ? Colors.red
+                                                : (isDarkMode ? Colors.white : AppColors.fourth_color),
                                             size: 22.sp,
-                                          ), 
+                                          ),
                                           SizedBox(height: 4.h),
                                           Text(
                                             'Favorite',
@@ -554,7 +578,7 @@ class HomeView extends StatelessWidget {
                                           Text(
                                             'Share',
                                             style: GoogleFonts.outfit(
-                                              color: isDarkMode? Colors.white: AppColors.fourth_color,
+                                              color: isDarkMode ? Colors.white : AppColors.fourth_color,
                                               fontSize: 13.sp,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -581,12 +605,12 @@ class HomeView extends StatelessWidget {
                       style: GoogleFonts.playfairDisplay(
                         fontWeight: FontWeight.w600,
                         fontSize: 20.sp,
-                        color: isDarkMode? AppColors.l_schedule_clr3: AppColors.heading_color,
+                        color: isDarkMode ? AppColors.l_schedule_clr3 : AppColors.heading_color,
                       ),
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: isDarkMode? Color(0xFFF6AD14).withOpacity(0.65): Colors.white,
+                        color: isDarkMode ? const Color(0xFFF6AD14).withOpacity(0.65) : Colors.white,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: InkWell(
@@ -633,7 +657,7 @@ class HomeView extends StatelessWidget {
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.w400,
                           fontSize: 14.sp,
-                          color: isDarkMode ? AppColors.fourth_color: AppColors.heading_color,
+                          color: isDarkMode ? AppColors.fourth_color : AppColors.heading_color,
                         ),
                       );
                     }
@@ -641,7 +665,7 @@ class HomeView extends StatelessWidget {
                       width: double.infinity,
                       padding: EdgeInsets.all(16.w),
                       decoration: BoxDecoration(
-                        color: isDarkMode? const Color(0xFF051123): Colors.white,
+                        color: isDarkMode ? const Color(0xFF051123) : Colors.white,
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
                           color: const Color(0xFFC5A880).withOpacity(0.35),
@@ -681,16 +705,12 @@ class HomeView extends StatelessWidget {
                                 String priorPeriod = "Morning";
                                 try {
                                   final priorHourStr = (priorEvent.startTime).split(':').first.trim();
-                                  final int priorHourValue = int.parse(
-                                    priorHourStr,
-                                  );
+                                  final int priorHourValue = int.parse(priorHourStr);
                                   if (priorHourValue == 12) {
                                     priorPeriod = "Noon";
-                                  } else if (priorHourValue > 12 &&
-                                      priorHourValue <= 16) {
+                                  } else if (priorHourValue > 12 && priorHourValue <= 16) {
                                     priorPeriod = "Afternoon";
-                                  } else if (priorHourValue >= 17 &&
-                                      priorHourValue <= 20) {
+                                  } else if (priorHourValue >= 17 && priorHourValue <= 20) {
                                     priorPeriod = "Evening";
                                   } else if (priorHourValue >= 21) {
                                     priorPeriod = "Night";
@@ -731,7 +751,7 @@ class HomeView extends StatelessWidget {
                                     event.description,
                                     Colors.grey,
                                     isDarkMode,
-                                    lightModeBackgroundColor:AppColors.l_schedule_clr1,
+                                    lightModeBackgroundColor: AppColors.l_schedule_clr1,
                                     isLastItem: isLastItem,
                                   ),
                                 ],
@@ -744,15 +764,17 @@ class HomeView extends StatelessWidget {
                   },
                 ),
                 SizedBox(height: 30.h),
-
                 Consumer<HomeController>(
                   builder: (context, homeController, child) {
                     final now = DateTime.now();
-                    final isSelectedDateToday = homeController.selectedDate.year == now.year && homeController.selectedDate.month == now.month && homeController.selectedDate.day == now.day;
+                    final isSelectedDateToday = homeController.selectedDate.year == now.year &&
+                        homeController.selectedDate.month == now.month &&
+                        homeController.selectedDate.day == now.day;
                     final currentIdx = homeController.currentQuoteIndex;
-                    final currentQuote = homeController.inspirationalQuotes.isNotEmpty ? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]: null;
+                    final currentQuote = homeController.inspirationalQuotes.isNotEmpty
+                        ? homeController.inspirationalQuotes[currentIdx % homeController.inspirationalQuotes.length]
+                        : null;
 
-                    // Hide section if selected date is not today OR current quote is empty
                     if (!isSelectedDateToday || currentQuote == null || currentQuote.quote.trim().isEmpty) {
                       return const SizedBox.shrink();
                     }
@@ -818,8 +840,7 @@ class HomeView extends StatelessWidget {
                                     ),
                                     SizedBox(width: 4.w),
                                     Text(
-                                      currentQuote.name.isNotEmpty
-                                      ? currentQuote.name : 'Motivation',
+                                      currentQuote.name.isNotEmpty ? currentQuote.name : 'Motivation',
                                       style: GoogleFonts.outfit(
                                         color: const Color(0xFFE5A100),
                                         fontSize: 13.sp,
@@ -851,47 +872,47 @@ class HomeView extends StatelessWidget {
                                   height: 1.4,
                                 ),
                                 child: homeController.inspirationalQuotes.isEmpty
-                                ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFFFFA500),
-                                  ),
-                                ): PageView.builder(
-                                  key: ValueKey(
-                                    homeController.inspirationalQuotes.length,
-                                  ),
-                                  controller:homeController.pageController,
-                                  itemCount: homeController.inspirationalQuotes.length,
-                                  onPageChanged: (index) {
-                                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      if (context.mounted) {
-                                        homeController.updateQuoteIndex(index);
-                                        }
-                                      });
-                                    },
-                                    itemBuilder: (context, index) {
-                                      if (index >= homeController.inspirationalQuotes.length) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      final quote = homeController.inspirationalQuotes[index];
-                                        return Column(
-                                          crossAxisAlignment:CrossAxisAlignment.start,
-                                          mainAxisAlignment:MainAxisAlignment.center,
+                                    ? const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Color(0xFFFFA500),
+                                        ),
+                                      )
+                                    : PageView.builder(
+                                        key: ValueKey(homeController.inspirationalQuotes.length),
+                                        controller: homeController.pageController,
+                                        itemCount: homeController.inspirationalQuotes.length,
+                                        onPageChanged: (index) {
+                                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                                            if (context.mounted) {
+                                              homeController.updateQuoteIndex(index);
+                                            }
+                                          });
+                                        },
+                                        itemBuilder: (context, index) {
+                                          if (index >= homeController.inspirationalQuotes.length) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          final quote = homeController.inspirationalQuotes[index];
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Flexible(
                                                 child: RepaintBoundary(
                                                   key: inspirationQuoteKey,
                                                   child: Container(
-                                                    padding:EdgeInsets.symmetric(horizontal: 6.w,),
-                                                    decoration:const BoxDecoration(),
+                                                    padding: EdgeInsets.symmetric(horizontal: 6.w),
+                                                    decoration: const BoxDecoration(),
                                                     child: Text(
                                                       quote.quote,
-                                                      textAlign:TextAlign.start,
+                                                      textAlign: TextAlign.start,
                                                       style: GoogleFonts.cormorant(
-                                                        fontWeight:FontWeight.w400,
+                                                        fontWeight: FontWeight.w400,
                                                         fontSize: 18.sp,
-                                                        color: isDarkMode? AppColors.l_schedule_clr3
-                                                        : Colors.black87.withOpacity(0.6),
-                                                        fontStyle:FontStyle.italic,
+                                                        color: isDarkMode
+                                                            ? AppColors.l_schedule_clr3
+                                                            : Colors.black87.withOpacity(0.6),
+                                                        fontStyle: FontStyle.italic,
                                                       ),
                                                     ),
                                                   ),
@@ -911,16 +932,16 @@ class HomeView extends StatelessWidget {
                                           );
                                         },
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 20.h),
-                                Container(
-                                  padding: EdgeInsets.only(top: 14.h),
-                                  decoration: BoxDecoration(
-                                  border: Border(
-                                    top: BorderSide(
-                                    color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.08),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                          Container(
+                            padding: EdgeInsets.only(top: 14.h),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.08),
                                   width: 1,
                                 ),
                               ),
@@ -946,8 +967,12 @@ class HomeView extends StatelessWidget {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          homeController.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                          color: homeController.isFavorite ? Colors.red : (isDarkMode ? Colors.white : AppColors.fourth_color),
+                                          homeController.isFavorite
+                                              ? Icons.favorite_rounded
+                                              : Icons.favorite_border_rounded,
+                                          color: homeController.isFavorite
+                                              ? Colors.red
+                                              : (isDarkMode ? Colors.white : AppColors.fourth_color),
                                           size: 22.sp,
                                         ),
                                         SizedBox(height: 4.h),
@@ -966,7 +991,7 @@ class HomeView extends StatelessWidget {
                                 Container(
                                   height: 24.h,
                                   width: 1,
-                                  color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
+                                  color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
                                 ),
                                 Expanded(
                                   child: GestureDetector(
@@ -1017,7 +1042,7 @@ class HomeView extends StatelessWidget {
                                 Container(
                                   height: 24.h,
                                   width: 1,
-                                  color:(isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
+                                  color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.12),
                                 ),
                                 Expanded(
                                   child: GestureDetector(
@@ -1031,7 +1056,7 @@ class HomeView extends StatelessWidget {
                                       children: [
                                         Icon(
                                           Icons.share_outlined,
-                                          color: isDarkMode ? Colors.white: AppColors.fourth_color,
+                                          color: isDarkMode ? Colors.white : AppColors.fourth_color,
                                           size: 22.sp,
                                         ),
                                         SizedBox(height: 4.h),
@@ -1064,7 +1089,7 @@ class HomeView extends StatelessWidget {
                       style: GoogleFonts.playfair(
                         fontWeight: FontWeight.w600,
                         fontSize: 22.sp,
-                        color: isDarkMode ? AppColors.l_schedule_clr3: Colors.black,
+                        color: isDarkMode ? AppColors.l_schedule_clr3 : Colors.black,
                       ),
                     ),
                     GestureDetector(
@@ -1077,7 +1102,7 @@ class HomeView extends StatelessWidget {
                         width: 32.w,
                         height: 32.h,
                         decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.white.withOpacity(0.1): AppColors.button_color.withOpacity(0.2),
+                          color: isDarkMode ? Colors.white.withOpacity(0.1) : AppColors.button_color.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(16.r),
                           border: Border.all(
                             color: AppColors.fourth_color.withOpacity(0.2),
@@ -1094,10 +1119,10 @@ class HomeView extends StatelessWidget {
                   width: double.infinity,
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? const Color(0xFF051123): const Color(0xFFFFFFFF),
+                    color: isDarkMode ? const Color(0xFF051123) : const Color(0xFFFFFFFF),
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
-                      color: isDarkMode ? const Color(0xFFC5A880).withOpacity(0.35): Colors.transparent,
+                      color: isDarkMode ? const Color(0xFFC5A880).withOpacity(0.35) : Colors.transparent,
                     ),
                   ),
                   child: Column(
@@ -1156,193 +1181,201 @@ class HomeView extends StatelessWidget {
     );
   }
 
-
-  Widget _buildScheduleEvent(BuildContext context,int id,String title,String time,String category,String location,String subtitle,Color indicatorColor,bool isDarkMode, {
-  Color? lightModeBackgroundColor,bool isLastItem = false,}) {
-  return IntrinsicHeight(
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          width: 24.w,
-          child: Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              if (!isLastItem)
-              Positioned(
-                top: 6.h,
-                bottom: 0,
-                child: Container(
-                  width: 1.5.w,
-                  color: const Color(0xFFC5A880).withOpacity(0.35),
-                ),
-              ),
-              Positioned(
-                top: 6.h,
-                left: 6.w,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 12.w,
-                      height: 12.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFA500),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFFA500).withOpacity(0.4),
-                            blurRadius: 6.r,
-                            spreadRadius: 1.r,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 6.w,
-                      height: 1.5.h,
+  Widget _buildScheduleEvent(
+    BuildContext context,
+    int id,
+    String title,
+    String time,
+    String category,
+    String location,
+    String subtitle,
+    Color indicatorColor,
+    bool isDarkMode, {
+    Color? lightModeBackgroundColor,
+    bool isLastItem = false,
+  }) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 24.w,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                if (!isLastItem)
+                  Positioned(
+                    top: 6.h,
+                    bottom: 0,
+                    child: Container(
+                      width: 1.5.w,
                       color: const Color(0xFFC5A880).withOpacity(0.35),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        Expanded(
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  context.push('/event_details', extra: id);
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? const Color(0xFF09121F) : Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: const Color(0xFFC5A880).withOpacity(0.2),
-                    ),
-                    image: DecorationImage(
-                      image: AssetImage(
-                        isDarkMode ? 'assets/images/container_bgm.jpg' : 'assets/images/container_bgm_light.png',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                Positioned(
+                  top: 6.h,
+                  left: 6.w,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // 🛠️ FIX: Wrapped category badge in Flexible to prevent right overflow
-                          Flexible(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 12.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.25),
-                                borderRadius: BorderRadius.circular(12.r),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.15),
-                                ),
-                              ),
-                              child: Text(
-                                category.isEmpty ? 'General' : category,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xFF7A8B9E),
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            time,
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15.sp,
-                              color: const Color(0xFFFFA500),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        title,
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.sp,
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
-                        SizedBox(height: 8.h),
-                        Row(
-                          children: [
-                            Text('📍', style: TextStyle(fontSize: 14.sp)),
-                            SizedBox(width: 6.w),
-                            Expanded(
-                              child: Text(
-                                location,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color: isDarkMode ? Colors.white70 : Colors.black,
-                                ),
-                              ),
+                      Container(
+                        width: 12.w,
+                        height: 12.h,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFA500),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFA500).withOpacity(0.4),
+                              blurRadius: 6.r,
+                              spreadRadius: 1.r,
                             ),
                           ],
                         ),
-                      ],
-                      if (subtitle.isNotEmpty) ...[
-                        SizedBox(height: 4.h),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.description_outlined,
-                              color: const Color(0xFF7A8B9E),
-                              size: 14.sp,
-                            ),
-                            SizedBox(width: 6.w),
-                            Expanded(
-                              child: Text(
-                                subtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color: isDarkMode ? Colors.white60 : Colors.black54,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
+                      Container(
+                        width: 6.w,
+                        height: 1.5.h,
+                        color: const Color(0xFFC5A880).withOpacity(0.35),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(height: isLastItem ? 0 : 16.h),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          Expanded(
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    context.push('/event_details', extra: id);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? const Color(0xFF09121F) : Colors.grey.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: const Color(0xFFC5A880).withOpacity(0.2),
+                      ),
+                      image: DecorationImage(
+                        image: AssetImage(
+                          isDarkMode ? 'assets/images/container_bgm.jpg' : 'assets/images/container_bgm_light.png',
+                        ),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 4.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.25),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.15),
+                                  ),
+                                ),
+                                child: Text(
+                                  category.isEmpty ? 'General' : category,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    color: const Color(0xFF7A8B9E),
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              time,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.sp,
+                                color: const Color(0xFFFFA500),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          title,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.sp,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        if (location.isNotEmpty && location.toLowerCase() != 'unknown') ...[
+                          SizedBox(height: 8.h),
+                          Row(
+                            children: [
+                              Text('📍', style: TextStyle(fontSize: 14.sp)),
+                              SizedBox(width: 6.w),
+                              Expanded(
+                                child: Text(
+                                  location,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.sp,
+                                    color: isDarkMode ? Colors.white70 : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (subtitle.isNotEmpty) ...[
+                          SizedBox(height: 4.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.description_outlined,
+                                color: const Color(0xFF7A8B9E),
+                                size: 14.sp,
+                              ),
+                              SizedBox(width: 6.w),
+                              Expanded(
+                                child: Text(
+                                  subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.sp,
+                                    color: isDarkMode ? Colors.white60 : Colors.black54,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: isLastItem ? 0 : 16.h),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   String _getDayName(int weekday) {
     switch (weekday) {
